@@ -1,5 +1,11 @@
 # @nativefragments/core
 
+## 0.3.1
+
+### Patch Changes
+
+- Ship TypeScript declarations for all public exports and update alternate link tags during fragment navigation.
+
 ## 0.3.0
 
 ### Minor Changes

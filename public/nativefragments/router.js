@@ -46,6 +46,21 @@ const setHead = (meta) => {
 
   const canonical = document.head.querySelector('link[rel="canonical"]');
   if (canonical && meta.canonical) canonical.setAttribute("href", meta.canonical);
+
+  if (Array.isArray(meta.alternates)) {
+    document.head
+      .querySelectorAll('link[rel="alternate"][hreflang]')
+      .forEach((node) => node.remove());
+
+    for (const alternate of meta.alternates) {
+      if (!alternate?.hreflang || !alternate?.href) continue;
+      const link = document.createElement("link");
+      link.rel = "alternate";
+      link.hreflang = alternate.hreflang;
+      link.href = alternate.href;
+      document.head.appendChild(link);
+    }
+  }
 };
 
 const readFragmentManifest = () => {

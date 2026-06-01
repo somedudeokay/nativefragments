@@ -1,20 +1,40 @@
 {
   "name": "@nativefragments/core",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Zero dependency, zero build framework core for agents building AI-friendly web applications.",
   "type": "module",
   "main": "./src/index.js",
+  "types": "./types/index.d.ts",
   "exports": {
-    ".": "./src/index.js",
-    "./cloudflare": "./src/cloudflare/index.js",
-    "./server": "./src/server/index.js",
-    "./client/router.js": "./public/nativefragments/router.js",
-    "./client/component.js": "./public/nativefragments/component.js",
-    "./client/worker.js": "./public/nativefragments/worker.js"
+    ".": {
+      "types": "./types/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./cloudflare": {
+      "types": "./types/cloudflare.d.ts",
+      "default": "./src/cloudflare/index.js"
+    },
+    "./server": {
+      "types": "./types/server.d.ts",
+      "default": "./src/server/index.js"
+    },
+    "./client/router.js": {
+      "types": "./types/client-router.d.ts",
+      "default": "./public/nativefragments/router.js"
+    },
+    "./client/component.js": {
+      "types": "./types/client-component.d.ts",
+      "default": "./public/nativefragments/component.js"
+    },
+    "./client/worker.js": {
+      "types": "./types/client-worker.d.ts",
+      "default": "./public/nativefragments/worker.js"
+    }
   },
   "files": [
     "src",
     "public/nativefragments",
+    "types",
     "docs",
     "skills",
     "README.md",

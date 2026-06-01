@@ -11,6 +11,8 @@ import { attrs, html, jsonScript, raw } from "./html.js";
  * @property {string} [title] Document title.
  * @property {string} [description] Meta description.
  * @property {string} [canonical] Canonical URL.
+ * @property {{ hreflang: string, href: string }[]} [alternates] Alternate
+ * language URLs for `<link rel="alternate" hreflang="...">`.
  */
 
 /**
