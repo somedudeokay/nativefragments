@@ -133,6 +133,9 @@ const styles = sheet(`
   .shell {
     background: color-mix(in srgb, var(--c-shell) 5%, transparent);
     border-color: color-mix(in srgb, var(--c-shell) 52%, transparent);
+    display: flex;
+    flex: 1;
+    flex-direction: column;
   }
 
   .lbl-shell {
@@ -142,6 +145,9 @@ const styles = sheet(`
   .fragment {
     background: color-mix(in srgb, var(--c-frag) 7%, transparent);
     border-color: color-mix(in srgb, var(--c-frag) 52%, transparent);
+    display: flex;
+    flex: 1;
+    flex-direction: column;
     margin-top: 0.95rem;
   }
 
@@ -152,6 +158,9 @@ const styles = sheet(`
   .subfragment {
     background: color-mix(in srgb, var(--c-sub) 12%, transparent);
     border-color: color-mix(in srgb, var(--c-sub) 58%, transparent);
+    display: flex;
+    flex: 1;
+    flex-direction: column;
     margin-top: 0.95rem;
   }
 
@@ -178,19 +187,25 @@ const styles = sheet(`
   }
 
   .card[data-tab="overview"] .tab[data-tab="overview"],
-  .card[data-tab="activity"] .tab[data-tab="activity"] {
+  .card[data-tab="activity"] .tab[data-tab="activity"],
+  .card[data-tab="settings"] .tab[data-tab="settings"] {
     background: rgba(247, 243, 232, 0.12);
     color: #ffffff;
   }
 
   /* ---- fragment body (content + skeleton overlay) ---- */
   .frag-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
     margin-top: 0.2rem;
-    min-height: 156px;
     position: relative;
   }
 
   .frag-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
     transition: opacity 0.4s var(--ease, ease);
   }
 
@@ -217,9 +232,18 @@ const styles = sheet(`
     width: 56%;
   }
 
-  .frag-skel {
-    display: grid;
-    gap: 0.62rem;
+  /* glimmer sheen swept over a region while it is loading */
+  .glimmer {
+    background: linear-gradient(
+      100deg,
+      transparent 35%,
+      rgba(247, 243, 232, 0.13) 50%,
+      transparent 65%
+    );
+    background-position: 180% 0;
+    background-repeat: no-repeat;
+    background-size: 200% 100%;
+    border-radius: inherit;
     inset: 0;
     opacity: 0;
     pointer-events: none;
@@ -227,34 +251,11 @@ const styles = sheet(`
     transition: opacity 0.3s var(--ease, ease);
   }
 
-  .sk {
-    animation: nf-shimmer 1.15s linear infinite;
-    background:
-      linear-gradient(
-        90deg,
-        rgba(247, 243, 232, 0.05),
-        rgba(247, 243, 232, 0.17),
-        rgba(247, 243, 232, 0.05)
-      );
-    background-size: 200% 100%;
-    border-radius: 5px;
-    display: block;
-    height: 10px;
-  }
-
-  .sk.tall {
-    height: 15px;
-    width: 42%;
-  }
-
-  .sk.short {
-    width: 62%;
-  }
-
   /* ---- subfragment body ---- */
   .sub-body {
     align-items: center;
     display: flex;
+    flex: 1;
     min-height: 44px;
     position: relative;
   }
@@ -295,6 +296,7 @@ const styles = sheet(`
   .spark u {
     background: color-mix(in srgb, var(--c-sub) 55%, transparent);
     border-radius: 2px;
+    transition: height 0.4s var(--ease, ease);
     width: 5px;
   }
 
@@ -304,16 +306,11 @@ const styles = sheet(`
   .spark u:nth-child(4) { height: 90%; }
   .spark u:nth-child(5) { height: 60%; }
 
-  .sub-skel {
-    align-items: center;
-    display: flex;
-    gap: 0.6rem;
-    inset: 0;
-    opacity: 0;
-    pointer-events: none;
-    position: absolute;
-    transition: opacity 0.3s var(--ease, ease);
-  }
+  .card[data-sv="b"] .spark u:nth-child(1) { height: 72%; }
+  .card[data-sv="b"] .spark u:nth-child(2) { height: 44%; }
+  .card[data-sv="b"] .spark u:nth-child(3) { height: 90%; }
+  .card[data-sv="b"] .spark u:nth-child(4) { height: 56%; }
+  .card[data-sv="b"] .spark u:nth-child(5) { height: 98%; }
 
   /* ---- request log ---- */
   .log {
@@ -356,13 +353,14 @@ const styles = sheet(`
     animation: nf-spin 0.7s linear infinite;
   }
 
-  /* fragment fetch: dim content, overlay skeleton, pulse the fragment border */
-  .card[data-step="1"] .frag-content {
-    opacity: 0.12;
+  /* fragment fetch: glimmer the whole fragment, dim its content, pulse border */
+  .card[data-step="1"] .fragment > .glimmer {
+    animation: nf-glimmer 1.2s linear infinite;
+    opacity: 1;
   }
 
-  .card[data-step="1"] .frag-skel {
-    opacity: 1;
+  .card[data-step="1"] .frag-content {
+    opacity: 0.6;
   }
 
   .card[data-step="1"] .fragment {
@@ -370,13 +368,14 @@ const styles = sheet(`
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-frag) 22%, transparent);
   }
 
-  /* subfragment fetch: only the subfragment reloads */
-  .card[data-step="3"] .sub-content {
-    opacity: 0.12;
+  /* subfragment fetch: glimmer only the subfragment and dim its content */
+  .card[data-step="3"] .subfragment > .glimmer {
+    animation: nf-glimmer 1.2s linear infinite;
+    opacity: 1;
   }
 
-  .card[data-step="3"] .sub-skel {
-    opacity: 1;
+  .card[data-step="3"] .sub-content {
+    opacity: 0.6;
   }
 
   .card[data-step="3"] .subfragment {
@@ -390,12 +389,12 @@ const styles = sheet(`
     }
   }
 
-  @keyframes nf-shimmer {
+  @keyframes nf-glimmer {
     from {
-      background-position: 200% 0;
+      background-position: 180% 0;
     }
     to {
-      background-position: -200% 0;
+      background-position: -80% 0;
     }
   }
 
@@ -424,6 +423,7 @@ const HTML = `<div class="frame">
     class="card"
     data-step="0"
     data-tab="overview"
+    data-sv="a"
     role="img"
     aria-label="Diagram of the Native Fragments runtime. An outer shell contains a fragment, which contains a subfragment. On navigation only the fragment's HTML is swapped while the shell stays mounted, and a nested subfragment can update on its own."
   >
@@ -442,7 +442,7 @@ const HTML = `<div class="frame">
       <div class="nav" aria-hidden="true">
         <span class="tab" data-tab="overview">Overview</span>
         <span class="tab" data-tab="activity">Activity</span>
-        <span class="tab">Settings</span>
+        <span class="tab" data-tab="settings">Settings</span>
       </div>
 
       <div class="scope fragment">
@@ -457,23 +457,15 @@ const HTML = `<div class="frame">
               <span class="lbl lbl-sub">Subfragment</span>
               <div class="sub-body">
                 <div class="sub-content">
-                  <span class="stat"><b class="stat-num">128</b><i>events today</i></span>
+                  <span class="stat"><b class="stat-num">128</b><i class="stat-range">Today</i></span>
                   <span class="spark"><u></u><u></u><u></u><u></u><u></u></span>
                 </div>
-                <div class="sub-skel" aria-hidden="true">
-                  <span class="sk" style="width: 32%"></span>
-                  <span class="sk" style="width: 44%; margin-left: auto"></span>
-                </div>
               </div>
+              <div class="glimmer" aria-hidden="true"></div>
             </div>
           </div>
-
-          <div class="frag-skel" aria-hidden="true">
-            <span class="sk tall"></span>
-            <span class="sk"></span>
-            <span class="sk short"></span>
-          </div>
         </div>
+        <div class="glimmer" aria-hidden="true"></div>
       </div>
     </div>
 
@@ -483,17 +475,25 @@ const HTML = `<div class="frame">
   </div>
 </div>`;
 
-const STEPS = 5;
+const PHASES = 4;
 const TICK_MS = 1500;
-const TABS = ["overview", "activity"];
-const LABELS = { overview: "Overview", activity: "Activity" };
-const COUNTS = { overview: "128", activity: "342" };
-const LOG = {
-  0: "idle · shell stays mounted",
-  1: "GET {p} · x-fragment",
-  2: "200 · fragment swapped",
-  3: "GET {p} · x-fragment",
-  4: "200 · subfragment swapped",
+const DESTS = ["overview", "activity", "settings"];
+const DATA = {
+  overview: {
+    label: "Overview",
+    base: { n: "128", range: "Today" },
+    param: { n: "1.2k", range: "7 days", slug: "7d" },
+  },
+  activity: {
+    label: "Activity",
+    base: { n: "342", range: "Today" },
+    param: { n: "2.6k", range: "7 days", slug: "7d" },
+  },
+  settings: {
+    label: "Settings",
+    base: { n: "9", range: "Active" },
+    param: { n: "24", range: "All", slug: "all" },
+  },
 };
 
 class RuntimeMap extends HTMLElement {
@@ -509,22 +509,70 @@ class RuntimeMap extends HTMLElement {
     const hText = root.querySelector(".h-text");
     const pathEl = root.querySelector(".path");
     const statNum = root.querySelector(".stat-num");
+    const rangeEl = root.querySelector(".stat-range");
     const logEl = root.querySelector(".log-text");
 
-    let t = 0;
+    // Each destination plays a full 4-phase navigation, so the active tab only
+    // ever changes at phase 0 (while loading) — never silently. Phases 2-3 fetch
+    // a nested route param, which swaps ONLY the subfragment's content (number,
+    // range, sparkline) so it is clear what the param affects. Start on the first
+    // destination's loaded state, then advance through every tab in turn.
+    let t = 1;
     const render = () => {
-      const step = t % STEPS;
-      const cycle = Math.floor(t / STEPS) % 2;
-      const active = step === 0 ? TABS[cycle] : TABS[1 - cycle];
-      const scoped = step >= 3;
-      const path = "/" + active + (scoped ? "/stats" : "");
+      const phase = t % PHASES;
+      const idx = Math.floor(t / PHASES);
+      const dest = DESTS[idx % DESTS.length];
+      const prev = DESTS[(idx + DESTS.length - 1) % DESTS.length];
+      const d = DATA[dest];
 
-      card.dataset.step = String(step);
-      card.dataset.tab = active;
-      if (hText) hText.textContent = LABELS[active];
+      // The URL reflects the request in flight; the displayed content lags and
+      // only swaps once the load completes, so the old content stays visible
+      // (glimmering) during loading instead of changing early.
+      const paramScope = phase >= 2;
+      const path = "/" + dest + (paramScope ? "/" + d.param.slug : "");
+
+      let label;
+      let sub;
+      let sv;
+      if (phase === 0) {
+        // fragment request in flight — keep the previous page's content
+        label = DATA[prev].label;
+        sub = DATA[prev].param;
+        sv = "b";
+      } else if (phase === 1) {
+        // fragment loaded — new page, base subfragment
+        label = d.label;
+        sub = d.base;
+        sv = "a";
+      } else if (phase === 2) {
+        // subfragment request in flight — keep the base subfragment content
+        label = d.label;
+        sub = d.base;
+        sv = "a";
+      } else {
+        // subfragment loaded — param applied
+        label = d.label;
+        sub = d.param;
+        sv = "b";
+      }
+
+      card.dataset.step = String(phase + 1);
+      card.dataset.tab = dest;
+      card.dataset.sv = sv;
+      if (hText) hText.textContent = label;
       if (pathEl) pathEl.textContent = path;
-      if (statNum) statNum.textContent = COUNTS[active];
-      if (logEl) logEl.textContent = LOG[step].replace("{p}", path);
+      if (statNum) statNum.textContent = sub.n;
+      if (rangeEl) rangeEl.textContent = sub.range;
+      if (logEl) {
+        logEl.textContent =
+          phase === 0
+            ? "GET " + path + " · x-fragment"
+            : phase === 1
+              ? "200 · fragment swapped"
+              : phase === 2
+                ? "GET " + path + " · x-fragment"
+                : "idle · shell stays mounted";
+      }
     };
 
     render();
