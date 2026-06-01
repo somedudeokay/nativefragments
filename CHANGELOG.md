@@ -1,5 +1,11 @@
 # @nativefragments/create-app
 
+## 0.3.0
+
+### Minor Changes
+
+- 157ae05: Update the scaffold to `@nativefragments/core` 0.3 and include the latest fragment router with prefetch and declarative manifest support.
+
 ## 0.2.1
 
 ### Patch Changes
