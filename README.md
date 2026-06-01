@@ -28,8 +28,9 @@ npm i @nativefragments/core
 - Explicit route helpers.
 - Full-page and fragment render helpers.
 - Cloudflare Worker adapter.
-- Browser fragment navigation.
+- Browser fragment navigation with first-class prefetching.
 - Nested fragment slots for routes inside routes.
+- Declarative fragment manifests on Cloudflare through `HTMLRewriter`.
 - Web Worker RPC helpers for moving expensive client work off the main thread.
 - Shadow DOM component helpers, including declarative Shadow DOM support to
   avoid refresh FOUC.
@@ -38,7 +39,7 @@ npm i @nativefragments/core
 ## Package Exports
 
 ```js
-import { declarativeShadow, html, route } from "@nativefragments/core/server";
+import { declarativeShadow, fragment, html, route } from "@nativefragments/core/server";
 import { createCloudflareHandler } from "@nativefragments/core/cloudflare";
 ```
 
@@ -57,21 +58,38 @@ Routes can expose named fragment renderers for app regions that navigate inside
 the current page:
 
 ```js
+const profile = fragment("settings-panel", profilePanel);
+
 route("/settings/profile", {
   render: settingsPage,
-  fragments: {
-    "settings-panel": profilePanel
-  }
+  fragments: [profile]
 });
 ```
 
 ```html
-<a href="/settings/profile" data-fragment-slot="settings-panel">Profile</a>
+<a href="/settings/profile" data-fragment-slot="settings-panel" data-fragment-prefetch="intent">
+  Profile
+</a>
 <section data-fragment-slot="settings-panel"></section>
 ```
 
 The browser router sends `x-fragment-slot: settings-panel`, swaps only that
 section, and keeps the full route as the no-JavaScript fallback.
+
+## Fragment Prefetch
+
+The browser router prefetches same-origin fragments on hover and focus by
+default. Links can override the behavior:
+
+```html
+<a href="/reports" data-fragment-prefetch="visible">Reports</a>
+<a href="/settings" data-fragment-prefetch="load">Settings</a>
+<a href="/logout" data-fragment-prefetch="none">Log out</a>
+```
+
+Cloudflare apps inject a tiny fragment manifest with `HTMLRewriter` when the
+runtime supports it. The manifest is generated from `data-fragment-slot` and
+`data-fragment-prefetch` markup and exposed as `window.nativeFragmentsManifest`.
 
 ## Worker Helpers
 

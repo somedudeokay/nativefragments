@@ -13,6 +13,7 @@ Use this skill when creating or editing a Native Fragments app.
 - Keep apps zero build by default: no Vite, no JSX transform, no virtual DOM.
 - Use Cloudflare Workers for server rendering and static assets.
 - Render HTML on the server, then use fragment navigation for fast transitions.
+- Use declarative fragment prefetching for high-probability navigation.
 - Use nested fragment slots for route regions that should navigate without
   replacing the full page body.
 - Use Web Workers for expensive client-side work like search, filtering,
@@ -46,9 +47,15 @@ render: () => html`<h1>Hello</h1>`
 
 ## Nested Fragment Pattern
 
-Use named fragments when a route contains a sub-region with its own links.
+Use `fragment()` when a route contains a sub-region with its own links. This
+keeps the route registration, target attributes, and link attributes tied to
+one name.
 
 ```js
+import { fragment, html, route } from "@nativefragments/core/server";
+
+const profile = fragment("settings-panel", profilePanel);
+
 route("/settings/profile", {
   meta: () => ({
     title: "Profile",
@@ -57,22 +64,35 @@ route("/settings/profile", {
   }),
   render: () => html`<main>
     <nav>
-      <a href="/settings/profile" data-fragment-slot="settings-panel">
+      <a href="/settings/profile"${profile.prefetchAttrs("intent")}>
         Profile
       </a>
     </nav>
-    <section data-fragment-slot="settings-panel">
+    <section${profile.attrs()}>
       ${profilePanel()}
     </section>
   </main>`,
-  fragments: {
-    "settings-panel": profilePanel
-  }
+  fragments: [profile]
 });
 ```
 
 The link slot name must match the target container and the route `fragments`
 key. The full `render` output remains the canonical server-rendered fallback.
+
+## Prefetch Pattern
+
+The browser router prefetches same-origin fragment links on hover and focus by
+default. Override individual links with `data-fragment-prefetch`:
+
+```html
+<a href="/reports" data-fragment-prefetch="visible">Reports</a>
+<a href="/settings" data-fragment-prefetch="load">Settings</a>
+<a href="/logout" data-fragment-prefetch="none">Log out</a>
+```
+
+Use `visible` for links likely to be clicked after scrolling, `load` for
+near-certain next routes, and `none` for actions that should not be requested
+early.
 
 ## Worker Pattern
 

@@ -61,10 +61,36 @@ html`<app-counter>${declarativeShadow({
 
 Serializes JSON for safe embedding in an inline script payload.
 
+### `fragment(name, render)`
+
+Creates a named fragment definition for nested route regions.
+
+```js
+import { fragment, html, route } from "@nativefragments/core/server";
+
+const profile = fragment("settings-panel", () => html`<p>Profile</p>`);
+
+export const settingsRoute = route("/settings/profile", {
+  render: () => html`<main>
+    <a href="/settings/profile"${profile.prefetchAttrs("intent")}>
+      Profile
+    </a>
+    <section${profile.attrs()}>
+      ${profile.render()}
+    </section>
+  </main>`,
+  fragments: [profile]
+});
+```
+
+`fragment.attrs()` returns `data-fragment-slot`. `fragment.prefetchAttrs()`
+returns both `data-fragment-slot` and `data-fragment-prefetch`.
+
 ### `route(path, definition)`
 
 Creates a route definition. A route usually provides `meta` and `render`
 functions. A route can also expose named `fragments` for nested navigation.
+`fragments` can be an object map or an array created with `fragment()`.
 
 ```js
 import { html, route } from "@nativefragments/core/server";
@@ -145,9 +171,13 @@ Options:
 - `notFound`: Optional 404 route.
 - `assetsBinding`: Optional Cloudflare assets binding name. Defaults to
   `ASSETS`.
+- `fragmentManifest`: Optional Cloudflare `HTMLRewriter` manifest injection.
+  Defaults to `true`.
 
 Fragment requests use the `x-fragment: true` request header. Nested fragment
-requests also send `x-fragment-slot`.
+requests also send `x-fragment-slot`. Full document responses inject a
+`data-fragment-manifest` JSON script on Cloudflare when `HTMLRewriter` is
+available.
 
 ## `/nativefragments/router.js`
 
@@ -169,6 +199,8 @@ Options:
 
 - `slot`: CSS selector for the content slot. Defaults to `#content-slot`.
 - `ttl`: Fragment cache TTL in milliseconds. Defaults to `30000`.
+- `prefetch`: Default fragment prefetch mode. Defaults to `intent`. Use
+  `none`, `intent`, `visible`, or `load`.
 - `afterNavigate`: Callback after a successful fragment swap.
 
 For nested fragments, put the same `data-fragment-slot` name on the link and
@@ -182,6 +214,27 @@ target container:
 The router fetches the route with `x-fragment-slot: settings-panel`, replaces
 only that section, updates history, and keeps full-page navigation as the
 fallback.
+
+### `prefetchFragment(href, options)`
+
+Prefetches a same-origin fragment into the shared fragment cache.
+
+```js
+import { prefetchFragment } from "/nativefragments/router.js";
+
+await prefetchFragment("/settings/profile", {
+  slot: "settings-panel"
+});
+```
+
+Links can declare prefetch behavior:
+
+```html
+<a href="/reports" data-fragment-prefetch="intent">Reports</a>
+<a href="/dashboard" data-fragment-prefetch="visible">Dashboard</a>
+<a href="/settings" data-fragment-prefetch="load">Settings</a>
+<a href="/logout" data-fragment-prefetch="none">Log out</a>
+```
 
 ## `/nativefragments/component.js`
 

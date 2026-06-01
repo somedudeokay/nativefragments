@@ -21,9 +21,9 @@ import { attrs, html, jsonScript, raw } from "./html.js";
  * @typedef {object} FragmentDefinition
  * @property {string} name Fragment slot name.
  * @property {FragmentRenderer} render Fragment renderer.
- * @property {(attributes?: Record<string, string | boolean | null | undefined>) => string} attrs
+ * @property {(attributes?: import("./html.js").HtmlAttrs) => import("./html.js").RawHtml} attrs
  * Attributes for links and target containers using this fragment slot.
- * @property {(mode?: "intent" | "visible" | "load" | "none", attributes?: Record<string, string | boolean | null | undefined>) => string} prefetchAttrs
+ * @property {(mode?: "intent" | "visible" | "load" | "none", attributes?: import("./html.js").HtmlAttrs) => import("./html.js").RawHtml} prefetchAttrs
  * Attributes for links using this fragment slot with a prefetch mode.
  */
 
