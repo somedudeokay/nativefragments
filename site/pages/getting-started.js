@@ -6,7 +6,7 @@ export const gettingStartedPage = () =>
     eyebrow: "Start",
     title: "Create an app.",
     intro:
-      "The recommended starting point is the npm create command. It creates a Cloudflare Worker app with routes, a shell, browser helpers, and one Shadow DOM component.",
+      "The recommended starting point is the npm create command. It creates an edge-ready Cloudflare Worker app with routes, a shell, browser helpers, and one Shadow DOM component.",
     body: html`
       <h2>Create</h2>
       ${code(
@@ -17,6 +17,10 @@ npm run dev`,
         "shell",
       )}
       <h2>Deploy</h2>
+      <p>
+        Native Fragments is designed to deploy to Cloudflare Workers first. The
+        Worker renders full pages, partial rerenders, and API routes at the edge.
+      </p>
       ${code(`npm run deploy`, "shell")}
       <h2>Generated structure</h2>
       ${code(`worker.js

@@ -6,7 +6,7 @@ export const homePage = () =>
     eyebrow: "Introduction",
     title: "Native Fragments keeps the web readable.",
     intro:
-      "Build Cloudflare Worker apps with server-rendered HTML, fragment navigation, and native Shadow DOM components. No framework runtime dependency graph. No build step by default.",
+      "Build edge-first Cloudflare Worker apps with server-rendered HTML, fragment navigation, and native Shadow DOM components. No framework runtime dependency graph. No build step by default.",
     body: html`
       <section class="quick-grid">
         ${callout("For builders", "Use the scaffold to start an app in one command.")}
@@ -26,6 +26,10 @@ npm run dev`,
         framework provides small contracts around routing, fragment responses,
         metadata, and Shadow DOM helpers. The application remains ordinary
         HTML, CSS, and JavaScript.
+      </p>
+      <p>
+        The default deployment target is Cloudflare Workers, so pages,
+        fragments, and API routes can run at the edge close to users.
       </p>
     `,
   });

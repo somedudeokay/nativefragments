@@ -10,6 +10,8 @@ npm run dev
 
 The scaffold includes a Cloudflare Worker entry, a Hono API adapter under `/api/*`, a route manifest, a shell, app pages, browser fragment navigation, nested fragment slots, Shadow DOM component helpers, optional signals, and worker RPC helpers.
 
+Native Fragments is designed to deploy to Cloudflare Workers first. The Worker renders full pages, partial rerenders, and API routes at the edge close to users.
+
 ## Package Imports
 
 ```js
