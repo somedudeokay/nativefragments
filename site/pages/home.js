@@ -75,7 +75,7 @@ bindText(root.querySelector("[data-count]"), label);`;
 export const homePage = () => html`<section class="hero">
   <div class="hero-copy">
     <p class="eyebrow">Native Fragments</p>
-    <h1>The tiny web framework built for coding agents.</h1>
+    <h1>The tiny web framework built for <span class="accent">coding agents</span>.</h1>
     <p class="lede">
       Native Fragments helps agents create fast, maintainable web apps without
       a compile pipeline. The app stays readable at runtime: server HTML, real
@@ -83,7 +83,7 @@ export const homePage = () => html`<section class="hero">
       Workers.
     </p>
     <div class="hero-actions">
-      <a class="primary-action" href="https://docs.nativefragments.org/getting-started">Start building</a>
+      <a class="primary-action" href="/docs">Start building <span class="cta-arrow" aria-hidden="true">→</span></a>
       <a class="secondary-action" href="https://docs.nativefragments.org/reference">API reference</a>
     </div>
   </div>
@@ -240,7 +240,7 @@ export const homePage = () => html`<section class="hero">
   <p class="eyebrow">Start small</p>
   <h2>Install the scaffold and inspect every line.</h2>
   <div class="hero-actions">
-    <a class="primary-action" href="https://docs.nativefragments.org/getting-started">Get started</a>
+    <a class="primary-action" href="/docs">Get started <span class="cta-arrow" aria-hidden="true">→</span></a>
     <a class="secondary-action" href="https://github.com/somedudeokay/nativefragments">View GitHub</a>
   </div>
 </section>`;

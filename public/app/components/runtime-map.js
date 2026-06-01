@@ -5,68 +5,107 @@ const styles = sheet(`
     display: block;
   }
 
+  .shell {
+    background: color-mix(in srgb, var(--ink, #141414) 6%, transparent);
+    border: 1px solid var(--line, rgba(20, 20, 20, 0.1));
+    border-radius: 24px;
+    padding: 8px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .shell {
+      animation: nfFloat 7s var(--ease, ease) infinite;
+    }
+  }
+
   .map {
-    background: #111111;
-    border: 1px solid #111111;
-    box-shadow: 12px 12px 0 #ff6b35;
+    background: #16181d;
+    border: 1px solid rgba(247, 243, 232, 0.08);
+    border-radius: 18px;
+    box-shadow:
+      0 30px 60px -22px rgba(20, 20, 20, 0.4),
+      inset 0 1px 0 rgba(247, 243, 232, 0.06);
     color: #f7f3e8;
     min-height: 430px;
-    padding: clamp(1rem, 3vw, 1.5rem);
+    padding: clamp(1.4rem, 3vw, 1.9rem);
     position: relative;
   }
 
   .label {
-    border-bottom: 1px solid #f7f3e8;
-    color: #1ed760;
+    border-bottom: 1px solid rgba(247, 243, 232, 0.12);
+    color: var(--green, #1ed760);
     display: flex;
-    font-size: 0.75rem;
-    font-weight: 800;
+    font-family: var(--mono, "JetBrains Mono", ui-monospace, SFMono-Regular, monospace);
+    font-size: 0.72rem;
+    font-weight: 500;
     justify-content: space-between;
-    padding-bottom: 0.75rem;
+    letter-spacing: 0.08em;
+    padding-bottom: 0.85rem;
     text-transform: uppercase;
   }
 
   .flow {
     display: grid;
-    gap: 1rem;
+    gap: 0.85rem;
     margin-top: 1.5rem;
   }
 
   .node {
-    border: 1px solid #f7f3e8;
+    background: rgba(247, 243, 232, 0.03);
+    border: 1px solid rgba(247, 243, 232, 0.1);
+    border-radius: 12px;
     display: grid;
     gap: 0.4rem;
-    padding: 1rem;
+    padding: 1rem 1.1rem;
+    transition: border-color 0.4s var(--ease, ease), background 0.4s var(--ease, ease);
+  }
+
+  .node:hover {
+    background: rgba(247, 243, 232, 0.05);
+    border-color: color-mix(in srgb, var(--green, #1ed760) 40%, transparent);
   }
 
   .node strong {
     color: #ffffff;
-    font-size: clamp(1.15rem, 3vw, 1.65rem);
-    line-height: 1;
+    font-family: var(--display, "Space Grotesk", ui-sans-serif, system-ui, sans-serif);
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
   }
 
   .node span {
-    color: #c9c3b5;
-    font-size: 0.9rem;
-    line-height: 1.45;
+    color: #b8b2a4;
+    font-family: var(--sans, "Geist", ui-sans-serif, system-ui, sans-serif);
+    font-size: 0.88rem;
+    line-height: 1.5;
   }
 
   .arrow {
-    color: #1ed760;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 1.25rem;
-    font-weight: 900;
+    color: var(--green, #1ed760);
+    font-family: var(--mono, "JetBrains Mono", ui-monospace, SFMono-Regular, monospace);
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    padding-left: 0.25rem;
   }
 
   .stamp {
-    border: 1px solid #1ed760;
-    bottom: 1rem;
-    color: #1ed760;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.75rem;
-    padding: 0.45rem 0.55rem;
+    border: 1px solid rgba(30, 215, 96, 0.5);
+    border-radius: 999px;
+    bottom: 1.1rem;
+    color: var(--green, #1ed760);
+    font-family: var(--mono, "JetBrains Mono", ui-monospace, SFMono-Regular, monospace);
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    padding: 0.4rem 0.65rem;
     position: absolute;
-    right: 1rem;
+    right: 1.1rem;
+  }
+
+  @keyframes nfFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
   }
 `);
 
@@ -74,29 +113,31 @@ class RuntimeMap extends HTMLElement {
   connectedCallback() {
     shadow(this, {
       styles: [styles],
-      html: `<section class="map" aria-label="Native Fragments request flow">
-        <div class="label">
-          <span>fragment runtime</span>
-          <span>no build</span>
-        </div>
-        <div class="flow">
-          <div class="node">
-            <strong>Worker route</strong>
-            <span>Match an explicit manifest entry. Render HTML and metadata.</span>
+      html: `<div class="shell">
+        <section class="map" aria-label="Native Fragments request flow">
+          <div class="label">
+            <span>fragment runtime</span>
+            <span>no build</span>
           </div>
-          <div class="arrow">↓ x-fragment: true</div>
-          <div class="node">
-            <strong>Content slot</strong>
-            <span>Swap only the page fragment. Keep the document alive.</span>
+          <div class="flow">
+            <div class="node">
+              <strong>Worker route</strong>
+              <span>Match an explicit manifest entry. Render HTML and metadata.</span>
+            </div>
+            <div class="arrow">↓ x-fragment: true</div>
+            <div class="node">
+              <strong>Content slot</strong>
+              <span>Swap only the page fragment. Keep the document alive.</span>
+            </div>
+            <div class="arrow">↓ customElements.define()</div>
+            <div class="node">
+              <strong>Shadow island</strong>
+              <span>Native behavior and scoped CSS, with no app-wide style leaks.</span>
+            </div>
           </div>
-          <div class="arrow">↓ customElements.define()</div>
-          <div class="node">
-            <strong>Shadow island</strong>
-            <span>Native behavior and scoped CSS, with no app-wide style leaks.</span>
-          </div>
-        </div>
-        <div class="stamp">0 deps · 0 build</div>
-      </section>`,
+          <div class="stamp">0 deps · 0 build</div>
+        </section>
+      </div>`,
     });
   }
 }
