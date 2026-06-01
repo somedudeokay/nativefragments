@@ -256,7 +256,7 @@ const padSeconds = (count) => String(count).padStart(3, "0").slice(-3);
 const headerHtml = ({ activePath = "/", seconds = 0, clickCount = 0 } = {}) => {
   const padded = padSeconds(seconds);
   const paddedClicks = padSeconds(clickCount);
-  const active = activePath === "/nested-route" ? "/nested-route" : "/";
+  const active = activePath.startsWith("/nested-route") ? "/nested-route" : "/";
   const digits = [...padded]
     .map(
       (digit, index) =>

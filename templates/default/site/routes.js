@@ -37,4 +37,15 @@ export const routes = [
       ),
     render: nestedRoutePage,
   }),
+  route("/nested-route/:panel", {
+    fragments: [nestedPanelFragment],
+    meta: (context) =>
+      meta(
+        context,
+        context.url.pathname,
+        "Pure HTML partial rerenders - Zero dependencies",
+        "A Native Fragments app demonstrating nested pure HTML partial rerenders.",
+      ),
+    render: nestedRoutePage,
+  }),
 ];

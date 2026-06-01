@@ -6,7 +6,7 @@ export const nestedPanelFragment = fragment(nestedPanelName, (context) =>
 );
 
 const panel = (context) =>
-  context.url.searchParams.get("panel") === "activity" ? "activity" : "overview";
+  context.params.panel === "activity" ? "activity" : "overview";
 
 const nestedLink = ({ active, href, label }) => html`<a
   href="${href}"
@@ -51,12 +51,12 @@ export const nestedRegion = (context) => {
   const links = [
     nestedLink({
       active: activePanel === "overview",
-      href: "/nested-route?panel=overview",
+      href: "/nested-route/overview",
       label: "Overview",
     }),
     nestedLink({
       active: activePanel === "activity",
-      href: "/nested-route?panel=activity",
+      href: "/nested-route/activity",
       label: "Activity",
     }),
   ].join("");

@@ -9,7 +9,7 @@
     "check": "node --check worker.js && find site public/app public/nativefragments -name '*.js' -print0 | xargs -0 -n1 node --check"
   },
   "dependencies": {
-    "@nativefragments/core": "^0.3.0",
+    "@nativefragments/core": "^0.4.0",
     "hono": "^4.12.23"
   }
 }

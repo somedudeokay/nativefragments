@@ -8,7 +8,7 @@ import {
 const styles = sheet(``);
 
 const currentTab = () =>
-  window.location.pathname === "/nested-route" ? "/nested-route" : "/";
+  window.location.pathname.startsWith("/nested-route") ? "/nested-route" : "/";
 
 class DemoHeader extends HTMLElement {
   #cleanup = [];
