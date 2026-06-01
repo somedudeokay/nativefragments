@@ -232,8 +232,7 @@ h2 {
   font-weight: 600;
 }
 
-.nested-copy p,
-.route-note p {
+.nested-copy p {
   color: var(--muted);
   font-size: 1rem;
   line-height: 1.6;
@@ -263,21 +262,6 @@ h2 {
   position: absolute;
 }
 
-.route-note {
-  align-self: start;
-  background: color-mix(in srgb, var(--yellow) 26%, var(--paper));
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  display: grid;
-  gap: 0.5rem;
-  grid-column: 2;
-  padding: 1rem 1.1rem;
-}
-
-.route-note strong {
-  font-family: var(--display);
-}
-
 p code {
   background: color-mix(in srgb, var(--ink) 5%, transparent);
   border: 1px solid var(--line);
@@ -291,12 +275,10 @@ p code {
 @keyframes nested-panel-enter {
   from {
     opacity: 0;
-    transform: translateY(0.35rem);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -309,10 +291,6 @@ p code {
 @media (max-width: 860px) {
   .demo-hero {
     grid-template-columns: 1fr;
-  }
-
-  .route-note {
-    grid-column: auto;
   }
 
   h1 {

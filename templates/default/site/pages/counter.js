@@ -102,10 +102,11 @@ export const counterPage = ({ request }) => {
   return html`<section class="demo-hero counter-route">
     <div class="hero-copy">
       <p class="eyebrow">Counter route</p>
-      <h1>State that survives partial rerenders.</h1>
+      <h1>Pure HTML state. Zero dependencies.</h1>
       <p class="lede">
         The header is outside the page area. The content below can rerender in
-        pieces, but the click counter stays shared across the app.
+        pieces, but the click counter stays shared across the app without a
+        client framework.
       </p>
     </div>
     <app-counter-panel>

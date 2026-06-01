@@ -1,4 +1,4 @@
-import { attrs, fragment, html, raw } from "@nativefragments/core/server";
+import { fragment, html, raw } from "@nativefragments/core/server";
 
 const nestedPanelName = "nested-panel";
 export const nestedPanelFragment = fragment(nestedPanelName, (context) =>
@@ -70,10 +70,10 @@ export const nestedRegion = (context) => {
 export const nestedRoutePage = (context) => html`<section class="demo-hero nested-route">
   <div class="hero-copy">
     <p class="eyebrow">Nested route</p>
-    <h1>Replace one region, keep everything else alive.</h1>
+    <h1>Pure HTML partial rerenders. Zero dependencies.</h1>
     <p class="lede">
-      This page demonstrates nested partial rerenders. Use the controls below
-      to request only the nested panel from the server.
+      Use the controls below to request only the nested panel from the server.
+      The rest of the page stays mounted without a client framework.
     </p>
   </div>
   <section
@@ -84,11 +84,4 @@ export const nestedRoutePage = (context) => html`<section class="demo-hero neste
   >
     ${raw(nestedRegion(context))}
   </section>
-  <aside class="route-note" ${attrs({ "data-fragment-prefetch": "visible" })}>
-    <strong>Header state check</strong>
-    <p>
-      The shell timer keeps moving, and the shared click counter remains in the
-      header while this route and the nested panel rerender.
-    </p>
-  </aside>
 </section>`;

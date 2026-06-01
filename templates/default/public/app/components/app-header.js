@@ -66,6 +66,7 @@ class DemoHeader extends HTMLElement {
 
       const activeTab = tabs.find((tab) => tab.dataset.tab === active) ?? tabs[0];
       if (!activeTab || !nav) return;
+      nav.dataset.activeTab = active;
 
       const navBox = nav.getBoundingClientRect();
       const tabBox = activeTab.getBoundingClientRect();

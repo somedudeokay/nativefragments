@@ -146,6 +146,9 @@ export const headerStyles = `
   }
 
   nav {
+    --tab-width: calc((100% - 0.5rem) / 2);
+    --tab-x: 0;
+
     background: color-mix(in srgb, var(--surface, #fffdf6) 72%, transparent);
     border: 1px solid var(--line, rgba(20, 20, 20, 0.1));
     border-radius: var(--radius-pill, 999px);
@@ -154,6 +157,10 @@ export const headerStyles = `
     grid-template-columns: repeat(2, minmax(0, 1fr));
     padding: 0.25rem;
     position: relative;
+  }
+
+  nav[data-active-tab="/nested-route"] {
+    --tab-x: var(--tab-width);
   }
 
   .tab-indicator {
@@ -168,7 +175,7 @@ export const headerStyles = `
     transition:
       transform 0.42s var(--ease, cubic-bezier(0.16, 1, 0.3, 1)),
       width 0.42s var(--ease, cubic-bezier(0.16, 1, 0.3, 1));
-    width: var(--tab-width, calc((100% - 0.5rem) / 2));
+    width: var(--tab-width);
   }
 
   a {
@@ -277,7 +284,7 @@ const headerHtml = ({ activePath = "/", seconds = 0, clickCount = 0 } = {}) => {
       <span>click counter</span>
       <strong data-click-count>${paddedClicks}</strong>
     </div>
-    <nav aria-label="Demo routes">
+    <nav aria-label="Demo routes" data-active-tab="${active}">
       <span class="tab-indicator" aria-hidden="true"></span>
       <a href="/" data-tab="/" ${active === "/" ? raw('aria-current="page"') : ""}>Counter</a>
       <a
