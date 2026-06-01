@@ -1,4 +1,5 @@
 import { shadow, sheet } from "/nativefragments/component.js";
+import { bindText, computed, state } from "/nativefragments/signals.js";
 
 const counterStyles = `
   :host {
@@ -19,25 +20,31 @@ const counterStyles = `
 const styles = sheet(counterStyles);
 
 const counterMarkup = (count) =>
-  `<button type="button">Count ${count}</button>`;
+  `<button type="button"><span data-count>Count ${count}</span></button>`;
 
 class AppCounter extends HTMLElement {
-  count = 0;
+  #count = state(0);
+  #cleanup = [];
+  #increment = () => {
+    this.#count.set(this.#count.get() + 1);
+  };
 
   connectedCallback() {
-    this.render();
-  }
-
-  render() {
     const root = shadow(this, {
       styles: [styles],
-      html: counterMarkup(this.count),
+      html: counterMarkup(this.#count.get()),
     });
 
-    root.querySelector("button").addEventListener("click", () => {
-      this.count += 1;
-      this.render();
-    });
+    const label = computed(() => `Count ${this.#count.get()}`);
+    const button = root.querySelector("button");
+
+    this.#cleanup.push(bindText(root.querySelector("[data-count]"), label));
+    button.addEventListener("click", this.#increment);
+    this.#cleanup.push(() => button.removeEventListener("click", this.#increment));
+  }
+
+  disconnectedCallback() {
+    for (const cleanup of this.#cleanup.splice(0)) cleanup();
   }
 }
 

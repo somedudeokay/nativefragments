@@ -17,7 +17,7 @@ const counterStyles = `
 `;
 
 const counterMarkup = (count) =>
-  html`<button type="button">Count ${count}</button>`;
+  html`<button type="button"><span data-count>Count ${count}</span></button>`;
 
 export const homePage = () => html`<section class="hero">
   <p class="eyebrow">Native Fragments</p>
