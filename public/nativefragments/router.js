@@ -1,5 +1,4 @@
 const defaultSlot = "#content-slot";
-let currentController = null;
 const cache = new Map();
 
 const fragmentUrl = (url) => `${url.pathname}${url.search}`;
@@ -16,8 +15,16 @@ const slotTarget = (slot) =>
 
 const slotHeader = (slot) => (isSelectorSlot(slot) ? null : slot);
 
+const fragmentCacheKey = (url, slot) => {
+  const requestedSlot = slotHeader(slot);
+  return requestedSlot ? `${fragmentUrl(url)}::${requestedSlot}` : fragmentUrl(url);
+};
+
 const sameRoute = (url) =>
   url.pathname === window.location.pathname && url.search === window.location.search;
+
+const shouldSkipNavigation = (url, slot, defaultNavigationSlot, pushState) =>
+  pushState && slot === defaultNavigationSlot && sameRoute(url);
 
 const consumeMeta = (fragment) => {
   const node = fragment.querySelector("script[data-fragment-meta]");
@@ -40,12 +47,17 @@ const setHead = (meta) => {
   if (canonical && meta.canonical) canonical.setAttribute("href", meta.canonical);
 };
 
-const fetchFragment = async (url, signal, ttl, slot) => {
-  const requestedSlot = slotHeader(slot);
-  const key = requestedSlot ? `${fragmentUrl(url)}::${requestedSlot}` : fragmentUrl(url);
-  const cached = cache.get(key);
-  if (cached && Date.now() - cached.timestamp < ttl) return cached.html;
+const cachedFragment = (url, ttl, slot) => {
+  const cached = cache.get(fragmentCacheKey(url, slot));
+  return cached && Date.now() - cached.timestamp < ttl ? cached.html : null;
+};
 
+const writeFragmentCache = (url, slot, html) => {
+  cache.set(fragmentCacheKey(url, slot), { html, timestamp: Date.now() });
+};
+
+const requestFragment = async (url, signal, slot) => {
+  const requestedSlot = slotHeader(slot);
   const response = await fetch(fragmentUrl(url), {
     headers: {
       "x-fragment": "true",
@@ -54,10 +66,51 @@ const fetchFragment = async (url, signal, ttl, slot) => {
     signal,
   });
   if (!response.ok) throw new Error(`Fragment request failed: ${response.status}`);
+  return response.text();
+};
 
-  const html = await response.text();
-  cache.set(key, { html, timestamp: Date.now() });
+const fetchFragment = async ({ url, signal, ttl, slot }) => {
+  const cached = cachedFragment(url, ttl, slot);
+  if (cached) return cached;
+
+  const html = await requestFragment(url, signal, slot);
+  writeFragmentCache(url, slot, html);
   return html;
+};
+
+const parseFragment = (html) => {
+  const template = document.createElement("template");
+  template.innerHTML = html;
+  return {
+    content: template.content,
+    meta: consumeMeta(template.content),
+  };
+};
+
+const applyFragment = ({ fragment, target, url, slot, pushState, scroll }) => {
+  if (pushState) history.pushState({ fragmentSlot: slot }, "", fragmentUrl(url));
+  target.replaceChildren(fragment.content);
+  setHead(fragment.meta);
+  if (scroll) window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+};
+
+const routeTo = (href) => new URL(href, window.location.origin);
+
+const shouldHandleLink = (event) =>
+  !event.defaultPrevented &&
+  !event.metaKey &&
+  !event.ctrlKey &&
+  !event.shiftKey &&
+  !event.altKey &&
+  event.button === 0;
+
+const linkFromEvent = (event) =>
+  event
+    .composedPath()
+    .find((item) => item instanceof Element && item.matches?.("a[href]"));
+
+const fallbackToDocument = (url) => {
+  window.location.href = fragmentUrl(url);
 };
 
 /**
@@ -88,6 +141,7 @@ export const installFragmentNavigation = ({
   afterNavigate = () => {},
 } = {}) => {
   if (!slotTarget(slot)) return;
+  let currentController = null;
 
   const navigate = async (href, pushState = true, nextSlot = slot) => {
     const url = new URL(href, window.location.origin);
@@ -95,11 +149,11 @@ export const installFragmentNavigation = ({
       window.location.href = url.href;
       return;
     }
-    if (pushState && sameRoute(url)) return;
+    if (shouldSkipNavigation(url, nextSlot, slot, pushState)) return;
 
     const root = slotTarget(nextSlot);
     if (!root) {
-      window.location.href = fragmentUrl(url);
+      fallbackToDocument(url);
       return;
     }
 
@@ -107,39 +161,34 @@ export const installFragmentNavigation = ({
     currentController = new AbortController();
 
     try {
-      const html = await fetchFragment(url, currentController.signal, ttl, nextSlot);
-      const template = document.createElement("template");
-      template.innerHTML = html;
-      const meta = consumeMeta(template.content);
-
-      if (pushState) history.pushState({ fragmentSlot: nextSlot }, "", fragmentUrl(url));
-      root.replaceChildren(template.content);
-      setHead(meta);
-      afterNavigate({ meta, url, slot: nextSlot });
-      if (nextSlot === slot) window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      const html = await fetchFragment({
+        url,
+        signal: currentController.signal,
+        ttl,
+        slot: nextSlot,
+      });
+      const fragment = parseFragment(html);
+      applyFragment({
+        fragment,
+        target: root,
+        url,
+        slot: nextSlot,
+        pushState,
+        scroll: nextSlot === slot,
+      });
+      afterNavigate({ meta: fragment.meta, url, slot: nextSlot });
     } catch (error) {
-      if (error.name !== "AbortError") window.location.href = fragmentUrl(url);
+      if (error.name !== "AbortError") fallbackToDocument(url);
     }
   };
 
   document.addEventListener("click", (event) => {
-    if (
-      event.defaultPrevented ||
-      event.metaKey ||
-      event.ctrlKey ||
-      event.shiftKey ||
-      event.altKey ||
-      event.button !== 0
-    ) {
-      return;
-    }
+    if (!shouldHandleLink(event)) return;
 
-    const link = event
-      .composedPath()
-      .find((item) => item instanceof Element && item.matches?.("a[href]"));
+    const link = linkFromEvent(event);
     if (!link || link.target || link.hasAttribute("download")) return;
 
-    const url = new URL(link.href);
+    const url = routeTo(link.href);
     if (url.origin !== window.location.origin) return;
 
     event.preventDefault();
