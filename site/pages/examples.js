@@ -1,4 +1,5 @@
 import { html } from "../../src/server/index.js";
+import { codeBlock } from "../code.js";
 
 const smokeExample = `curl -f http://127.0.0.1:8787/
 curl -f http://127.0.0.1:8787/docs \\
@@ -31,21 +32,21 @@ export const examplesPage = () => html`<section class="page-hero compact">
 <section class="docs-grid">
   <article>
     <h2>HTTP smoke</h2>
-    <pre><code>${smokeExample}</code></pre>
+    ${codeBlock(smokeExample, "shell")}
   </article>
 
   <article>
     <h2>Web Test Runner component test</h2>
-    <pre><code>${wtrExample}</code></pre>
+    ${codeBlock(wtrExample, "shell")}
   </article>
 
   <article>
     <h2>Shadow DOM assertion</h2>
-    <pre><code>${shadowTestExample}</code></pre>
+    ${codeBlock(shadowTestExample)}
   </article>
 
   <article>
     <h2>Build escape hatch</h2>
-    <pre><code>${esbuildExample}</code></pre>
+    ${codeBlock(esbuildExample, "shell")}
   </article>
 </section>`;

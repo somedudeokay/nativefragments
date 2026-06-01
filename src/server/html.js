@@ -1,4 +1,4 @@
-const RAW = Symbol("native-fragments.raw");
+const RAW = Symbol("nativefragments.raw");
 
 export const raw = (value = "") => ({
   [RAW]: true,

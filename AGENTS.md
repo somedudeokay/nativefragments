@@ -1,14 +1,16 @@
 # Native Fragments
 
-Native Fragments is a zero-dependency, zero-build frontend framework aimed at
-AI agents and long-lived web apps.
+Native Fragments is a zero-dependency, zero-build frontend framework for agents
+building fast, maintainable, AI-friendly web applications.
 
 ## Goals
 
 - Zero dependencies in the framework runtime.
 - Zero app build by default.
 - Blazing fast HTML-first pages with fragment navigation.
-- Built for AI agents: explicit files, tiny APIs, obvious edit points.
+- Built for agents: explicit files, tiny APIs, obvious edit points.
+- AI-friendly applications: real HTML, links, and browser modules that agents
+  can inspect, click, scrape, and maintain after deploy.
 - Zero maintenance by leaning on stable browser APIs.
 - Free to deploy on Cloudflare Workers for small projects.
 - Infinite scale as a design target: cacheable assets, edge fragments, and no
@@ -22,7 +24,7 @@ AI agents and long-lived web apps.
 
 - `src/server`: HTML helpers, route helpers, metadata, and rendering.
 - `src/cloudflare`: Cloudflare Worker adapter.
-- `public/native-fragments`: browser-loadable framework modules.
+- `public/nativefragments`: browser-loadable framework modules.
 - `site`: this repo's docsite routes, shell, and page renderers.
 - `public/app`: docsite browser modules and custom elements.
 

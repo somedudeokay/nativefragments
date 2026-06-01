@@ -1,4 +1,4 @@
-import { shadow, sheet } from "/native-fragments/component.js";
+import { shadow, sheet } from "/nativefragments/component.js";
 
 const styles = sheet(`
   :host {
@@ -85,6 +85,7 @@ class NativeFragmentsHeader extends HTMLElement {
       { href: "/", label: "Native Fragments" },
       { href: "/docs", label: "Docs" },
       { href: "/examples", label: "Examples" },
+      { href: "/demos", label: "Demos" },
       { href: "/manifesto", label: "Manifesto" },
     ];
     const path = window.location.pathname.replace(/\/$/, "") || "/";

@@ -1,4 +1,5 @@
 import { html, raw } from "../../src/server/index.js";
+import { codeBlock } from "../code.js";
 
 const claim = (label, text) => html`<li>
   <strong>${label}</strong>
@@ -8,11 +9,12 @@ const claim = (label, text) => html`<li>
 export const homePage = () => html`<section class="hero">
   <div class="hero-copy">
     <p class="eyebrow">Native Fragments</p>
-    <h1>Zero build web apps for AI agents.</h1>
+    <h1>Zero build apps built by AI agents.</h1>
     <p class="lede">
       A frontend framework that stays close to the native Web Platform:
       server-rendered fragments, Custom Elements, Shadow DOM, browser ES modules,
-      and Cloudflare Workers.
+      and Cloudflare Workers. The result is fast for users and easy for agents
+      to inspect, click, scrape, and maintain.
     </p>
     <div class="hero-actions">
       <a class="primary-action" href="/docs">Read the model</a>
@@ -30,6 +32,7 @@ export const homePage = () => html`<section class="hero">
         claim("Zero build", "Ship browser-native modules directly."),
         claim("Blazing fast", "HTML first, fragments next, islands only where needed."),
         claim("Built for agents", "Explicit files, boring contracts, tiny APIs."),
+        claim("AI-friendly apps", "Readable HTML and native modules at runtime."),
         claim("Zero maintenance", "The browser is the compatibility layer."),
         claim("Free to deploy", "Cloudflare Workers first, no server bill required."),
         claim("Infinite scale", "Static assets and edge fragments by default."),
@@ -45,9 +48,9 @@ export const homePage = () => html`<section class="hero">
   </div>
   <p>
     Native Fragments adds just enough convention for agents to build durable
-    apps: route manifests, escaped HTML templates, fragment responses, metadata
-    updates, and Shadow DOM component islands. Everything else is HTML, CSS, and
-    JavaScript.
+    applications: route manifests, escaped HTML templates, fragment responses,
+    metadata updates, and Shadow DOM component islands. Everything else is
+    HTML, CSS, and JavaScript.
   </p>
 </section>
 
@@ -56,8 +59,8 @@ export const homePage = () => html`<section class="hero">
     <p class="eyebrow">No compile step</p>
     <h2>Dev is just Wrangler.</h2>
   </div>
-  <pre><code>npm run dev
+  ${codeBlock(`npm run dev
 
 # internally:
-npx wrangler dev</code></pre>
+npx wrangler dev`, "shell")}
 </section>`;

@@ -1,10 +1,11 @@
 import { route } from "../src/server/index.js";
+import { demosPage } from "./pages/demos.js";
 import { docsPage } from "./pages/docs.js";
 import { examplesPage } from "./pages/examples.js";
 import { homePage } from "./pages/home.js";
 import { manifestoPage } from "./pages/manifesto.js";
 
-const origin = "https://native-fragments.dev";
+const origin = "https://nativefragments.org";
 
 const meta = (path, title, description) => ({
   canonical: `${origin}${path}`,
@@ -17,8 +18,8 @@ export const routes = [
     meta: () =>
       meta(
         "/",
-        "Zero build web framework for agents",
-        "Native Fragments is a zero-dependency, zero-build frontend framework for AI agents and Cloudflare Workers.",
+        "Zero build web framework built for agents",
+        "Native Fragments is a zero-dependency, zero-build frontend framework for agents building AI-friendly applications.",
       ),
     render: homePage,
   }),
@@ -40,12 +41,21 @@ export const routes = [
       ),
     render: examplesPage,
   }),
+  route("/demos", {
+    meta: () =>
+      meta(
+        "/demos",
+        "Demos",
+        "Native Fragments demos are coming soon.",
+      ),
+    render: demosPage,
+  }),
   route("/manifesto", {
     meta: () =>
       meta(
         "/manifesto",
         "Manifesto",
-        "The Native Fragments goals: zero dependencies, zero build, blazing fast, built for agents, zero maintenance, free to deploy, infinite scale.",
+        "The Native Fragments goals: zero dependencies, zero build, blazing fast, built for agents, AI-friendly applications, zero maintenance, free to deploy, infinite scale.",
       ),
     render: manifestoPage,
   }),

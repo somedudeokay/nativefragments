@@ -1,4 +1,4 @@
-import { installFragmentNavigation } from "/native-fragments/router.js";
+import { installFragmentNavigation } from "/nativefragments/router.js";
 import "./components/site-header.js";
 import "./components/runtime-map.js";
 

@@ -22,6 +22,7 @@ export const shell = ({ body, meta }) => html`<!doctype html>
       <a href="/">Native Fragments</a>
       <a href="/docs">Docs</a>
       <a href="/examples">Examples</a>
+      <a href="/demos">Demos</a>
       <a href="/manifesto">Manifesto</a>
     </nf-site-header>
     <main id="content-slot">${raw(body)}</main>

@@ -9,7 +9,7 @@ const assetLike = (url) =>
   /\.[a-zA-Z0-9]+$/.test(url.pathname) ||
   url.pathname.startsWith("/app/") ||
   url.pathname.startsWith("/assets/") ||
-  url.pathname.startsWith("/native-fragments/");
+  url.pathname.startsWith("/nativefragments/");
 
 const requestWantsFragment = (request) =>
   request.headers.get("x-fragment") === "true";

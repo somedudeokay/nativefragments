@@ -12,8 +12,8 @@ export const manifestoPage = () => html`<section class="page-hero manifesto">
 
 <section class="goal-wall" aria-label="Native Fragments goals">
   <p>
-    Zero dependencies. Zero build. Blazing fast. Built for agents. Zero
-    maintenance. Free to deploy. Infinite scale.
+    Zero dependencies. Zero build. Blazing fast. Built for agents. AI-friendly
+    applications. Zero maintenance. Free to deploy. Infinite scale.
   </p>
 </section>
 
@@ -22,6 +22,10 @@ export const manifestoPage = () => html`<section class="page-hero manifesto">
     <li>
       <strong>Agents need locality.</strong>
       <span>One route, one renderer, one component file, one obvious edit.</span>
+    </li>
+    <li>
+      <strong>Applications should be readable by agents.</strong>
+      <span>Native HTML and browser modules are easier to click, scrape, inspect, and maintain than opaque transpiled bundles.</span>
     </li>
     <li>
       <strong>Maintenance comes from deletion.</strong>

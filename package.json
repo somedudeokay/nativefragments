@@ -1,21 +1,33 @@
 {
-  "name": "@somedudeokay/native-fragments",
+  "name": "@nativefragments/nativefragments",
   "version": "0.1.0",
-  "description": "Zero dependencies, zero build fragment UI framework for native web apps built by agents.",
+  "description": "Zero dependencies, zero build frontend framework for agents building AI-friendly web applications.",
   "type": "module",
   "main": "./src/index.js",
   "exports": {
     ".": "./src/index.js",
     "./cloudflare": "./src/cloudflare/index.js",
     "./server": "./src/server/index.js",
-    "./client/router.js": "./public/native-fragments/router.js",
-    "./client/component.js": "./public/native-fragments/component.js"
+    "./client/router.js": "./public/nativefragments/router.js",
+    "./client/component.js": "./public/nativefragments/component.js"
   },
   "files": [
     "src",
-    "public/native-fragments",
+    "public/nativefragments",
+    "skills",
     "README.md"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/somedudeokay/nativefragments.git"
+  },
+  "bugs": {
+    "url": "https://github.com/somedudeokay/nativefragments/issues"
+  },
+  "homepage": "https://nativefragments.org",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "npx wrangler dev",
     "deploy": "npx wrangler deploy"
@@ -25,7 +37,8 @@
     "cloudflare-workers",
     "zero-build",
     "fragments",
-    "ai-agents"
+    "ai-agents",
+    "ai-friendly-apps"
   ],
   "license": "MIT"
 }

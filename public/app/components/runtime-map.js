@@ -1,4 +1,4 @@
-import { shadow, sheet } from "/native-fragments/component.js";
+import { shadow, sheet } from "/nativefragments/component.js";
 
 const styles = sheet(`
   :host {
