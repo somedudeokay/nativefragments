@@ -1,5 +1,15 @@
 # @nativefragments/core
 
+## 0.4.0
+
+### Minor Changes
+
+- cd810d2: Add path parameter matching for server routes and expose captured values on `context.params`.
+
+### Patch Changes
+
+- 0e6f955: Materialize declarative Shadow DOM templates inserted through fragment navigation before hydrating components.
+
 ## 0.3.1
 
 ### Patch Changes
