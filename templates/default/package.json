@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@nativefragments/core": "^0.2.0",
-    "@nativefragments/signals": "^0.1.0",
     "hono": "^4.12.23"
   }
 }
