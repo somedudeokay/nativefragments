@@ -159,7 +159,7 @@ class NativeFragmentsHeader extends HTMLElement {
   sync() {
     const links = [
       { href: "/", label: "Native Fragments" },
-      { href: "/docs", label: "Docs" },
+      { href: "https://docs.nativefragments.org", label: "Docs" },
       { href: "/examples", label: "Examples" },
       { href: "/demos", label: "Demos" },
       { href: "/manifesto", label: "Manifesto" },

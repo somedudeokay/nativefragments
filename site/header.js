@@ -152,7 +152,7 @@ const githubIcon = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentCol
 </svg>`;
 
 const links = [
-  { href: "/docs", label: "Docs" },
+  { href: "https://docs.nativefragments.org", label: "Docs" },
   { href: "/examples", label: "Examples" },
   { href: "/demos", label: "Demos" },
   { href: "/manifesto", label: "Manifesto" },

@@ -28,12 +28,7 @@ export default {
       );
     }
 
-    const isLocalDev = env?.DEPLOY_ENV === "development";
-
-    if (
-      !isLocalDev &&
-      (url.pathname === "/docs" || url.pathname.startsWith("/docs/"))
-    ) {
+    if (url.pathname === "/docs" || url.pathname.startsWith("/docs/")) {
       const pathname = url.pathname === "/docs" ? "/" : url.pathname.slice(5);
       return Response.redirect(
         `https://docs.nativefragments.org${pathname}${url.search}`,
