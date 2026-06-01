@@ -1,11 +1,20 @@
 import { html, raw } from "@nativefragments/core/server";
+import { criticalStyles } from "./critical-styles.js";
 import { siteHeader } from "./header.js";
 
 const headLinks = ({ meta }) => html`
   <title>${meta.title}</title>
   <meta name="description" content="${meta.description}" />
   <link rel="canonical" href="${meta.canonical}" />
-  <link rel="stylesheet" href="/app/styles.css" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <style>${raw(criticalStyles)}</style>
+  <link
+    rel="preload"
+    href="/app/styles.css"
+    as="style"
+    onload="this.onload=null;this.rel='stylesheet'"
+  />
+  <noscript><link rel="stylesheet" href="/app/styles.css" /></noscript>
   <script type="module" src="/app/client.js"></script>
 `;
 

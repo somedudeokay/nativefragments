@@ -158,7 +158,6 @@ h2 {
   background: var(--paper);
   color: var(--ink);
   display: flex;
-  color: var(--green);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.78rem;
   justify-content: center;
