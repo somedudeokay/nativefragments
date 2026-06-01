@@ -163,6 +163,42 @@ h2 {
   line-height: 1.1;
 }
 
+.feature-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  list-style: none;
+  margin: 0;
+  max-width: 46rem;
+  padding: 0;
+}
+
+.feature-list li {
+  align-items: center;
+  background: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--paper) 16%, transparent);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
+  color: var(--paper);
+  display: inline-flex;
+  font-family: var(--display);
+  font-size: clamp(1.02rem, 2.3vw, 1.55rem);
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+  min-height: 2.85rem;
+  padding: 0.65rem 0.95rem;
+}
+
+.feature-list li::before {
+  background: var(--green);
+  border-radius: 999px;
+  content: "";
+  height: 0.46rem;
+  margin-right: 0.58rem;
+  width: 0.46rem;
+}
+
 .lede {
   color: var(--muted);
   font-size: clamp(1.05rem, 1.5vw, 1.2rem);

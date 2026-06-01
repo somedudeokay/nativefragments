@@ -21,7 +21,7 @@ export const routes = [
       meta(
         context,
         "/",
-        "Pure HTML state - Zero dependencies",
+        "Counter route - Native Fragments starter",
         "A zero-build Native Fragments app with pure HTML shared state.",
       ),
     render: counterPage,
@@ -32,7 +32,7 @@ export const routes = [
       meta(
         context,
         "/nested-route",
-        "Pure HTML partial rerenders - Zero dependencies",
+        "Nested route - Native Fragments starter",
         "A Native Fragments app demonstrating nested pure HTML partial rerenders.",
       ),
     render: nestedRoutePage,
@@ -43,7 +43,7 @@ export const routes = [
       meta(
         context,
         context.url.pathname,
-        "Pure HTML partial rerenders - Zero dependencies",
+        "Nested route - Native Fragments starter",
         "A Native Fragments app demonstrating nested pure HTML partial rerenders.",
       ),
     render: nestedRoutePage,

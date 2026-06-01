@@ -1,4 +1,5 @@
 import { declarativeShadow, html } from "@nativefragments/core/server";
+import { featureList } from "../features.js";
 import { readClickCountCookie } from "../state.js";
 
 const counterPanelStyles = `
@@ -102,7 +103,7 @@ export const counterPage = ({ request }) => {
   return html`<section class="demo-hero counter-route">
     <div class="hero-copy">
       <p class="eyebrow">Counter route</p>
-      <h1>Pure HTML state. Zero dependencies.</h1>
+      ${featureList()}
       <p class="lede">
         The header is outside the page area. The content below can rerender in
         pieces, but the click counter stays shared across the app without a
