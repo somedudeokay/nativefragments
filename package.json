@@ -1,0 +1,32 @@
+{
+  "name": "@nativefragments/create-app",
+  "version": "0.1.1",
+  "description": "Create a zero-build Native Fragments app.",
+  "type": "module",
+  "bin": {
+    "create-app": "bin/create-app.js"
+  },
+  "files": [
+    "bin",
+    "templates",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/somedudeokay/nativefragments-create-app.git"
+  },
+  "homepage": "https://nativefragments.org/docs",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "check": "node --check bin/create-app.js && find templates -name '*.js' -print0 | xargs -0 -n1 node --check"
+  },
+  "keywords": [
+    "nativefragments",
+    "create",
+    "cloudflare-workers",
+    "zero-build"
+  ],
+  "license": "MIT"
+}
