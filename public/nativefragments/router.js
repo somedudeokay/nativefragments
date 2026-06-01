@@ -1,5 +1,6 @@
 const defaultSlot = "#content-slot";
 const cache = new Map();
+const inFlight = new Map();
 
 const fragmentUrl = (url) => `${url.pathname}${url.search}`;
 
@@ -70,12 +71,22 @@ const requestFragment = async (url, signal, slot) => {
 };
 
 const fetchFragment = async ({ url, signal, ttl, slot }) => {
+  const key = fragmentCacheKey(url, slot);
   const cached = cachedFragment(url, ttl, slot);
   if (cached) return cached;
+  if (inFlight.has(key)) return inFlight.get(key);
 
-  const html = await requestFragment(url, signal, slot);
-  writeFragmentCache(url, slot, html);
-  return html;
+  const request = requestFragment(url, signal, slot)
+    .then((html) => {
+      writeFragmentCache(url, slot, html);
+      return html;
+    })
+    .finally(() => {
+      inFlight.delete(key);
+    });
+
+  inFlight.set(key, request);
+  return request;
 };
 
 const parseFragment = (html) => {
@@ -113,11 +124,115 @@ const fallbackToDocument = (url) => {
   window.location.href = fragmentUrl(url);
 };
 
+const prefetchMode = (value) => {
+  if (value === true || value === undefined) return "intent";
+  if (value === false || value === "false" || value === "off") return "none";
+  return value;
+};
+
+const linkPrefetchMode = (link, fallback) => {
+  const value = link.dataset.fragmentPrefetch;
+  return prefetchMode(value === undefined ? fallback : value);
+};
+
+const shouldPrefetchLink = (link) =>
+  link &&
+  !link.target &&
+  !link.hasAttribute("download") &&
+  link.origin === window.location.origin;
+
+/**
+ * Prefetch a same-origin fragment into the shared fragment cache.
+ *
+ * @param {string | URL} href URL to prefetch.
+ * @param {{ slot?: string, ttl?: number, signal?: AbortSignal }} [options={}]
+ * Prefetch options.
+ * @returns {Promise<string | null>} Prefetched fragment HTML, or `null` for
+ * skipped cross-origin URLs.
+ */
+export const prefetchFragment = async (
+  href,
+  { slot = defaultSlot, ttl = 30_000, signal } = {},
+) => {
+  const url = routeTo(href);
+  if (url.origin !== window.location.origin) return null;
+  return fetchFragment({ url, signal, ttl, slot });
+};
+
+const installIntentPrefetch = ({ ttl, slot, prefetch }) => {
+  const timers = new WeakMap();
+
+  const queue = (link) => {
+    if (!shouldPrefetchLink(link) || linkPrefetchMode(link, prefetch) !== "intent") {
+      return;
+    }
+    if (timers.has(link)) return;
+
+    const timer = window.setTimeout(() => {
+      timers.delete(link);
+      prefetchFragment(link.href, {
+        ttl,
+        slot: link.dataset.fragmentSlot ?? slot,
+      }).catch(() => {});
+    }, 65);
+
+    timers.set(link, timer);
+  };
+
+  const cancel = (link) => {
+    const timer = timers.get(link);
+    if (!timer) return;
+    window.clearTimeout(timer);
+    timers.delete(link);
+  };
+
+  document.addEventListener("pointerover", (event) => queue(linkFromEvent(event)));
+  document.addEventListener("focusin", (event) => queue(linkFromEvent(event)));
+  document.addEventListener("pointerout", (event) => cancel(linkFromEvent(event)));
+  document.addEventListener("focusout", (event) => cancel(linkFromEvent(event)));
+};
+
+const prefetchLinks = ({ ttl, slot, mode, fallback = "none" }) => {
+  for (const link of document.querySelectorAll("a[href]")) {
+    if (!shouldPrefetchLink(link) || linkPrefetchMode(link, fallback) !== mode) continue;
+    prefetchFragment(link.href, {
+      ttl,
+      slot: link.dataset.fragmentSlot ?? slot,
+    }).catch(() => {});
+  }
+};
+
+const installVisiblePrefetch = ({ ttl, slot, fallback = "none" }) => {
+  if (!("IntersectionObserver" in window)) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      const link = entry.target;
+      observer.unobserve(link);
+      prefetchFragment(link.href, {
+        ttl,
+        slot: link.dataset.fragmentSlot ?? slot,
+      }).catch(() => {});
+    }
+  }, { rootMargin: "240px" });
+
+  for (const link of document.querySelectorAll("a[href]")) {
+    if (!shouldPrefetchLink(link) || linkPrefetchMode(link, fallback) !== "visible") {
+      continue;
+    }
+    observer.observe(link);
+  }
+};
+
 /**
  * @typedef {object} FragmentNavigationOptions
  * @property {string} [slot="#content-slot"] Selector for the element replaced
  * by fragment responses.
  * @property {number} [ttl=30000] Fragment cache time in milliseconds.
+ * @property {boolean | "none" | "intent" | "visible" | "load"} [prefetch="intent"]
+ * Default fragment prefetch behavior. Links can override this with
+ * `data-fragment-prefetch="intent|visible|load|none"`.
  * @property {(event: { meta: object | null, url: URL, slot: string }) => void} [afterNavigate]
  * Callback fired after a successful client-side navigation.
  */
@@ -138,10 +253,12 @@ const fallbackToDocument = (url) => {
 export const installFragmentNavigation = ({
   slot = defaultSlot,
   ttl = 30_000,
+  prefetch = "intent",
   afterNavigate = () => {},
 } = {}) => {
   if (!slotTarget(slot)) return;
   let currentController = null;
+  const defaultPrefetch = prefetchMode(prefetch);
 
   const navigate = async (href, pushState = true, nextSlot = slot) => {
     const url = new URL(href, window.location.origin);
@@ -203,6 +320,12 @@ export const installFragmentNavigation = ({
     );
   });
 
+  installIntentPrefetch({ ttl, slot, prefetch: defaultPrefetch });
+  prefetchLinks({ ttl, slot, mode: "load", fallback: defaultPrefetch });
+  installVisiblePrefetch({ ttl, slot, fallback: defaultPrefetch });
+
   window.nativeFragmentsNavigate = navigate;
+  window.nativeFragmentsPrefetch = (href, nextSlot = slot) =>
+    prefetchFragment(href, { ttl, slot: nextSlot });
   return navigate;
 };
