@@ -7,6 +7,9 @@ Native Fragments Core is the runtime package for building fast, maintainable web
 applications with native browser APIs: HTML, CSS, JavaScript, Custom Elements,
 Shadow DOM, Fetch, History, and standard server-side `Response` objects.
 
+- Website: https://nativefragments.org
+- Docs: https://docs.nativefragments.org
+
 For a new app, start with the scaffold:
 
 ```sh
@@ -154,6 +157,7 @@ See [docs/api-reference.md](docs/api-reference.md).
 
 ## Links
 
-- Docs: https://nativefragments.org
+- Website: https://nativefragments.org
+- Docs: https://docs.nativefragments.org
 - GitHub: https://github.com/somedudeokay/nativefragments
 - npm: https://www.npmjs.com/package/@nativefragments/core
