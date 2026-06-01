@@ -75,7 +75,8 @@ const escapeStyleText = (value) =>
  * Put this as the first child of a custom element to avoid a flash of unstyled
  * light DOM before the component module loads. Pair it with the browser
  * {@link shadow} helper, which preserves an existing declarative shadow root on
- * first upgrade.
+ * first upgrade and materializes declarative shadow templates inserted during
+ * fragment navigation.
  *
  * @param {DeclarativeShadowOptions} [options={}] Shadow template options.
  * @returns {RawHtml} Trusted declarative shadow template.
