@@ -17,6 +17,7 @@
     "scripts",
     "third-party",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE",
     "THIRD_PARTY_NOTICES.md"
   ],
@@ -33,7 +34,10 @@
   },
   "scripts": {
     "check": "find src public/nativefragments scripts -name '*.js' -print0 | xargs -0 -n1 node --check",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "npm run check && npm run smoke && changeset publish"
   },
   "keywords": [
     "signals",
@@ -45,5 +49,9 @@
   "dependencies": {
     "signal-polyfill": "^0.2.2"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.7.0",
+    "@changesets/cli": "^2.31.0"
+  }
 }
