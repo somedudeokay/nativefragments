@@ -30,6 +30,7 @@ npm i @nativefragments/core
 - Cloudflare Worker adapter.
 - Browser fragment navigation.
 - Nested fragment slots for routes inside routes.
+- Web Worker RPC helpers for moving expensive client work off the main thread.
 - Shadow DOM component helpers, including declarative Shadow DOM support to
   avoid refresh FOUC.
 - Agent skill shipped with the package.
@@ -47,6 +48,7 @@ Browser helpers are plain ES modules that can be served from your app's
 ```js
 import { installFragmentNavigation } from "/nativefragments/router.js";
 import { shadow, sheet } from "/nativefragments/component.js";
+import { createWorkerClient } from "/nativefragments/worker.js";
 ```
 
 ## Nested Fragments
@@ -70,6 +72,29 @@ route("/settings/profile", {
 
 The browser router sends `x-fragment-slot: settings-panel`, swaps only that
 section, and keeps the full route as the no-JavaScript fallback.
+
+## Worker Helpers
+
+Use workers for search, filtering, parsing, and other client work that can run
+away from the main thread:
+
+```js
+// public/app/search-worker.js
+import { exposeWorker } from "/nativefragments/worker.js";
+
+exposeWorker({
+  search: ({ rows, query }) =>
+    rows.filter((row) => row.name.toLowerCase().includes(query.toLowerCase()))
+});
+```
+
+```js
+// public/app/search.js
+import { createWorkerClient } from "/nativefragments/worker.js";
+
+const searchWorker = createWorkerClient("/app/search-worker.js");
+const rows = await searchWorker.call("search", { rows: allRows, query: "oslo" });
+```
 
 ## No-FOUC Components
 

@@ -9,7 +9,8 @@
     "./cloudflare": "./src/cloudflare/index.js",
     "./server": "./src/server/index.js",
     "./client/router.js": "./public/nativefragments/router.js",
-    "./client/component.js": "./public/nativefragments/component.js"
+    "./client/component.js": "./public/nativefragments/component.js",
+    "./client/worker.js": "./public/nativefragments/worker.js"
   },
   "files": [
     "src",

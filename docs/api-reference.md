@@ -214,3 +214,59 @@ class AppCard extends HTMLElement {
 
 customElements.define("app-card", AppCard);
 ```
+
+## `/nativefragments/worker.js`
+
+### `createWorkerClient(workerOrUrl, options)`
+
+Creates a module worker from a URL, or wraps an existing `Worker`, and returns a
+small RPC client.
+
+```js
+import { createWorkerClient } from "/nativefragments/worker.js";
+
+const worker = createWorkerClient("/app/search-worker.js", {
+  timeout: 10000
+});
+
+const results = await worker.call("search", {
+  rows,
+  query: "native"
+});
+```
+
+Options:
+
+- `timeout`: Call timeout in milliseconds. Defaults to `30000`.
+- `workerOptions`: Options passed to the `Worker` constructor when a URL is
+  provided. Defaults to `{ type: "module" }`.
+
+### `workerClient(worker, options)`
+
+Wraps an existing dedicated worker. Use this when the app owns worker creation.
+
+### `exposeWorker(handlers, scope)`
+
+Registers named handlers inside a dedicated worker.
+
+```js
+import { exposeWorker } from "/nativefragments/worker.js";
+
+exposeWorker({
+  search: ({ rows, query }) =>
+    rows.filter((row) => row.title.toLowerCase().includes(query.toLowerCase()))
+});
+```
+
+### `transferResult(payload, transfer)`
+
+Returns a worker response with Transferable objects so large buffers can move
+without copying.
+
+```js
+import { exposeWorker, transferResult } from "/nativefragments/worker.js";
+
+exposeWorker({
+  bytes: (buffer) => transferResult(buffer, [buffer])
+});
+```

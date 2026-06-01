@@ -15,6 +15,8 @@ Use this skill when creating or editing a Native Fragments app.
 - Render HTML on the server, then use fragment navigation for fast transitions.
 - Use nested fragment slots for route regions that should navigate without
   replacing the full page body.
+- Use Web Workers for expensive client-side work like search, filtering,
+  parsing, and background preparation.
 - Put component styling inside Shadow DOM.
 - Avoid refresh FOUC by server-rendering important custom elements with
   declarative Shadow DOM.
@@ -71,6 +73,34 @@ route("/settings/profile", {
 
 The link slot name must match the target container and the route `fragments`
 key. The full `render` output remains the canonical server-rendered fallback.
+
+## Worker Pattern
+
+Use `/nativefragments/worker.js` for worker RPC instead of inventing a custom
+`postMessage` protocol in each app.
+
+Worker module:
+
+```js
+import { exposeWorker } from "/nativefragments/worker.js";
+
+exposeWorker({
+  filter: ({ rows, query }) =>
+    rows.filter((row) => row.name.toLowerCase().includes(query.toLowerCase()))
+});
+```
+
+Main thread:
+
+```js
+import { createWorkerClient } from "/nativefragments/worker.js";
+
+const worker = createWorkerClient("/app/filter-worker.js");
+const rows = await worker.call("filter", { rows: allRows, query });
+```
+
+Keep worker payloads structured-clone friendly. Use `transferResult()` for
+large `ArrayBuffer` payloads that should move without copying.
 
 ## Component Pattern
 
