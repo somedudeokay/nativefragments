@@ -20,10 +20,12 @@ export const shell = ({ body, meta }) => html`<!doctype html>
     <a class="skip-link" href="#content-slot">Skip to content</a>
     <nf-site-header>
       <a href="/">Native Fragments</a>
-      <a href="/docs">Docs</a>
+      <a href="https://docs.nativefragments.org">Docs</a>
       <a href="/examples">Examples</a>
       <a href="/demos">Demos</a>
       <a href="/manifesto">Manifesto</a>
+      <a href="https://github.com/somedudeokay/nativefragments">GitHub</a>
+      <a href="https://www.npmjs.com/package/@nativefragments/core">npm</a>
     </nf-site-header>
     <main id="content-slot">${raw(body)}</main>
   </body>

@@ -1,66 +1,162 @@
-import { html, raw } from "@nativefragments/core/server";
+import { html } from "@nativefragments/core/server";
 import { codeBlock } from "../code.js";
 
-const claim = (label, text) => html`<li>
-  <strong>${label}</strong>
-  <span>${text}</span>
-</li>`;
+const installExample = `npm create @nativefragments/app@latest my-app
+cd my-app
+npm run dev`;
+
+const routeExample = `import { html, route } from "@nativefragments/core/server";
+
+export const routes = [
+  route("/", {
+    meta: () => ({
+      title: "Dashboard",
+      description: "A fast HTML-first dashboard.",
+      canonical: "https://example.com/",
+    }),
+    render: () => html\`
+      <h1>Revenue</h1>
+      <metric-card value="$42k"></metric-card>
+    \`,
+  }),
+];`;
+
+const componentExample = `import { shadow, sheet } from "/nativefragments/component.js";
+
+const styles = sheet(\`
+  button {
+    border: 1px solid currentColor;
+  }
+\`);
+
+class ThemeSwitch extends HTMLElement {
+  connectedCallback() {
+    shadow(this, {
+      styles: [styles],
+      html: \`<button type="button">Switch theme</button>\`,
+    });
+  }
+}
+
+customElements.define("theme-switch", ThemeSwitch);`;
 
 export const homePage = () => html`<section class="hero">
   <div class="hero-copy">
     <p class="eyebrow">Native Fragments</p>
-    <h1>Zero build apps built by AI agents.</h1>
+    <h1>The tiny web framework built for coding agents.</h1>
     <p class="lede">
-      A frontend framework that stays close to the native Web Platform:
-      server-rendered fragments, Custom Elements, Shadow DOM, browser ES modules,
-      and Cloudflare Workers. The result is fast for users and easy for agents
-      to inspect, click, scrape, and maintain.
+      Native Fragments helps agents create fast, maintainable web apps without
+      a compile pipeline. The app stays readable at runtime: server HTML, real
+      links, browser ES modules, Custom Elements, Shadow DOM, and Cloudflare
+      Workers.
     </p>
     <div class="hero-actions">
-      <a class="primary-action" href="/docs">Read the model</a>
-      <a class="secondary-action" href="/examples">Copy an example</a>
+      <a class="primary-action" href="https://docs.nativefragments.org/getting-started">Start building</a>
+      <a class="secondary-action" href="https://docs.nativefragments.org/reference">API reference</a>
     </div>
   </div>
   <nf-runtime-map></nf-runtime-map>
 </section>
 
-<section class="claim-band">
-  <ul>
-    ${raw(
-      [
-        claim("Zero dependencies", "Runtime code you can read in minutes."),
-        claim("Zero build", "Ship browser-native modules directly."),
-        claim("Blazing fast", "HTML first, fragments next, islands only where needed."),
-        claim("Built for agents", "Explicit files, boring contracts, tiny APIs."),
-        claim("AI-friendly apps", "Readable HTML and native modules at runtime."),
-        claim("Zero maintenance", "The browser is the compatibility layer."),
-        claim("Free to deploy", "Cloudflare Workers first, no server bill required."),
-        claim("Infinite scale", "Static assets and edge fragments by default."),
-      ].join(""),
-    )}
-  </ul>
+<section class="proof-strip" aria-label="Framework goals">
+  <strong>Zero dependencies</strong>
+  <strong>Zero build</strong>
+  <strong>Blazing fast</strong>
+  <strong>Built for agents</strong>
+  <strong>AI-friendly apps</strong>
+  <strong>Free to deploy</strong>
 </section>
 
-<section class="split">
+<section class="landing-section intro-section">
   <div>
     <p class="eyebrow">The bet</p>
-    <h2>The Web Platform is the framework.</h2>
+    <h2>Use the Web Platform as the framework.</h2>
   </div>
-  <p>
-    Native Fragments adds just enough convention for agents to build durable
-    applications: route manifests, escaped HTML templates, fragment responses,
-    metadata updates, and Shadow DOM component islands. Everything else is
-    HTML, CSS, and JavaScript.
-  </p>
+  <div class="section-copy">
+    <p>
+      Most frontend stacks hide the thing agents need to reason about: the
+      actual HTML, links, styles, and behavior. Native Fragments keeps those
+      surfaces explicit, so generated apps are easy to read, debug, click,
+      scrape, and extend.
+    </p>
+    <p>
+      The framework adds the small contracts an app needs: route manifests,
+      escaped HTML templates, fragment responses, metadata updates, and Shadow
+      DOM helpers. Everything else is ordinary browser code.
+    </p>
+  </div>
 </section>
 
-<section class="code-panel">
+<section class="landing-section install-section">
   <div>
-    <p class="eyebrow">No compile step</p>
-    <h2>Dev is just Wrangler.</h2>
+    <p class="eyebrow">No build step</p>
+    <h2>Create an app, then run the Worker.</h2>
   </div>
-  ${codeBlock(`npm run dev
+  <div class="section-copy">
+    <p>
+      The default development loop has no bundler. The scaffold ships browser
+      modules directly and runs on Wrangler, so agents do not have to edit a
+      build graph before they can make a visible change.
+    </p>
+    ${codeBlock(installExample, "shell")}
+  </div>
+</section>
 
-# internally:
-npx wrangler dev`, "shell")}
+<section class="landing-section route-section">
+  <div>
+    <p class="eyebrow">HTML first</p>
+    <h2>Routes are files agents can understand.</h2>
+  </div>
+  <div class="section-copy">
+    <p>
+      A route is a path, metadata, and a render function. Normal requests return
+      the full document. Fragment requests return only the page body and the
+      metadata the browser needs to update the head.
+    </p>
+    ${codeBlock(routeExample)}
+  </div>
+</section>
+
+<section class="landing-section component-section">
+  <div>
+    <p class="eyebrow">Native islands</p>
+    <h2>Interactive pieces are Custom Elements.</h2>
+  </div>
+  <div class="section-copy">
+    <p>
+      Components use Shadow DOM for scoped CSS, but still expose normal DOM that
+      browsers and agents know how to inspect. Shared theme values can stay in
+      CSS custom properties.
+    </p>
+    ${codeBlock(componentExample)}
+  </div>
+</section>
+
+<section class="landing-section agent-section">
+  <div>
+    <p class="eyebrow">AI-friendly output</p>
+    <h2>Better for agents to build. Better for agents to browse.</h2>
+  </div>
+  <div class="section-copy">
+    <p>
+      Native Fragments is not just a framework agents can use. It produces apps
+      that are easier for agents to operate: real anchors, server-rendered
+      content, small modules, readable source, and minimal framework magic.
+    </p>
+    <ul class="agent-list">
+      <li>Route manifests expose the app map.</li>
+      <li>Fragment navigation keeps links crawlable.</li>
+      <li>Shadow DOM keeps component styling local.</li>
+      <li>Generated docs and skills live inside the package.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="cta-section">
+  <p class="eyebrow">Start small</p>
+  <h2>Install the scaffold and inspect every line.</h2>
+  <div class="hero-actions">
+    <a class="primary-action" href="https://docs.nativefragments.org/getting-started">Get started</a>
+    <a class="secondary-action" href="https://github.com/somedudeokay/nativefragments">View GitHub</a>
+  </div>
 </section>`;

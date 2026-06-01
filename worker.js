@@ -12,8 +12,18 @@ export default {
     const url = new URL(request.url);
 
     if (url.hostname === "www.nativefragments.org") {
-      url.hostname = "nativefragments.org";
-      return Response.redirect(url.toString(), 301);
+      return Response.redirect(
+        `https://nativefragments.org${url.pathname}${url.search}`,
+        301,
+      );
+    }
+
+    if (url.pathname === "/docs" || url.pathname.startsWith("/docs/")) {
+      const pathname = url.pathname === "/docs" ? "/" : url.pathname.slice(5);
+      return Response.redirect(
+        `https://docs.nativefragments.org${pathname}${url.search}`,
+        301,
+      );
     }
 
     return app.fetch(request, env, context);

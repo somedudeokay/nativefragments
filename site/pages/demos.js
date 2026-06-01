@@ -1,29 +1,32 @@
-import { html } from "@nativefragments/core/server";
+import { html, raw } from "@nativefragments/core/server";
+
+const demo = (title, text) => html`<article>
+  <span>Coming soon</span>
+  <h2>${title}</h2>
+  <p>${text}</p>
+</article>`;
 
 export const demosPage = () => html`<section class="page-hero compact">
   <p class="eyebrow">Demos</p>
-  <h1>Reference apps are coming soon.</h1>
+  <h1>Small apps you can inspect.</h1>
   <p>
-    This page will collect small, inspectable demos built with Native Fragments:
-    forms, dashboards, content sites, realtime screens, and agent-generated app
-    patterns.
+    The demos will be complete, focused mini apps. Each one should be small
+    enough for an agent to read end to end and real enough to copy into a
+    product.
   </p>
 </section>
 
 <section class="coming-soon-grid">
-  <article>
-    <span>Coming soon</span>
-    <h2>Starter Worker</h2>
-    <p>A minimal Cloudflare Worker app with fragments, metadata, and assets.</p>
-  </article>
-  <article>
-    <span>Coming soon</span>
-    <h2>Shadow DOM Form</h2>
-    <p>A native custom element form with scoped CSS and no framework state.</p>
-  </article>
-  <article>
-    <span>Coming soon</span>
-    <h2>Agent Task Board</h2>
-    <p>A denser app surface built from small browser-native islands.</p>
-  </article>
+  ${raw(
+    [
+      demo("Analytics Dashboard", "Server-rendered metrics with interactive Shadow DOM filters."),
+      demo("Nested Routes", "A settings area with parent navigation and focused child pages."),
+      demo("Todo App", "Local-first state, form handling, and tiny component islands."),
+      demo("Theme Switcher", "CSS custom properties shared across Shadow DOM components."),
+      demo("Form Wizard", "Multi-step forms with progressive enhancement and real links."),
+      demo("Activity Feed", "A realtime-looking operational surface with fragment refreshes."),
+      demo("Content Site", "Markdown-like pages, metadata, and fast internal navigation."),
+      demo("Command Palette", "Keyboard interaction in one Custom Element with scoped CSS."),
+    ].join(""),
+  )}
 </section>`;

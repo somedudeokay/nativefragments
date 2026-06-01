@@ -124,12 +124,6 @@ h2 {
   background: transparent;
 }
 
-.claim-band {
-  background: var(--ink);
-  color: var(--paper);
-  padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 5vw, 4rem);
-}
-
 .goal-wall {
   background: var(--green);
   border-bottom: 1px solid var(--ink);
@@ -148,39 +142,36 @@ h2 {
   max-width: 18ch;
 }
 
-.claim-band ul {
+.proof-strip {
+  background: var(--ink);
+  border-bottom: 1px solid var(--ink);
+  color: var(--paper);
   display: grid;
   gap: 1px;
-  grid-template-columns: repeat(8, minmax(9rem, 1fr));
-  list-style: none;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   margin: 0;
-  overflow-x: auto;
-  padding: 0;
+  padding: 1px;
 }
 
-.claim-band li {
-  border: 1px solid #6c665c;
-  display: grid;
-  gap: 0.75rem;
-  min-height: 12rem;
-  padding: 1rem;
-}
-
-.claim-band strong {
+.proof-strip strong {
+  align-items: center;
+  background: var(--paper);
+  color: var(--ink);
+  display: flex;
   color: var(--green);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.5rem;
-  line-height: 1;
-}
-
-.claim-band span {
-  color: #d7d0c2;
-  line-height: 1.45;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  justify-content: center;
+  min-height: 4.5rem;
+  padding: 0.8rem;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .split,
 .code-panel,
-.page-hero {
+.page-hero,
+.landing-section {
   display: grid;
   gap: clamp(1.5rem, 4vw, 3rem);
   grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
@@ -193,6 +184,72 @@ h2 {
 .docs-grid > *,
 .coming-soon-grid > * {
   min-width: 0;
+}
+
+.landing-section {
+  border-top: 1px solid var(--ink);
+}
+
+.landing-section h2 {
+  max-width: 10ch;
+}
+
+.section-copy {
+  align-self: end;
+  display: grid;
+  gap: 1.15rem;
+}
+
+.section-copy p,
+.agent-list {
+  color: var(--muted);
+  font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.install-section {
+  background: var(--yellow);
+}
+
+.component-section {
+  background: #eaf2ff;
+}
+
+.agent-section {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.agent-section .eyebrow {
+  border-color: var(--paper);
+}
+
+.agent-section .section-copy p,
+.agent-section .agent-list {
+  color: #d7d0c2;
+}
+
+.agent-list {
+  display: grid;
+  gap: 0.65rem;
+  list-style: none;
+  padding: 0;
+}
+
+.agent-list li {
+  border-top: 1px solid #6c665c;
+  padding-top: 0.65rem;
+}
+
+.cta-section {
+  background: var(--green);
+  border-top: 1px solid var(--ink);
+  padding: clamp(3rem, 7vw, 6rem) clamp(1rem, 5vw, 4rem);
+}
+
+.cta-section h2 {
+  max-width: 11ch;
 }
 
 .compact h1,
@@ -300,8 +357,10 @@ p code {
 
 .link-strip span,
 .coming-soon-grid span {
+  align-self: start;
   background: var(--green);
   border: 1px solid var(--ink);
+  justify-self: start;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.72rem;
   font-weight: 900;
@@ -335,7 +394,7 @@ p code {
 .coming-soon-grid {
   display: grid;
   gap: 1px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   padding: 0 clamp(1rem, 5vw, 4rem) clamp(4rem, 8vw, 7rem);
 }
 
@@ -349,7 +408,7 @@ p code {
 
 .coming-soon-grid h2 {
   align-self: end;
-  font-size: clamp(2rem, 5vw, 4rem);
+  font-size: clamp(1.6rem, 3.4vw, 2.7rem);
 }
 
 .coming-soon-grid p {
@@ -407,12 +466,17 @@ p code {
   .split,
   .code-panel,
   .page-hero,
+  .landing-section,
   .principles li {
     grid-template-columns: 1fr;
   }
 
   .docs-grid {
     grid-template-columns: 1fr;
+  }
+
+  .proof-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .link-strip,

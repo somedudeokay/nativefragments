@@ -47,6 +47,20 @@ const styles = sheet(`
     gap: clamp(0.4rem, 2vw, 1rem);
   }
 
+  .header-links {
+    align-items: center;
+    display: flex;
+    gap: clamp(0.6rem, 2vw, 1.15rem);
+  }
+
+  .icon-links {
+    align-items: center;
+    border-left: 1px solid #111111;
+    display: flex;
+    gap: 0.35rem;
+    padding-left: 0.75rem;
+  }
+
   a {
     color: #111111;
     font-size: 0.82rem;
@@ -61,6 +75,32 @@ const styles = sheet(`
     padding: 0.35rem 0.55rem;
   }
 
+  .icon-link {
+    align-items: center;
+    display: inline-flex;
+    height: 2.1rem;
+    justify-content: center;
+    width: 2.1rem;
+  }
+
+  .icon-link svg {
+    display: block;
+    height: 1.1rem;
+    width: 1.1rem;
+  }
+
+  .npm-mark {
+    align-items: center;
+    border: 1px solid currentColor;
+    display: inline-flex;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.62rem;
+    height: 1.05rem;
+    justify-content: center;
+    line-height: 1;
+    width: 1.55rem;
+  }
+
   @media (max-width: 560px) {
     header {
       align-items: flex-start;
@@ -69,11 +109,26 @@ const styles = sheet(`
       padding: 0.75rem 1rem;
     }
 
+    .header-links {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
     nav {
       flex-wrap: wrap;
     }
+
+    .icon-links {
+      border-left: 0;
+      padding-left: 0;
+    }
   }
 `);
+
+const githubIcon = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+  <path d="M12 .5a12 12 0 0 0-3.8 23.38c.6.11.82-.26.82-.58v-2.08c-3.34.73-4.04-1.41-4.04-1.41-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.08 1.84 2.82 1.31 3.51 1 .11-.78.42-1.31.76-1.61-2.66-.3-5.46-1.33-5.46-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.45 11.45 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.8 5.62-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58A12 12 0 0 0 12 .5Z"/>
+</svg>`;
 
 class NativeFragmentsHeader extends HTMLElement {
   connectedCallback() {
@@ -83,7 +138,7 @@ class NativeFragmentsHeader extends HTMLElement {
   sync() {
     const links = [
       { href: "/", label: "Native Fragments" },
-      { href: "/docs", label: "Docs" },
+      { href: "https://docs.nativefragments.org", label: "Docs" },
       { href: "/examples", label: "Examples" },
       { href: "/demos", label: "Demos" },
       { href: "/manifesto", label: "Manifesto" },
@@ -94,17 +149,23 @@ class NativeFragmentsHeader extends HTMLElement {
       styles: [styles],
       html: `<header>
         <a class="brand" href="/">Native Fragments</a>
-        <nav aria-label="Primary">
-          ${links
-            .slice(1)
-            .map(
-              ({ href, label }) =>
-                `<a href="${href}" ${
-                  href === path ? 'aria-current="page"' : ""
-                }>${label}</a>`,
-            )
-            .join("")}
-        </nav>
+        <div class="header-links">
+          <nav aria-label="Primary">
+            ${links
+              .slice(1)
+              .map(
+                ({ href, label }) =>
+                  `<a href="${href}" ${
+                    href === path ? 'aria-current="page"' : ""
+                  }>${label}</a>`,
+              )
+              .join("")}
+          </nav>
+          <div class="icon-links" aria-label="Package links">
+            <a class="icon-link" href="https://github.com/somedudeokay/nativefragments" aria-label="GitHub" title="GitHub">${githubIcon}</a>
+            <a class="icon-link" href="https://www.npmjs.com/package/@nativefragments/core" aria-label="npm" title="npm"><span class="npm-mark">npm</span></a>
+          </div>
+        </div>
       </header>`,
     });
   }
