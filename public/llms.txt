@@ -1,0 +1,23 @@
+# Native Fragments Docs
+
+> Native Fragments is a zero-dependency, zero-build frontend framework for
+> agents building AI-friendly web applications.
+
+## Start
+
+- [Introduction](https://docs.nativefragments.org/index.md)
+- [Getting Started](https://docs.nativefragments.org/getting-started.md)
+- [API Reference](https://docs.nativefragments.org/reference.md)
+
+## Concepts
+
+- [Routing](https://docs.nativefragments.org/routing.md)
+- [Fragments](https://docs.nativefragments.org/fragments.md)
+- [Components](https://docs.nativefragments.org/components.md)
+- [Agent-Friendly Applications](https://docs.nativefragments.org/agent-friendly.md)
+
+## Complete Context
+
+- [llms-full.txt](https://docs.nativefragments.org/llms-full.txt)
+- [Core npm package](https://www.npmjs.com/package/@nativefragments/core)
+- [Core GitHub repo](https://github.com/somedudeokay/nativefragments)
