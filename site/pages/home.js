@@ -14,9 +14,12 @@ export const homePage = () =>
         ${callout("For users", "HTML first, fast navigation, and resilient pages.")}
       </section>
       <h2>Start here</h2>
-      ${code(`npm create @nativefragments/app@latest my-app
+      ${code(
+        `npm create @nativefragments/app@latest my-app
 cd my-app
-npm run dev`)}
+npm run dev`,
+        "shell",
+      )}
       <h2>What makes it different</h2>
       <p>
         Native Fragments treats the browser as the long-lived platform. The

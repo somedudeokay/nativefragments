@@ -9,9 +9,12 @@ export const aiPage = () =>
       "Native Fragments keeps source and runtime output close to the platform: HTML, links, modules, and small files. The docs expose agent entrypoints too.",
     body: html`
       <h2>Agent entrypoints</h2>
-      ${code(`https://docs.nativefragments.org/llms.txt
+      ${code(
+        `https://docs.nativefragments.org/llms.txt
 https://docs.nativefragments.org/llms-full.txt
-node_modules/@nativefragments/core/skills/nativefragments/SKILL.md`)}
+node_modules/@nativefragments/core/skills/nativefragments/SKILL.md`,
+        "shell",
+      )}
       <h2>Runtime readability</h2>
       <p>
         Generated apps are easier to browse and scrape because the output is

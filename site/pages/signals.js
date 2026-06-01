@@ -9,8 +9,11 @@ export const signalsPage = () =>
       "Core does not need reactive state. Add @nativefragments/signals when a custom element or island needs local state and DOM bindings.",
     body: html`
       <h2>Install</h2>
-      ${code(`npm i @nativefragments/signals
-cp node_modules/@nativefragments/signals/public/nativefragments/*.js public/nativefragments/`)}
+      ${code(
+        `npm i @nativefragments/signals
+cp node_modules/@nativefragments/signals/public/nativefragments/*.js public/nativefragments/`,
+        "shell",
+      )}
       <h2>Use in a component</h2>
       ${code(`import { bindText, computed, state } from "/nativefragments/signals.js";
 

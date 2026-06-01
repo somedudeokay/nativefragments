@@ -1,7 +1,7 @@
 import { html, raw } from "@nativefragments/core/server";
+import { codeBlock } from "../code.js";
 
-export const code = (source) =>
-  raw(`<pre><code>${source.trim().replace(/&/g, "&amp;").replace(/</g, "&lt;")}</code></pre>`);
+export const code = (source, language = "js") => codeBlock(source, language);
 
 export const docPage = ({ eyebrow, title, intro, body }) => html`<article class="doc">
   <p class="eyebrow">${eyebrow}</p>

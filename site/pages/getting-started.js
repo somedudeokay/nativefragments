@@ -9,12 +9,15 @@ export const gettingStartedPage = () =>
       "The recommended starting point is the npm create command. It creates a Cloudflare Worker app with routes, a shell, browser helpers, and one Shadow DOM component.",
     body: html`
       <h2>Create</h2>
-      ${code(`npm create @nativefragments/app@latest my-app
+      ${code(
+        `npm create @nativefragments/app@latest my-app
 cd my-app
 npm install
-npm run dev`)}
+npm run dev`,
+        "shell",
+      )}
       <h2>Deploy</h2>
-      ${code(`npm run deploy`)}
+      ${code(`npm run deploy`, "shell")}
       <h2>Generated structure</h2>
       ${code(`worker.js
 site/routes.js
