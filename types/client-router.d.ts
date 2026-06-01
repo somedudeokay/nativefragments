@@ -31,7 +31,8 @@ export type FragmentNavigationOptions = {
 /**
  * Prefetch a same-origin fragment into the shared fragment cache.
  *
- * Cross-origin URLs are skipped and resolve to `null`.
+ * Cross-origin URLs and document-like URLs such as `/agents.txt` are skipped
+ * and resolve to `null`.
  */
 export function prefetchFragment(
   href: string | URL,
@@ -50,7 +51,10 @@ export function prefetchFragment(
  *
  * The returned navigate function can be used for imperative navigation. Links
  * with `data-fragment-slot="name"` replace only the matching named fragment
- * container and send `x-fragment-slot: name`.
+ * container and send `x-fragment-slot: name`. External links, document-like
+ * URLs such as `/agents.txt`, modified clicks, and links with
+ * `data-nativefragments-reload` or `data-fragment-navigation="false"` keep
+ * normal browser behavior.
  */
 export function installFragmentNavigation(
   options?: FragmentNavigationOptions,

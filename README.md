@@ -79,6 +79,14 @@ route("/settings/profile", {
 The browser router sends `x-fragment-slot: settings-panel`, swaps only that
 section, and keeps the full route as the no-JavaScript fallback.
 
+External links, static documents, modified clicks, and links marked with
+`data-nativefragments-reload` or `data-fragment-navigation="false"` keep normal
+browser navigation:
+
+```html
+<a href="/agents.txt" data-nativefragments-reload>Get started for agents</a>
+```
+
 Routes support path params:
 
 ```js

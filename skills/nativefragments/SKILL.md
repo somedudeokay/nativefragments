@@ -94,6 +94,11 @@ Use `visible` for links likely to be clicked after scrolling, `load` for
 near-certain next routes, and `none` for actions that should not be requested
 early.
 
+`data-fragment-prefetch="none"` only disables early fetches. For a link that
+must use normal browser navigation, such as `/agents.txt`, a file download, or a
+server-only action, add `data-nativefragments-reload` or
+`data-fragment-navigation="false"`.
+
 ## Worker Pattern
 
 Use `/nativefragments/worker.js` for worker RPC instead of inventing a custom

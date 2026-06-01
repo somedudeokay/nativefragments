@@ -1,5 +1,16 @@
 # @nativefragments/core
 
+## 0.4.1
+
+### Patch Changes
+
+- b680557: Add JSDoc descriptions to the public type declarations so IDEs, language
+  servers, and coding agents can read framework API guidance inline while
+  building apps.
+- Skip fragment navigation and prefetch for document-like same-origin URLs, and
+  add explicit link opt-outs with `data-nativefragments-reload` and
+  `data-fragment-navigation="false"`.
+
 ## 0.4.0
 
 ### Minor Changes

@@ -229,6 +229,17 @@ The router fetches the route with `x-fragment-slot: settings-panel`, replaces
 only that section, updates history, and keeps full-page navigation as the
 fallback.
 
+Links to another origin, downloaded files, modified clicks, and same-origin
+document-like URLs such as `/agents.txt`, `/robots.txt`, `/feed.xml`, or
+`/guide.pdf` keep normal browser behavior. Add `data-nativefragments-reload` or
+`data-fragment-navigation="false"` to any same-origin app link that should also
+skip fragment navigation:
+
+```html
+<a href="/agents.txt" data-nativefragments-reload>Get started for agents</a>
+<a href="/account/export" data-fragment-navigation="false">Export data</a>
+```
+
 The links are real URLs. Path subroutes work the same way as query-string
 routes when the server route exists:
 
@@ -239,7 +250,8 @@ routes when the server route exists:
 
 ### `prefetchFragment(href, options)`
 
-Prefetches a same-origin fragment into the shared fragment cache.
+Prefetches a same-origin fragment into the shared fragment cache. Cross-origin
+and document-like URLs resolve to `null` without fetching.
 
 ```js
 import { prefetchFragment } from "/nativefragments/router.js";
