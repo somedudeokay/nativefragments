@@ -9,7 +9,8 @@
   "files": [
     "bin",
     "templates",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
   ],
   "repository": {
     "type": "git",
@@ -20,7 +21,10 @@
     "access": "public"
   },
   "scripts": {
-    "check": "node --check bin/create-app.js && find templates -name '*.js' -print0 | xargs -0 -n1 node --check"
+    "check": "node --check bin/create-app.js && find templates -name '*.js' -print0 | xargs -0 -n1 node --check",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "npm run check && changeset publish"
   },
   "keywords": [
     "nativefragments",
@@ -28,5 +32,9 @@
     "cloudflare-workers",
     "zero-build"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.7.0",
+    "@changesets/cli": "^2.31.0"
+  }
 }
