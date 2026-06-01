@@ -25,7 +25,7 @@ npm i @nativefragments/core
 ## What Core Provides
 
 - Escaped server-side HTML templates.
-- Explicit route helpers.
+- Explicit route helpers with path params.
 - Full-page and fragment render helpers.
 - Cloudflare Worker adapter.
 - Browser fragment navigation with first-class prefetching.
@@ -75,6 +75,15 @@ route("/settings/profile", {
 
 The browser router sends `x-fragment-slot: settings-panel`, swaps only that
 section, and keeps the full route as the no-JavaScript fallback.
+
+Routes support path params:
+
+```js
+route("/settings/:panel", {
+  render: ({ params }) => settingsPage(params.panel),
+  fragments: [profile]
+});
+```
 
 ## Fragment Prefetch
 

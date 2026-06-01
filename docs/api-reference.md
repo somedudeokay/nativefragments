@@ -90,7 +90,8 @@ returns both `data-fragment-slot` and `data-fragment-prefetch`.
 
 Creates a route definition. A route usually provides `meta` and `render`
 functions. A route can also expose named `fragments` for nested navigation.
-`fragments` can be an object map or an array created with `fragment()`.
+`fragments` can be an object map or an array created with `fragment()`. Use
+`:name` path segments to capture params into `context.params`.
 
 ```js
 import { html, route } from "@nativefragments/core/server";
@@ -102,6 +103,17 @@ export const homeRoute = route("/", {
     canonical: "https://example.com/"
   }),
   render: () => html`<h1>Home</h1>`
+});
+```
+
+```js
+export const postRoute = route("/posts/:slug", {
+  meta: ({ params }) => ({
+    title: params.slug,
+    description: `Post ${params.slug}`,
+    canonical: `https://example.com/posts/${params.slug}`
+  }),
+  render: ({ params }) => html`<h1>${params.slug}</h1>`
 });
 ```
 
@@ -128,7 +140,9 @@ export const settingsRoute = route("/settings/profile", {
 
 ### `createRoutes(routes)`
 
-Creates a normalized route manifest with a `match(pathname)` method.
+Creates a normalized route manifest with a `match(pathname)` method. Exact
+static routes match first; parameterized routes such as `/posts/:slug` match in
+declaration order.
 
 ### `renderRoute({ match, request, slot })`
 
@@ -214,6 +228,14 @@ target container:
 The router fetches the route with `x-fragment-slot: settings-panel`, replaces
 only that section, updates history, and keeps full-page navigation as the
 fallback.
+
+The links are real URLs. Path subroutes work the same way as query-string
+routes when the server route exists:
+
+```html
+<a href="/settings/profile" data-fragment-slot="settings-panel">Profile</a>
+<a href="/settings/billing" data-fragment-slot="settings-panel">Billing</a>
+```
 
 ### `prefetchFragment(href, options)`
 

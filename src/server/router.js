@@ -4,6 +4,8 @@ import { attrs, html, jsonScript, raw } from "./html.js";
  * @typedef {object} RouteContext
  * @property {Request} request Original request.
  * @property {URL} url Parsed request URL.
+ * @property {Record<string, string>} params Path parameters captured from a
+ * route pattern like `/posts/:slug`.
  */
 
 /**
@@ -40,7 +42,7 @@ import { attrs, html, jsonScript, raw } from "./html.js";
  */
 
 /**
- * @typedef {RouteDefinition & { path: string }} Route
+ * @typedef {RouteDefinition & { path: string, params?: Record<string, string> }} Route
  */
 
 const normalizePath = (path) => {
@@ -51,6 +53,45 @@ const normalizePath = (path) => {
 const normalizeFragments = (fragments) => {
   if (!Array.isArray(fragments)) return fragments;
   return Object.fromEntries(fragments.map((item) => [item.name, item.render]));
+};
+
+const decodeSegment = (segment) => {
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return segment;
+  }
+};
+
+const pathSegments = (path) =>
+  normalizePath(path).split("/").filter(Boolean).map(decodeSegment);
+
+const paramName = (segment) => (segment.startsWith(":") ? segment.slice(1) : null);
+
+const compileRoutePattern = (item) => {
+  const segments = pathSegments(item.path);
+  const hasParams = segments.some((segment) => paramName(segment));
+  if (!hasParams) return null;
+
+  return { item, segments };
+};
+
+const matchRoutePattern = (compiled, pathname) => {
+  const requestSegments = pathSegments(pathname);
+  if (compiled.segments.length !== requestSegments.length) return null;
+
+  const params = {};
+
+  for (const [index, segment] of compiled.segments.entries()) {
+    const name = paramName(segment);
+    if (name) {
+      params[name] = requestSegments[index] ?? "";
+      continue;
+    }
+    if (segment !== requestSegments[index]) return null;
+  }
+
+  return { ...compiled.item, params };
 };
 
 /**
@@ -79,7 +120,8 @@ export const fragment = (name, render) => ({
 /**
  * Create a normalized route definition.
  *
- * @param {string} path URL path for the route.
+ * @param {string} path URL path for the route. Use `:name` segments for path
+ * params, for example `/posts/:slug`.
  * @param {RouteDefinition} definition Route metadata and render functions.
  * @returns {Route} Normalized route.
  */
@@ -90,18 +132,28 @@ export const route = (path, definition) => ({
 });
 
 /**
- * Create a route manifest that can match normalized paths.
+ * Create a route manifest that can match normalized paths. Exact static routes
+ * win first, then parameterized routes are matched in declaration order.
  *
  * @param {Route[]} routes Route definitions.
  * @returns {{ all: Route[], match(pathname: string): Route | null }} Route manifest.
  */
 export const createRoutes = (routes) => {
   const byPath = new Map(routes.map((item) => [normalizePath(item.path), item]));
+  const patterns = routes.map(compileRoutePattern).filter(Boolean);
 
   return {
     all: routes,
     match(pathname) {
-      return byPath.get(normalizePath(pathname)) ?? null;
+      const exact = byPath.get(normalizePath(pathname));
+      if (exact) return exact;
+
+      for (const pattern of patterns) {
+        const match = matchRoutePattern(pattern, pathname);
+        if (match) return match;
+      }
+
+      return null;
     },
   };
 };
@@ -126,7 +178,7 @@ export const fragmentMeta = (meta) =>
  * @returns {Promise<{ body: string, meta: Required<RouteMeta> }>} Rendered route.
  */
 export const renderRoute = async ({ match, request, slot = null }) => {
-  const context = { request, url: new URL(request.url) };
+  const context = { params: match.params ?? {}, request, url: new URL(request.url) };
   const meta = await match.meta?.(context);
   const render = slot && match.fragments?.[slot] ? match.fragments[slot] : match.render;
   const body = await render(context);

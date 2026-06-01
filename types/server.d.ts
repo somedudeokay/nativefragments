@@ -22,6 +22,7 @@ export type DeclarativeShadowOptions = {
 };
 
 export type RouteContext = {
+  params: Record<string, string>;
   request: Request;
   url: URL;
 };
@@ -59,6 +60,7 @@ export type RouteDefinition = {
 };
 
 export type Route = RouteDefinition & {
+  params?: Record<string, string>;
   path: string;
 };
 
