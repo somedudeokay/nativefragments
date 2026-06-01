@@ -1,6 +1,6 @@
 import { shadow, sheet } from "/nativefragments/component.js";
 
-const styles = sheet(`
+const counterStyles = `
   :host {
     display: inline-block;
   }
@@ -14,7 +14,12 @@ const styles = sheet(`
     font-weight: 800;
     padding: 0.75rem 1rem;
   }
-`);
+`;
+
+const styles = sheet(counterStyles);
+
+const counterMarkup = (count) =>
+  `<button type="button">Count ${count}</button>`;
 
 class AppCounter extends HTMLElement {
   count = 0;
@@ -26,7 +31,7 @@ class AppCounter extends HTMLElement {
   render() {
     const root = shadow(this, {
       styles: [styles],
-      html: `<button type="button">Count ${this.count}</button>`,
+      html: counterMarkup(this.count),
     });
 
     root.querySelector("button").addEventListener("click", () => {
