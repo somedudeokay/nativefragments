@@ -19,6 +19,8 @@ import { html, jsonScript, raw } from "./html.js";
  * Function that returns metadata for the route.
  * @property {(context: RouteContext) => string | Promise<string>} render
  * Function that renders route body HTML.
+ * @property {Record<string, (context: RouteContext) => string | Promise<string>>} [fragments]
+ * Named fragment renderers used by nested fragment slots.
  */
 
 /**
@@ -73,13 +75,16 @@ export const fragmentMeta = (meta) =>
 /**
  * Render a matched route and normalize metadata defaults.
  *
- * @param {{ match: Route, request: Request }} options Render options.
+ * @param {{ match: Route, request: Request, slot?: string | null }} options
+ * Render options. When `slot` matches `RouteDefinition.fragments`, only that
+ * named fragment is rendered.
  * @returns {Promise<{ body: string, meta: Required<RouteMeta> }>} Rendered route.
  */
-export const renderRoute = async ({ match, request }) => {
+export const renderRoute = async ({ match, request, slot = null }) => {
   const context = { request, url: new URL(request.url) };
   const meta = await match.meta?.(context);
-  const body = await match.render(context);
+  const render = slot && match.fragments?.[slot] ? match.fragments[slot] : match.render;
+  const body = await render(context);
 
   return {
     body,

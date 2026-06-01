@@ -64,7 +64,7 @@ Serializes JSON for safe embedding in an inline script payload.
 ### `route(path, definition)`
 
 Creates a route definition. A route usually provides `meta` and `render`
-functions.
+functions. A route can also expose named `fragments` for nested navigation.
 
 ```js
 import { html, route } from "@nativefragments/core/server";
@@ -79,13 +79,35 @@ export const homeRoute = route("/", {
 });
 ```
 
+Nested fragments let a route render a full page for normal requests and a
+smaller region for links that target a named slot.
+
+```js
+export const settingsRoute = route("/settings/profile", {
+  render: () => html`<main>
+    <nav>
+      <a href="/settings/profile" data-fragment-slot="settings-panel">
+        Profile
+      </a>
+    </nav>
+    <section data-fragment-slot="settings-panel">
+      ${profilePanel()}
+    </section>
+  </main>`,
+  fragments: {
+    "settings-panel": profilePanel
+  }
+});
+```
+
 ### `createRoutes(routes)`
 
 Creates a normalized route manifest with a `match(pathname)` method.
 
-### `renderRoute({ match, request })`
+### `renderRoute({ match, request, slot })`
 
-Renders a matched route and returns `{ body, meta }`.
+Renders a matched route and returns `{ body, meta }`. When `slot` matches a key
+in `match.fragments`, only that named fragment renderer is used.
 
 ### `renderFragment({ body, meta })`
 
@@ -117,11 +139,15 @@ Options:
 
 - `routes`: Array of route definitions.
 - `shell`: Function receiving `{ body, meta }` and returning a full document.
+- `api`: Optional Web Standards router with a `fetch(request, env, context)`
+  method. Hono apps can be passed directly.
+- `apiPrefix`: Optional path prefix delegated to `api`. Defaults to `/api`.
 - `notFound`: Optional 404 route.
 - `assetsBinding`: Optional Cloudflare assets binding name. Defaults to
   `ASSETS`.
 
-Fragment requests use the `x-fragment: true` request header.
+Fragment requests use the `x-fragment: true` request header. Nested fragment
+requests also send `x-fragment-slot`.
 
 ## `/nativefragments/router.js`
 
@@ -144,6 +170,18 @@ Options:
 - `slot`: CSS selector for the content slot. Defaults to `#content-slot`.
 - `ttl`: Fragment cache TTL in milliseconds. Defaults to `30000`.
 - `afterNavigate`: Callback after a successful fragment swap.
+
+For nested fragments, put the same `data-fragment-slot` name on the link and
+target container:
+
+```html
+<a href="/settings/profile" data-fragment-slot="settings-panel">Profile</a>
+<section data-fragment-slot="settings-panel"></section>
+```
+
+The router fetches the route with `x-fragment-slot: settings-panel`, replaces
+only that section, updates history, and keeps full-page navigation as the
+fallback.
 
 ## `/nativefragments/component.js`
 

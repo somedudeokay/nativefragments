@@ -29,6 +29,7 @@ npm i @nativefragments/core
 - Full-page and fragment render helpers.
 - Cloudflare Worker adapter.
 - Browser fragment navigation.
+- Nested fragment slots for routes inside routes.
 - Shadow DOM component helpers, including declarative Shadow DOM support to
   avoid refresh FOUC.
 - Agent skill shipped with the package.
@@ -47,6 +48,28 @@ Browser helpers are plain ES modules that can be served from your app's
 import { installFragmentNavigation } from "/nativefragments/router.js";
 import { shadow, sheet } from "/nativefragments/component.js";
 ```
+
+## Nested Fragments
+
+Routes can expose named fragment renderers for app regions that navigate inside
+the current page:
+
+```js
+route("/settings/profile", {
+  render: settingsPage,
+  fragments: {
+    "settings-panel": profilePanel
+  }
+});
+```
+
+```html
+<a href="/settings/profile" data-fragment-slot="settings-panel">Profile</a>
+<section data-fragment-slot="settings-panel"></section>
+```
+
+The browser router sends `x-fragment-slot: settings-panel`, swaps only that
+section, and keeps the full route as the no-JavaScript fallback.
 
 ## No-FOUC Components
 

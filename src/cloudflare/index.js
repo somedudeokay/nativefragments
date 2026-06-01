@@ -14,6 +14,9 @@ const assetLike = (url) =>
 const requestWantsFragment = (request) =>
   request.headers.get("x-fragment") === "true";
 
+const requestedFragmentSlot = (request) =>
+  request.headers.get("x-fragment-slot");
+
 const securityHeaders = {
   "Content-Security-Policy": "frame-ancestors 'self'",
   "X-Content-Type-Options": "nosniff",
@@ -74,7 +77,8 @@ export const createCloudflareHandler = ({
 
       const match = manifest.match(url.pathname) ?? notFound;
       const status = match === notFound ? 404 : 200;
-      const rendered = await renderRoute({ match, request });
+      const slot = requestWantsFragment(request) ? requestedFragmentSlot(request) : null;
+      const rendered = await renderRoute({ match, request, slot });
       const body = requestWantsFragment(request)
         ? renderFragment(rendered)
         : shell(rendered);

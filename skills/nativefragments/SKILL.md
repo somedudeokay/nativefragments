@@ -13,6 +13,8 @@ Use this skill when creating or editing a Native Fragments app.
 - Keep apps zero build by default: no Vite, no JSX transform, no virtual DOM.
 - Use Cloudflare Workers for server rendering and static assets.
 - Render HTML on the server, then use fragment navigation for fast transitions.
+- Use nested fragment slots for route regions that should navigate without
+  replacing the full page body.
 - Put component styling inside Shadow DOM.
 - Avoid refresh FOUC by server-rendering important custom elements with
   declarative Shadow DOM.
@@ -36,9 +38,39 @@ route("/", {
     description: "Page description",
     canonical: "https://example.com/"
   }),
-  render: () => html`<h1>Hello</h1>`
+render: () => html`<h1>Hello</h1>`
 });
 ```
+
+## Nested Fragment Pattern
+
+Use named fragments when a route contains a sub-region with its own links.
+
+```js
+route("/settings/profile", {
+  meta: () => ({
+    title: "Profile",
+    description: "Profile settings",
+    canonical: "https://example.com/settings/profile"
+  }),
+  render: () => html`<main>
+    <nav>
+      <a href="/settings/profile" data-fragment-slot="settings-panel">
+        Profile
+      </a>
+    </nav>
+    <section data-fragment-slot="settings-panel">
+      ${profilePanel()}
+    </section>
+  </main>`,
+  fragments: {
+    "settings-panel": profilePanel
+  }
+});
+```
+
+The link slot name must match the target container and the route `fragments`
+key. The full `render` output remains the canonical server-rendered fallback.
 
 ## Component Pattern
 
