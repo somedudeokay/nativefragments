@@ -83,10 +83,10 @@ const counterPanelStyles = `
 const padSeconds = (count) => String(count).padStart(3, "0").slice(-3);
 
 const counterPanelHtml = (count) => html`<section class="panel">
-  <span class="label">Shared signal state</span>
+  <span class="label">Shared state</span>
   <strong class="value" data-click-count>${padSeconds(count)}</strong>
   <p>
-    This click counter and the header read the same signal. The value is saved
+    This click counter and the header read the same state. The value is saved
     to localStorage and mirrored to a cookie so refreshes render with the same
     state before JavaScript hydrates.
   </p>
@@ -102,10 +102,10 @@ export const counterPage = ({ request }) => {
   return html`<section class="demo-hero counter-route">
     <div class="hero-copy">
       <p class="eyebrow">Counter route</p>
-      <h1>Signal state that survives fragment navigation.</h1>
+      <h1>State that survives partial rerenders.</h1>
       <p class="lede">
-        The header is outside the fragment slot. The page below can change, but
-        the click counter is shared across fragments through a signal.
+        The header is outside the page area. The content below can rerender in
+        pieces, but the click counter stays shared across the app.
       </p>
     </div>
     <app-counter-panel>

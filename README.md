@@ -9,7 +9,7 @@ npm run dev
 ```
 
 The generated app uses `@nativefragments/core`, Cloudflare Workers, Hono API
-routes, static assets, fragment navigation, nested-fragment capable routing,
-Shadow DOM component helpers, worker helpers, and shared signal state. The
-starter UI includes a persistent header that proves route fragments can
-navigate without rerendering the document shell.
+routes, static assets, partial rerenders, nested partial areas, Shadow DOM
+component helpers, worker helpers, and shared state. The starter UI includes a
+persistent header that proves pages can update in pieces without rerendering
+the document shell.

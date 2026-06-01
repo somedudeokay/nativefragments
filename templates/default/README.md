@@ -20,6 +20,6 @@ The starter includes:
 - Fragment navigation with route-level and nested slot demos.
 - A persistent shell header that is not replaced during navigation.
 - Server-rendered Shadow DOM components with no refresh FOUC.
-- Shared signal state in `/nativefragments/signals.js`.
+- Shared state in `/nativefragments/signals.js`.
 - LocalStorage and cookie-backed counter state for refresh-safe SSR.
 - Worker RPC helpers in `/nativefragments/worker.js`.

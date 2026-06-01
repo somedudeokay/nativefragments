@@ -113,6 +113,10 @@ a {
   max-width: 640px;
 }
 
+.nested-route .hero-copy {
+  align-self: start;
+}
+
 .eyebrow {
   align-items: center;
   background: color-mix(in srgb, var(--ink) 4%, transparent);
@@ -180,6 +184,7 @@ h2 {
   display: grid;
   gap: 1.2rem;
   min-height: 26rem;
+  overflow: hidden;
   padding: clamp(1rem, 2vw, 1.25rem);
 }
 
@@ -214,6 +219,7 @@ h2 {
 
 .nested-copy {
   align-content: start;
+  animation: nested-panel-enter 0.24s var(--ease) both;
   display: grid;
   gap: 1rem;
   min-height: 18rem;
@@ -282,6 +288,24 @@ p code {
   padding: 0.08rem 0.35rem;
 }
 
+@keyframes nested-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.35rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nested-copy {
+    animation: none;
+  }
+}
+
 @media (max-width: 860px) {
   .demo-hero {
     grid-template-columns: 1fr;
@@ -305,4 +329,3 @@ p code {
     grid-template-columns: 1fr;
   }
 }
-

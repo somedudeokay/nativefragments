@@ -67,7 +67,7 @@ export const headerStyles = `
     align-items: center;
     background: #161616;
     border: 1px solid rgba(20, 20, 20, 0.24);
-    border-radius: var(--radius-pill, 999px);
+    border-radius: 0.6rem;
     box-shadow: var(--shadow-sm, 0 1px 2px rgba(20, 20, 20, 0.05));
     color: var(--paper, #f7f3e8);
     display: inline-flex;
@@ -75,43 +75,56 @@ export const headerStyles = `
     font-size: 0.88rem;
     font-variant-numeric: tabular-nums;
     font-weight: 600;
-    gap: 0.08rem;
-    height: 2.45rem;
+    gap: 0.18rem;
+    height: 2.5rem;
     justify-content: center;
-    padding: 0 0.78rem;
+    padding: 0 0.45rem;
+    perspective: 260px;
   }
 
   .digit {
     align-items: center;
-    border-radius: 50%;
+    background: linear-gradient(180deg, #242424 0%, #171717 48%, #0f0f0f 52%, #202020 100%);
+    border: 1px solid rgba(247, 243, 232, 0.14);
+    border-radius: 0.35rem;
+    box-shadow:
+      inset 0 1px rgba(255, 255, 255, 0.08),
+      inset 0 -1px rgba(0, 0, 0, 0.45);
     display: inline-flex;
-    height: 1.55rem;
+    height: 1.78rem;
     justify-content: center;
+    line-height: 1;
+    overflow: hidden;
     position: relative;
-    width: 1.2rem;
+    transform-origin: 50% 50%;
+    width: 1.32rem;
   }
 
-  .digit.is-spinning::after {
-    animation: digit-spin 1s linear infinite;
-    border: 1px solid color-mix(in srgb, var(--green, #1ed760) 88%, transparent);
-    border-left-color: transparent;
-    border-radius: 50%;
+  .digit::after {
+    background: rgba(0, 0, 0, 0.42);
     content: "";
-    inset: -0.16rem -0.02rem;
+    height: 1px;
+    left: 0;
     position: absolute;
+    right: 0;
+    top: 50%;
+  }
+
+  .digit.is-flipping {
+    animation: digit-flip 0.42s var(--ease, cubic-bezier(0.16, 1, 0.3, 1));
   }
 
   .click-state {
     align-items: center;
-    background: var(--surface, #fffdf6);
-    border: 1px solid var(--line, rgba(20, 20, 20, 0.1));
-    border-radius: var(--radius-pill, 999px);
-    box-shadow: var(--shadow-sm, 0 1px 2px rgba(20, 20, 20, 0.05));
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
     display: inline-flex;
     gap: 0.55rem;
     justify-self: end;
     min-height: 2.45rem;
-    padding: 0.34rem 0.8rem;
+    padding: 0;
   }
 
   .click-state span {
@@ -180,9 +193,24 @@ export const headerStyles = `
     color: var(--paper, #f7f3e8);
   }
 
-  @keyframes digit-spin {
-    to {
-      transform: rotate(360deg);
+  @keyframes digit-flip {
+    0% {
+      transform: rotateX(0deg) translateY(0);
+    }
+
+    42% {
+      color: color-mix(in srgb, var(--paper, #f7f3e8) 70%, transparent);
+      transform: rotateX(-72deg) translateY(-0.04rem);
+    }
+
+    100% {
+      transform: rotateX(0deg) translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .digit.is-flipping {
+      animation: none;
     }
   }
 
@@ -226,7 +254,7 @@ const headerHtml = ({ activePath = "/", seconds = 0, clickCount = 0 } = {}) => {
   const digits = [...padded]
     .map(
       (digit, index) =>
-        html`<span class="digit ${index === 2 ? "is-spinning" : ""}" data-digit="${index}">${digit}</span>`,
+        html`<span class="digit" data-digit="${index}">${digit}</span>`,
     )
     .join("");
 
@@ -241,7 +269,7 @@ const headerHtml = ({ activePath = "/", seconds = 0, clickCount = 0 } = {}) => {
         ${raw(digits)}
       </span>
       <span class="render-copy">
-        <strong>this will not rerender on navigate</strong>
+        <strong>header stays mounted during partial rerenders</strong>
         <span>seconds since rerender</span>
       </span>
     </div>

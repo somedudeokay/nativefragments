@@ -30,8 +30,13 @@ class DemoHeader extends HTMLElement {
       secondsCounter?.setAttribute("aria-label", `${next} seconds since rerender`);
 
       digits.forEach((digit, index) => {
+        const changed = digit.textContent !== next[index];
         digit.textContent = next[index];
-        digit.classList.toggle("is-spinning", index === 2);
+        digit.classList.remove("is-flipping");
+        if (changed) {
+          void digit.offsetWidth;
+          digit.classList.add("is-flipping");
+        }
       });
     };
 
