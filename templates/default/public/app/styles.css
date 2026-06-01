@@ -163,40 +163,54 @@ h2 {
   line-height: 1.1;
 }
 
-.feature-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
+.feature-grid {
+  border-top: 1px solid var(--line);
+  column-gap: clamp(1.25rem, 3vw, 2.75rem);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   list-style: none;
   margin: 0;
-  max-width: 46rem;
+  max-width: 44rem;
   padding: 0;
 }
 
-.feature-list li {
-  align-items: center;
-  background: var(--ink);
-  border: 1px solid color-mix(in srgb, var(--paper) 16%, transparent);
-  border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-sm);
-  color: var(--paper);
-  display: inline-flex;
-  font-family: var(--display);
-  font-size: clamp(1.02rem, 2.3vw, 1.55rem);
-  font-weight: 700;
-  letter-spacing: 0;
-  line-height: 1;
-  min-height: 2.85rem;
-  padding: 0.65rem 0.95rem;
+.feature-grid li {
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  gap: 0.12rem;
+  padding: 0.68rem 0;
 }
 
-.feature-list li::before {
+.feature-grid li:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+.feature-name {
+  align-items: center;
+  color: var(--ink);
+  display: inline-flex;
+  font-family: var(--display);
+  font-size: 0.98rem;
+  font-weight: 600;
+  gap: 0.5rem;
+  line-height: 1.2;
+}
+
+.feature-name::before {
   background: var(--green);
   border-radius: 999px;
   content: "";
-  height: 0.46rem;
-  margin-right: 0.58rem;
-  width: 0.46rem;
+  flex: none;
+  height: 0.4rem;
+  width: 0.4rem;
+}
+
+.feature-note {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.01em;
+  padding-left: 0.9rem;
 }
 
 .lede {
@@ -337,6 +351,10 @@ p code {
 @media (max-width: 520px) {
   .demo-hero {
     padding-block: 3rem;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
   }
 
   .nested-tabs {

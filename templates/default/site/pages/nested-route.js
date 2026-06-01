@@ -7,7 +7,7 @@ export const nestedPanelFragment = fragment(nestedPanelName, (context) =>
 );
 
 const panel = (context) =>
-  context.params.panel === "activity" ? "activity" : "overview";
+  context.params?.panel === "activity" ? "activity" : "overview";
 
 const nestedLink = ({ active, href, label }) => html`<a
   href="${href}"
@@ -23,9 +23,8 @@ const panelContent = (activePanel) =>
         <span>02</span>
         <h2>Only this nested region changed.</h2>
         <p>
-          The page route, the top header, and the outer layout stay mounted.
-          The app requests a named partial rerender, so the server returns this
-          panel only.
+          The header and layout stay mounted. The server returns just this
+          panel.
         </p>
         <ul>
           <li>real links</li>
@@ -37,8 +36,7 @@ const panelContent = (activePanel) =>
         <span>01</span>
         <h2>One partial rerender can live inside another.</h2>
         <p>
-          This route renders a nested content area. Links inside it update only
-          that area without touching the document shell or the route-level tabs.
+          Links here update only this panel. The shell and tabs stay put.
         </p>
         <ul>
           <li>declarative partial areas</li>
@@ -73,8 +71,8 @@ export const nestedRoutePage = (context) => html`<section class="demo-hero neste
     <p class="eyebrow">Nested route</p>
     ${featureList()}
     <p class="lede">
-      Use the controls below to request only the nested panel from the server.
-      The rest of the page stays mounted without a client framework.
+      The tabs fetch only the panel below. Everything else stays mounted — no
+      client framework.
     </p>
   </div>
   <section

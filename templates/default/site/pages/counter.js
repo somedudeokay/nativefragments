@@ -87,9 +87,8 @@ const counterPanelHtml = (count) => html`<section class="panel">
   <span class="label">Shared state</span>
   <strong class="value" data-click-count>${padSeconds(count)}</strong>
   <p>
-    This click counter and the header read the same state. The value is saved
-    to localStorage and mirrored to a cookie so refreshes render with the same
-    state before JavaScript hydrates.
+    The header reads this same value. It lives in localStorage and a cookie, so
+    a refresh shows the right number before JavaScript runs.
   </p>
   <div class="actions">
     <button type="button" data-increment>Increment click counter</button>
@@ -105,9 +104,8 @@ export const counterPage = ({ request }) => {
       <p class="eyebrow">Counter route</p>
       ${featureList()}
       <p class="lede">
-        The header is outside the page area. The content below can rerender in
-        pieces, but the click counter stays shared across the app without a
-        client framework.
+        One shared state, no client framework. The page rerenders in pieces
+        while the counter stays in sync.
       </p>
     </div>
     <app-counter-panel>
