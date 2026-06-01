@@ -81,7 +81,7 @@ export const homePage = () => html`<section class="hero">
     </p>
     <div class="hero-actions">
       <a class="primary-action" href="/docs">Start building <span class="cta-arrow" aria-hidden="true">→</span></a>
-      <a class="secondary-action agent-action" href="/agents.txt">
+      <a class="secondary-action agent-action" href="/agents.txt" data-nativefragments-reload>
         <span class="agent-glyph" aria-hidden="true">&gt;_</span> Get started for agents
       </a>
       <a class="secondary-action" href="https://docs.nativefragments.org/reference">API reference</a>
