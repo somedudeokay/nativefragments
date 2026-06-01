@@ -17,7 +17,9 @@ The starter includes:
 
 - Cloudflare Worker rendering through `@nativefragments/core`.
 - Hono mounted under `/api/*`.
-- Fragment navigation with nested slot support.
-- Shadow DOM component helpers with no refresh FOUC.
-- Signals in `/nativefragments/signals.js`.
+- Fragment navigation with route-level and nested slot demos.
+- A persistent shell header that is not replaced during navigation.
+- Server-rendered Shadow DOM components with no refresh FOUC.
+- Shared signal state in `/nativefragments/signals.js`.
+- LocalStorage and cookie-backed counter state for refresh-safe SSR.
 - Worker RPC helpers in `/nativefragments/worker.js`.
