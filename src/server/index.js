@@ -8,6 +8,7 @@ export {
 } from "./html.js";
 export {
   createRoutes,
+  fragment,
   fragmentMeta,
   notFoundRoute,
   renderFragment,

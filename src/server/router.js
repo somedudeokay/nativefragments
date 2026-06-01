@@ -1,4 +1,4 @@
-import { html, jsonScript, raw } from "./html.js";
+import { attrs, html, jsonScript, raw } from "./html.js";
 
 /**
  * @typedef {object} RouteContext
@@ -14,12 +14,26 @@ import { html, jsonScript, raw } from "./html.js";
  */
 
 /**
+ * @typedef {(context: RouteContext) => string | Promise<string>} FragmentRenderer
+ */
+
+/**
+ * @typedef {object} FragmentDefinition
+ * @property {string} name Fragment slot name.
+ * @property {FragmentRenderer} render Fragment renderer.
+ * @property {(attributes?: Record<string, string | boolean | null | undefined>) => string} attrs
+ * Attributes for links and target containers using this fragment slot.
+ * @property {(mode?: "intent" | "visible" | "load" | "none", attributes?: Record<string, string | boolean | null | undefined>) => string} prefetchAttrs
+ * Attributes for links using this fragment slot with a prefetch mode.
+ */
+
+/**
  * @typedef {object} RouteDefinition
  * @property {(context: RouteContext) => RouteMeta | Promise<RouteMeta>} [meta]
  * Function that returns metadata for the route.
  * @property {(context: RouteContext) => string | Promise<string>} render
  * Function that renders route body HTML.
- * @property {Record<string, (context: RouteContext) => string | Promise<string>>} [fragments]
+ * @property {Record<string, FragmentRenderer> | FragmentDefinition[]} [fragments]
  * Named fragment renderers used by nested fragment slots.
  */
 
@@ -32,6 +46,34 @@ const normalizePath = (path) => {
   return path.replace(/\/+$/, "") || "/";
 };
 
+const normalizeFragments = (fragments) => {
+  if (!Array.isArray(fragments)) return fragments;
+  return Object.fromEntries(fragments.map((item) => [item.name, item.render]));
+};
+
+/**
+ * Create a named fragment definition.
+ *
+ * Use this when a route has a nested region with its own navigation. The
+ * returned object can be registered in `route(..., { fragments: [item] })` and
+ * its attributes can be reused on links and target containers.
+ *
+ * @param {string} name Fragment slot name.
+ * @param {FragmentRenderer} render Fragment renderer.
+ * @returns {FragmentDefinition} Fragment definition.
+ */
+export const fragment = (name, render) => ({
+  name,
+  render,
+  attrs: (attributes = {}) => attrs({ ...attributes, "data-fragment-slot": name }),
+  prefetchAttrs: (mode = "intent", attributes = {}) =>
+    attrs({
+      ...attributes,
+      "data-fragment-slot": name,
+      "data-fragment-prefetch": mode,
+    }),
+});
+
 /**
  * Create a normalized route definition.
  *
@@ -41,6 +83,7 @@ const normalizePath = (path) => {
  */
 export const route = (path, definition) => ({
   ...definition,
+  fragments: normalizeFragments(definition.fragments),
   path: normalizePath(path),
 });
 
