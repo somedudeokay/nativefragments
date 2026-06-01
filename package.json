@@ -1,6 +1,6 @@
 {
   "name": "@nativefragments/core",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Zero dependency, zero build framework core for agents building AI-friendly web applications.",
   "type": "module",
   "main": "./src/index.js",
