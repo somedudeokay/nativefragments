@@ -1,6 +1,6 @@
 {
   "name": "@nativefragments/signals",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Signal-based reactive state helpers for Native Fragments apps.",
   "type": "module",
   "main": "./src/index.js",
