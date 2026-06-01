@@ -1,4 +1,5 @@
 import { html, raw } from "@nativefragments/core/server";
+import { siteHeader } from "./header.js";
 import { navGroups } from "./nav.js";
 
 const renderNav = (pathname) => html`${raw(
@@ -41,15 +42,7 @@ export const shell = ({ body, meta }) => {
       curated documentation index, then use same-host Markdown pages when
       available.
     </p>
-    <nf-site-header>
-      <a href="https://nativefragments.org/">Native Fragments</a>
-      <a href="https://docs.nativefragments.org">Docs</a>
-      <a href="https://nativefragments.org/examples">Examples</a>
-      <a href="https://nativefragments.org/demos">Demos</a>
-      <a href="https://nativefragments.org/manifesto">Manifesto</a>
-      <a href="https://github.com/somedudeokay/nativefragments">GitHub</a>
-      <a href="https://www.npmjs.com/package/@nativefragments/core">npm</a>
-    </nf-site-header>
+    ${siteHeader()}
     <div class="layout">
       <aside class="sidebar">${raw(renderNav(pathname))}</aside>
       <main id="content-slot">${raw(body)}</main>

@@ -11,6 +11,15 @@ export const apiSections = [
         "type": "{ [RAW]: true, value: string }"
       },
       {
+        "name": "DeclarativeShadowOptions",
+        "description": "",
+        "properties": [
+          "{string[]} [styles=[]] CSS text rendered into `<style>` tags inside the declarative shadow root.",
+          "{string} [html=\"\"] Trusted shadow root HTML. Build dynamic HTML with {@link html} before passing it here."
+        ],
+        "type": "object"
+      },
+      {
         "name": "HtmlAttrs",
         "description": "",
         "properties": [],
@@ -47,6 +56,16 @@ export const apiSections = [
         ],
         "properties": [],
         "returns": "{string} Rendered HTML.",
+        "type": ""
+      },
+      {
+        "name": "declarativeShadow",
+        "description": "Render a declarative Shadow DOM template for server-rendered components. Put this as the first child of a custom element to avoid a flash of unstyled light DOM before the component module loads. Pair it with the browser {@link shadow} helper, which preserves an existing declarative shadow root on first upgrade.",
+        "params": [
+          "{DeclarativeShadowOptions} [options={}] Shadow template options."
+        ],
+        "properties": [],
+        "returns": "{RawHtml} Trusted declarative shadow template.",
         "type": ""
       },
       {
@@ -248,7 +267,8 @@ export const apiSections = [
         "description": "",
         "properties": [
           "{CSSStyleSheet[]} [styles=[]] Constructable stylesheets to adopt.",
-          "{string} [html=\"\"] Shadow root HTML."
+          "{string} [html=\"\"] Shadow root HTML.",
+          "{boolean} [hydrate=true] Preserve an existing declarative shadow root on the first render so server-rendered components do not flash."
         ],
         "type": "object"
       }
@@ -266,7 +286,7 @@ export const apiSections = [
       },
       {
         "name": "shadow",
-        "description": "Attach or reuse an open shadow root, adopt stylesheets, and set its HTML.",
+        "description": "Attach or reuse an open shadow root, adopt stylesheets, and set its HTML. If the element already has a declarative shadow root from server HTML, the first call preserves that DOM by default. Later calls update the HTML as usual, which keeps stateful components simple while avoiding refresh FOUC.",
         "params": [
           "{HTMLElement} element Custom element receiving the shadow root.",
           "{ShadowOptions} [options={}] Shadow render options."
