@@ -36,7 +36,6 @@ export type RouteMeta = {
   description?: string;
   canonical?: string;
   alternates?: AlternateLink[];
-  [key: string]: unknown;
 };
 
 export type FragmentRenderer = (
