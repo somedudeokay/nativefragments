@@ -24,5 +24,17 @@ export const homeRoute = route("/", {
         Apps export an array of routes. The Cloudflare adapter normalizes paths,
         matches requests, and renders the matched route.
       </p>
+      <h2>Nested route regions</h2>
+      <p>
+        A route can define named fragments for sub-regions. The full route still
+        renders a complete page, while fragment links can request only the
+        named region.
+      </p>
+      ${code(`route("/settings/profile", {
+  render: settingsPage,
+  fragments: {
+    "settings-panel": profilePanel
+  }
+});`)}
     `,
   });

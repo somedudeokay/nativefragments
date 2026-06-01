@@ -19,3 +19,15 @@ export const routes = [
 
 Routes are matched by normalized path. A normal document request renders the full shell. A request with `x-fragment: true` renders only the route body and metadata script.
 
+## Nested Route Regions
+
+```js
+route("/settings/profile", {
+  render: settingsPage,
+  fragments: {
+    "settings-panel": profilePanel,
+  },
+});
+```
+
+The full route remains the canonical server-rendered page. Links can target the named fragment slot for a smaller update.

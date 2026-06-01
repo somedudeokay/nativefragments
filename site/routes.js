@@ -1,4 +1,5 @@
 import { route } from "@nativefragments/core/server";
+import { apiRoutesPage } from "./pages/api-routes.js";
 import { aiPage } from "./pages/ai.js";
 import { componentsPage } from "./pages/components.js";
 import { fragmentsPage } from "./pages/fragments.js";
@@ -6,6 +7,8 @@ import { gettingStartedPage } from "./pages/getting-started.js";
 import { homePage } from "./pages/home.js";
 import { referencePage } from "./pages/reference.js";
 import { routingPage } from "./pages/routing.js";
+import { signalsPage } from "./pages/signals.js";
+import { workersPage } from "./pages/workers.js";
 
 const origin = "https://docs.nativefragments.org";
 
@@ -52,6 +55,33 @@ export const routes = [
         "Custom Elements and Shadow DOM component patterns.",
       ),
     render: componentsPage,
+  }),
+  route("/concepts/api-routes", {
+    meta: () =>
+      meta(
+        "/concepts/api-routes",
+        "API Routes",
+        "Mount Hono or any Web Standards router under Native Fragments.",
+      ),
+    render: apiRoutesPage,
+  }),
+  route("/concepts/workers", {
+    meta: () =>
+      meta(
+        "/concepts/workers",
+        "Workers",
+        "Use first-class worker helpers in Native Fragments apps.",
+      ),
+    render: workersPage,
+  }),
+  route("/concepts/signals", {
+    meta: () =>
+      meta(
+        "/concepts/signals",
+        "Signals",
+        "Optional signal-based reactive state for Native Fragments apps.",
+      ),
+    render: signalsPage,
   }),
   route("/concepts/agent-friendly", {
     meta: () =>

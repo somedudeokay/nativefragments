@@ -24,6 +24,9 @@ npm run dev
 - https://docs.nativefragments.org/routing.md
 - https://docs.nativefragments.org/fragments.md
 - https://docs.nativefragments.org/components.md
+- https://docs.nativefragments.org/api-routes.md
+- https://docs.nativefragments.org/workers.md
+- https://docs.nativefragments.org/signals.md
 - https://docs.nativefragments.org/agent-friendly.md
 - https://docs.nativefragments.org/reference.md
 
@@ -45,6 +48,18 @@ Browser imports:
 ```js
 import { installFragmentNavigation } from "/nativefragments/router.js";
 import { shadow, sheet } from "/nativefragments/component.js";
+import { createWorkerClient } from "/nativefragments/worker.js";
+```
+
+## Optional Signals Package
+
+```sh
+npm i @nativefragments/signals
+cp node_modules/@nativefragments/signals/public/nativefragments/*.js public/nativefragments/
+```
+
+```js
+import { bindText, computed, state } from "/nativefragments/signals.js";
 ```
 
 ## Agent Skill
@@ -63,6 +78,7 @@ site/pages/home.js
 public/app/client.js
 public/nativefragments/router.js
 public/nativefragments/component.js
+public/nativefragments/worker.js
 ```
 
 ## Principles
@@ -71,5 +87,7 @@ public/nativefragments/component.js
 - Fragment navigation upgrades real links.
 - Custom Elements own behavior.
 - Shadow DOM scopes component CSS.
+- Signals are optional reactive islands.
+- Web Workers handle expensive client work.
 - Source files stay small and explicit for agents.
 - Runtime output remains readable HTML and browser modules.

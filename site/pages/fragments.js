@@ -22,5 +22,17 @@ installFragmentNavigation({
         history, real HTML. JavaScript upgrades navigation without owning the
         whole page.
       </p>
+      <h2>Nested fragments</h2>
+      <p>
+        Add <code>data-fragment-slot</code> to a link and target container when
+        only one region should update.
+      </p>
+      ${code(`<a href="/settings/profile" data-fragment-slot="settings-panel">
+  Profile
+</a>
+
+<section data-fragment-slot="settings-panel">
+  ...
+</section>`)}
     `,
   });

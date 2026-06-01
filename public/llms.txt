@@ -14,10 +14,14 @@
 - [Routing](https://docs.nativefragments.org/routing.md)
 - [Fragments](https://docs.nativefragments.org/fragments.md)
 - [Components](https://docs.nativefragments.org/components.md)
+- [API Routes](https://docs.nativefragments.org/api-routes.md)
+- [Workers](https://docs.nativefragments.org/workers.md)
+- [Signals](https://docs.nativefragments.org/signals.md)
 - [Agent-Friendly Applications](https://docs.nativefragments.org/agent-friendly.md)
 
 ## Complete Context
 
 - [llms-full.txt](https://docs.nativefragments.org/llms-full.txt)
 - [Core npm package](https://www.npmjs.com/package/@nativefragments/core)
+- [Signals npm package](https://www.npmjs.com/package/@nativefragments/signals)
 - [Core GitHub repo](https://github.com/somedudeokay/nativefragments)

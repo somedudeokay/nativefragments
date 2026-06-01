@@ -32,6 +32,11 @@ const sources = [
     module: "/nativefragments/component.js",
     title: "Shadow DOM Components",
   },
+  {
+    file: "public/nativefragments/worker.js",
+    module: "/nativefragments/worker.js",
+    title: "Web Workers",
+  },
 ];
 
 const cleanLine = (line) => line.replace(/^\s*\* ?/, "");

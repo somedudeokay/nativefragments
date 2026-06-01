@@ -119,7 +119,8 @@ export const apiSections = [
         "description": "",
         "properties": [
           "{(context: RouteContext) => RouteMeta | Promise<RouteMeta>} [meta] Function that returns metadata for the route.",
-          "{(context: RouteContext) => string | Promise<string>} render Function that renders route body HTML."
+          "{(context: RouteContext) => string | Promise<string>} render Function that renders route body HTML.",
+          "{Record<string, (context: RouteContext) => string | Promise<string>>} [fragments] Named fragment renderers used by nested fragment slots."
         ],
         "type": "object"
       },
@@ -166,7 +167,7 @@ export const apiSections = [
         "name": "renderRoute",
         "description": "Render a matched route and normalize metadata defaults.",
         "params": [
-          "{{ match: Route, request: Request }} options Render options."
+          "{{ match: Route, request: Request, slot?: string | null }} options Render options. When `slot` matches `RouteDefinition.fragments`, only that named fragment is rendered."
         ],
         "properties": [],
         "returns": "{Promise<{ body: string, meta: Required<RouteMeta> }>} Rendered route.",
@@ -209,6 +210,8 @@ export const apiSections = [
         "properties": [
           "{Route[]} routes App route definitions.",
           "{(rendered: { body: string, meta: object }) => string} shell Function that wraps a rendered route body in a full HTML document.",
+          "{{ fetch(request: Request, env: Record<string, unknown>, context?: unknown): Promise<Response> | Response }} [api] Optional Web Standards API router. Hono apps work here because they expose a compatible `fetch` method.",
+          "{string} [apiPrefix=\"/api\"] URL prefix handled by `api`.",
           "{Route} [notFound] Optional 404 route.",
           "{string} [assetsBinding=\"ASSETS\"] Cloudflare assets binding name."
         ],
@@ -218,7 +221,7 @@ export const apiSections = [
     "symbols": [
       {
         "name": "createCloudflareHandler",
-        "description": "Create a Cloudflare Worker module for a Native Fragments app. Static assets are served from the configured assets binding. Normal document requests render the app shell. Requests with `x-fragment: true` return only the route body plus fragment metadata.",
+        "description": "Create a Cloudflare Worker module for a Native Fragments app. Static assets are served from the configured assets binding. Normal document requests render the app shell. Requests with `x-fragment: true` return only the route body plus fragment metadata. Requests under `apiPrefix` are delegated to the optional API router before app route matching.",
         "params": [
           "{CloudflareHandlerOptions} options Worker adapter options."
         ],
@@ -239,7 +242,7 @@ export const apiSections = [
         "properties": [
           "{string} [slot=\"#content-slot\"] Selector for the element replaced by fragment responses.",
           "{number} [ttl=30000] Fragment cache time in milliseconds.",
-          "{(event: { meta: object | null, url: URL }) => void} [afterNavigate] Callback fired after a successful client-side navigation."
+          "{(event: { meta: object | null, url: URL, slot: string }) => void} [afterNavigate] Callback fired after a successful client-side navigation."
         ],
         "type": "object"
       }
@@ -247,12 +250,12 @@ export const apiSections = [
     "symbols": [
       {
         "name": "installFragmentNavigation",
-        "description": "Install same-origin fragment navigation. Clicked links are fetched with `x-fragment: true`, the configured content slot is replaced, document metadata is updated, and history state is pushed. External links and modified clicks keep normal browser behavior.",
+        "description": "Install same-origin fragment navigation. Clicked links are fetched with `x-fragment: true`, the configured content slot is replaced, document metadata is updated, and history state is pushed. Links with `data-fragment-slot=\"name\"` replace only the matching `[data-fragment-slot=\"name\"]` container and send `x-fragment-slot: name`. External links and modified clicks keep normal browser behavior.",
         "params": [
           "{FragmentNavigationOptions} [options={}] Navigation options."
         ],
         "properties": [],
-        "returns": "{((href: string, pushState?: boolean) => Promise<void>) | undefined} Navigate function, or `undefined` if the slot does not exist.",
+        "returns": "{((href: string, pushState?: boolean, nextSlot?: string) => Promise<void>) | undefined} Navigate function, or `undefined` if the slot does not exist.",
         "type": ""
       }
     ]
@@ -293,6 +296,77 @@ export const apiSections = [
         ],
         "properties": [],
         "returns": "{ShadowRoot} The element's shadow root.",
+        "type": ""
+      }
+    ]
+  },
+  {
+    "file": "public/nativefragments/worker.js",
+    "module": "/nativefragments/worker.js",
+    "title": "Web Workers",
+    "types": [
+      {
+        "name": "WorkerClientOptions",
+        "description": "",
+        "properties": [
+          "{number} [timeout=30000] Request timeout in milliseconds."
+        ],
+        "type": "object"
+      },
+      {
+        "name": "NativeWorkerClient",
+        "description": "",
+        "properties": [
+          "{(type: string, payload?: unknown, transfer?: Transferable[]) => Promise<unknown>} call Call a named worker handler.",
+          "{() => void} dispose Reject pending calls and remove listeners.",
+          "{Worker} worker The wrapped Worker instance."
+        ],
+        "type": "object"
+      }
+    ],
+    "symbols": [
+      {
+        "name": "transferResult",
+        "description": "Wrap a worker response with Transferable objects.",
+        "params": [
+          "{T} payload Response payload.",
+          "{Transferable[]} [transfer=[]] Transferable objects to move."
+        ],
+        "properties": [],
+        "returns": "{{ payload: T, transfer: Transferable[], [transferMarker]: true }}",
+        "type": ""
+      },
+      {
+        "name": "workerClient",
+        "description": "Create a tiny RPC client for a dedicated Web Worker.",
+        "params": [
+          "{Worker} worker Worker instance.",
+          "{WorkerClientOptions} [options={}] Client options."
+        ],
+        "properties": [],
+        "returns": "{NativeWorkerClient} Worker client.",
+        "type": ""
+      },
+      {
+        "name": "createWorkerClient",
+        "description": "Create a module worker and wrap it with `workerClient`.",
+        "params": [
+          "{string | URL | Worker} workerOrUrl Existing Worker or worker module URL.",
+          "{WorkerClientOptions & { workerOptions?: WorkerOptions }} [options={}] Client and Worker constructor options."
+        ],
+        "properties": [],
+        "returns": "{NativeWorkerClient} Worker client.",
+        "type": ""
+      },
+      {
+        "name": "exposeWorker",
+        "description": "Expose named handlers inside a dedicated Web Worker.",
+        "params": [
+          "{Record<string, (payload: unknown, context: { event: MessageEvent, type: string }) => unknown | Promise<unknown>>} handlers Worker handlers keyed by message type.",
+          "{DedicatedWorkerGlobalScope} [scope=globalThis] Worker global scope."
+        ],
+        "properties": [],
+        "returns": "{() => void} Cleanup function.",
         "type": ""
       }
     ]

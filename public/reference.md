@@ -131,6 +131,7 @@ Properties:
 
 - `{(context: RouteContext) => RouteMeta | Promise<RouteMeta>} [meta] Function that returns metadata for the route.`
 - `{(context: RouteContext) => string | Promise<string>} render Function that renders route body HTML.`
+- `{Record<string, (context: RouteContext) => string | Promise<string>>} [fragments] Named fragment renderers used by nested fragment slots.`
 
 ### Route
 
@@ -175,7 +176,7 @@ Render a matched route and normalize metadata defaults.
 
 Parameters:
 
-- `{{ match: Route, request: Request }} options Render options.`
+- `{{ match: Route, request: Request, slot?: string | null }} options Render options. When `slot` matches `RouteDefinition.fragments`, only that named fragment is rendered.`
 
 Returns: `{Promise<{ body: string, meta: Required<RouteMeta> }>} Rendered route.`
 
@@ -219,12 +220,14 @@ Properties:
 
 - `{Route[]} routes App route definitions.`
 - `{(rendered: { body: string, meta: object }) => string} shell Function that wraps a rendered route body in a full HTML document.`
+- `{{ fetch(request: Request, env: Record<string, unknown>, context?: unknown): Promise<Response> | Response }} [api] Optional Web Standards API router. Hono apps work here because they expose a compatible `fetch` method.`
+- `{string} [apiPrefix="/api"] URL prefix handled by `api`.`
 - `{Route} [notFound] Optional 404 route.`
 - `{string} [assetsBinding="ASSETS"] Cloudflare assets binding name.`
 
 ### createCloudflareHandler
 
-Create a Cloudflare Worker module for a Native Fragments app. Static assets are served from the configured assets binding. Normal document requests render the app shell. Requests with `x-fragment: true` return only the route body plus fragment metadata.
+Create a Cloudflare Worker module for a Native Fragments app. Static assets are served from the configured assets binding. Normal document requests render the app shell. Requests with `x-fragment: true` return only the route body plus fragment metadata. Requests under `apiPrefix` are delegated to the optional API router before app route matching.
 
 Parameters:
 
@@ -248,17 +251,17 @@ Properties:
 
 - `{string} [slot="#content-slot"] Selector for the element replaced by fragment responses.`
 - `{number} [ttl=30000] Fragment cache time in milliseconds.`
-- `{(event: { meta: object | null, url: URL }) => void} [afterNavigate] Callback fired after a successful client-side navigation.`
+- `{(event: { meta: object | null, url: URL, slot: string }) => void} [afterNavigate] Callback fired after a successful client-side navigation.`
 
 ### installFragmentNavigation
 
-Install same-origin fragment navigation. Clicked links are fetched with `x-fragment: true`, the configured content slot is replaced, document metadata is updated, and history state is pushed. External links and modified clicks keep normal browser behavior.
+Install same-origin fragment navigation. Clicked links are fetched with `x-fragment: true`, the configured content slot is replaced, document metadata is updated, and history state is pushed. Links with `data-fragment-slot="name"` replace only the matching `[data-fragment-slot="name"]` container and send `x-fragment-slot: name`. External links and modified clicks keep normal browser behavior.
 
 Parameters:
 
 - `{FragmentNavigationOptions} [options={}] Navigation options.`
 
-Returns: `{((href: string, pushState?: boolean) => Promise<void>) | undefined} Navigate function, or `undefined` if the slot does not exist.`
+Returns: `{((href: string, pushState?: boolean, nextSlot?: string) => Promise<void>) | undefined} Navigate function, or `undefined` if the slot does not exist.`
 
 ## Shadow DOM Components
 
@@ -298,4 +301,76 @@ Parameters:
 - `{ShadowOptions} [options={}] Shadow render options.`
 
 Returns: `{ShadowRoot} The element's shadow root.`
+
+## Web Workers
+
+Module: `/nativefragments/worker.js`
+
+Source: `public/nativefragments/worker.js`
+
+### WorkerClientOptions
+
+Type: `object`
+
+
+
+Properties:
+
+- `{number} [timeout=30000] Request timeout in milliseconds.`
+
+### NativeWorkerClient
+
+Type: `object`
+
+
+
+Properties:
+
+- `{(type: string, payload?: unknown, transfer?: Transferable[]) => Promise<unknown>} call Call a named worker handler.`
+- `{() => void} dispose Reject pending calls and remove listeners.`
+- `{Worker} worker The wrapped Worker instance.`
+
+### transferResult
+
+Wrap a worker response with Transferable objects.
+
+Parameters:
+
+- `{T} payload Response payload.`
+- `{Transferable[]} [transfer=[]] Transferable objects to move.`
+
+Returns: `{{ payload: T, transfer: Transferable[], [transferMarker]: true }}`
+
+### workerClient
+
+Create a tiny RPC client for a dedicated Web Worker.
+
+Parameters:
+
+- `{Worker} worker Worker instance.`
+- `{WorkerClientOptions} [options={}] Client options.`
+
+Returns: `{NativeWorkerClient} Worker client.`
+
+### createWorkerClient
+
+Create a module worker and wrap it with `workerClient`.
+
+Parameters:
+
+- `{string | URL | Worker} workerOrUrl Existing Worker or worker module URL.`
+- `{WorkerClientOptions & { workerOptions?: WorkerOptions }} [options={}] Client and Worker constructor options.`
+
+Returns: `{NativeWorkerClient} Worker client.`
+
+### exposeWorker
+
+Expose named handlers inside a dedicated Web Worker.
+
+Parameters:
+
+- `{Record<string, (payload: unknown, context: { event: MessageEvent, type: string }) => unknown | Promise<unknown>>} handlers Worker handlers keyed by message type.`
+- `{DedicatedWorkerGlobalScope} [scope=globalThis] Worker global scope.`
+
+Returns: `{() => void} Cleanup function.`
 
