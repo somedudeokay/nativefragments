@@ -64,14 +64,8 @@ class DemoHeader extends HTMLElement {
         }
       }
 
-      const activeTab = tabs.find((tab) => tab.dataset.tab === active) ?? tabs[0];
-      if (!activeTab || !nav) return;
+      if (!nav) return;
       nav.dataset.activeTab = active;
-
-      const navBox = nav.getBoundingClientRect();
-      const tabBox = activeTab.getBoundingClientRect();
-      nav.style.setProperty("--tab-x", `${tabBox.left - navBox.left - 4}px`);
-      nav.style.setProperty("--tab-width", `${tabBox.width}px`);
     };
 
     const scheduleTabs = () => requestAnimationFrame(updateTabs);
@@ -79,11 +73,9 @@ class DemoHeader extends HTMLElement {
 
     window.addEventListener("nativefragments:navigate", scheduleTabs);
     window.addEventListener("popstate", scheduleTabs);
-    window.addEventListener("resize", scheduleTabs);
     this.#cleanup.push(() => {
       window.removeEventListener("nativefragments:navigate", scheduleTabs);
       window.removeEventListener("popstate", scheduleTabs);
-      window.removeEventListener("resize", scheduleTabs);
     });
   }
 

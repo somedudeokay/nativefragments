@@ -146,8 +146,8 @@ export const headerStyles = `
   }
 
   nav {
+    --tab-left: 0.25rem;
     --tab-width: calc((100% - 0.5rem) / 2);
-    --tab-x: 0;
 
     background: color-mix(in srgb, var(--surface, #fffdf6) 72%, transparent);
     border: 1px solid var(--line, rgba(20, 20, 20, 0.1));
@@ -160,7 +160,7 @@ export const headerStyles = `
   }
 
   nav[data-active-tab="/nested-route"] {
-    --tab-x: var(--tab-width);
+    --tab-left: 50%;
   }
 
   .tab-indicator {
@@ -168,12 +168,11 @@ export const headerStyles = `
     border-radius: var(--radius-pill, 999px);
     bottom: 0.25rem;
     box-shadow: var(--shadow-md, 0 10px 30px -12px rgba(20, 20, 20, 0.18));
-    left: 0.25rem;
+    left: var(--tab-left);
     position: absolute;
     top: 0.25rem;
-    transform: translateX(var(--tab-x, 0));
     transition:
-      transform 0.42s var(--ease, cubic-bezier(0.16, 1, 0.3, 1)),
+      left 0.42s var(--ease, cubic-bezier(0.16, 1, 0.3, 1)),
       width 0.42s var(--ease, cubic-bezier(0.16, 1, 0.3, 1));
     width: var(--tab-width);
   }
