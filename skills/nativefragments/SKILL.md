@@ -14,6 +14,8 @@ Use this skill when creating or editing a Native Fragments app.
 - Use Cloudflare Workers for server rendering and static assets.
 - Render HTML on the server, then use fragment navigation for fast transitions.
 - Put component styling inside Shadow DOM.
+- Avoid refresh FOUC by server-rendering important custom elements with
+  declarative Shadow DOM.
 - Make files obvious for agents: one route, one renderer, one component file.
 
 ## Default Structure
@@ -40,12 +42,37 @@ route("/", {
 
 ## Component Pattern
 
+For any component visible during initial render, include a declarative shadow
+template in the server HTML. This prevents the browser from painting unstyled
+light DOM before the component module upgrades.
+
+Server renderer:
+
+```js
+import { declarativeShadow, html } from "@nativefragments/core/server";
+
+const cardStyles = `
+  :host { display: block; }
+  article { border: 1px solid currentColor; }
+`;
+
+export const appCard = (content) => html`<app-card>${declarativeShadow({
+  styles: [cardStyles],
+  html: html`<article>${content}</article>`
+})}</app-card>`;
+```
+
+Browser component:
+
 ```js
 import { shadow, sheet } from "/nativefragments/component.js";
 
-const styles = sheet(`
+const cardStyles = `
   :host { display: block; }
-`);
+  article { border: 1px solid currentColor; }
+`;
+
+const styles = sheet(cardStyles);
 
 class AppCard extends HTMLElement {
   connectedCallback() {
@@ -58,6 +85,10 @@ class AppCard extends HTMLElement {
 
 customElements.define("app-card", AppCard);
 ```
+
+The `shadow()` helper preserves an existing declarative shadow root on first
+upgrade, then updates normally on later renders. Use `{ hydrate: false }` only
+when a component must intentionally discard server-rendered shadow DOM.
 
 ## Testing Guidance
 

@@ -1,5 +1,6 @@
 export {
   attrs,
+  declarativeShadow,
   escapeHtml,
   html,
   jsonScript,

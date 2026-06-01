@@ -29,13 +29,14 @@ npm i @nativefragments/core
 - Full-page and fragment render helpers.
 - Cloudflare Worker adapter.
 - Browser fragment navigation.
-- Shadow DOM component helpers.
+- Shadow DOM component helpers, including declarative Shadow DOM support to
+  avoid refresh FOUC.
 - Agent skill shipped with the package.
 
 ## Package Exports
 
 ```js
-import { html, route } from "@nativefragments/core/server";
+import { declarativeShadow, html, route } from "@nativefragments/core/server";
 import { createCloudflareHandler } from "@nativefragments/core/cloudflare";
 ```
 
@@ -46,6 +47,21 @@ Browser helpers are plain ES modules that can be served from your app's
 import { installFragmentNavigation } from "/nativefragments/router.js";
 import { shadow, sheet } from "/nativefragments/component.js";
 ```
+
+## No-FOUC Components
+
+For components visible on first paint, render a declarative shadow template on
+the server and hydrate it with `shadow()` in the browser:
+
+```js
+html`<app-card>${declarativeShadow({
+  styles: [`:host { display: block; }`],
+  html: html`<article>Ready at first paint</article>`
+})}</app-card>`;
+```
+
+The browser `shadow()` helper preserves that server-rendered shadow root on the
+first upgrade, then updates normally on later renders.
 
 ## Agent Skill
 

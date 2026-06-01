@@ -37,6 +37,26 @@ import { attrs, html } from "@nativefragments/core/server";
 html`<button${attrs({ disabled: true, "data-id": "save" })}>Save</button>`;
 ```
 
+### `declarativeShadow(options)`
+
+Renders a native declarative Shadow DOM template for server-rendered custom
+elements. Put it as the first child of a custom element to avoid a flash of
+unstyled light DOM while the browser module loads.
+
+```js
+import { declarativeShadow, html } from "@nativefragments/core/server";
+
+const styles = `
+  :host { display: inline-block; }
+  button { border: 1px solid currentColor; }
+`;
+
+html`<app-counter>${declarativeShadow({
+  styles: [styles],
+  html: html`<button type="button">Count 0</button>`
+})}</app-counter>`;
+```
+
 ### `jsonScript(value)`
 
 Serializes JSON for safe embedding in an inline script payload.
@@ -134,7 +154,9 @@ Creates a constructable stylesheet from CSS text.
 ### `shadow(element, options)`
 
 Attaches or reuses an open Shadow Root, applies constructable stylesheets, and
-sets the shadow HTML.
+sets the shadow HTML. If the element already has a server-rendered declarative
+shadow root, the first call preserves it by default so the component hydrates
+without a refresh flash. Later calls update the HTML normally.
 
 ```js
 import { shadow, sheet } from "/nativefragments/component.js";

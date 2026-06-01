@@ -58,6 +58,35 @@ export const html = (strings, ...values) =>
     "",
   );
 
+const escapeStyleText = (value) =>
+  String(value).replace(/<\/style/gi, "<\\/style");
+
+/**
+ * @typedef {object} DeclarativeShadowOptions
+ * @property {string[]} [styles=[]] CSS text rendered into `<style>` tags inside
+ * the declarative shadow root.
+ * @property {string} [html=""] Trusted shadow root HTML. Build dynamic HTML with
+ * {@link html} before passing it here.
+ */
+
+/**
+ * Render a declarative Shadow DOM template for server-rendered components.
+ *
+ * Put this as the first child of a custom element to avoid a flash of unstyled
+ * light DOM before the component module loads. Pair it with the browser
+ * {@link shadow} helper, which preserves an existing declarative shadow root on
+ * first upgrade.
+ *
+ * @param {DeclarativeShadowOptions} [options={}] Shadow template options.
+ * @returns {RawHtml} Trusted declarative shadow template.
+ */
+export const declarativeShadow = ({ styles = [], html: shadowHtml = "" } = {}) =>
+  raw(
+    `<template shadowrootmode="open">${styles
+      .map((style) => `<style data-nativefragments-shadow>${escapeStyleText(style)}</style>`)
+      .join("")}${shadowHtml}</template>`,
+  );
+
 /**
  * Serialize JSON for safe embedding inside an inline script tag.
  *
