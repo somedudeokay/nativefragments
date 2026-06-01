@@ -25,8 +25,8 @@ building fast, maintainable, AI-friendly web applications.
 - `src/server`: HTML helpers, route helpers, metadata, and rendering.
 - `src/cloudflare`: Cloudflare Worker adapter.
 - `public/nativefragments`: browser-loadable framework modules.
-- `site`: this repo's docsite routes, shell, and page renderers.
-- `public/app`: docsite browser modules and custom elements.
+- `docs`: package API reference documentation.
+- `skills`: agent skill shipped with the npm package.
 
-No Vite, no framework compiler, no test runner dependency. If a build escape
-hatch is added later, use esbuild only.
+No Vite, no framework compiler, no test runner dependency. The public docsite
+lives in the separate `nativefragments.org` repo.

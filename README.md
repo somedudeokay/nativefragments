@@ -1,102 +1,68 @@
-# Native Fragments
+# Native Fragments Core
 
-Zero dependencies. Zero build. Blazing fast. Built for agents. Zero
-maintenance. Free to deploy. Infinite scale.
+Zero dependencies. Zero build. Blazing fast. Built for agents. AI-friendly
+applications. Zero maintenance.
 
-Native Fragments is a tiny frontend framework for agents building robust,
-AI-friendly web applications with the native Web Platform: HTML, CSS,
-JavaScript, Custom Elements, Shadow DOM, and standard server-side `Response`
-objects.
+Native Fragments Core is the runtime package for building fast, maintainable web
+applications with native browser APIs: HTML, CSS, JavaScript, Custom Elements,
+Shadow DOM, Fetch, History, and standard server-side `Response` objects.
 
-The apps are also easier for agents to browse after they ship: real links, real
-HTML, native custom elements, and readable browser modules instead of opaque
-transpiled bundles.
-
-It starts with Cloudflare Workers and static assets, but keeps the server
-adapter small enough to port elsewhere.
-
-## Run the Docsite
+For a new app, start with the scaffold:
 
 ```sh
+npm create @nativefragments/app@latest my-app
+cd my-app
 npm run dev
 ```
 
-The script runs `npx wrangler dev`. There is no install step for framework
-dependencies and no build step for the app.
-
-## Deploy
+Install the core package directly when you are wiring Native Fragments into an
+existing app:
 
 ```sh
-wrangler deploy
+npm i @nativefragments/core
 ```
 
-## Install
+## What Core Provides
 
-```sh
-npm i @nativefragments/nativefragments
-```
+- Escaped server-side HTML templates.
+- Explicit route helpers.
+- Full-page and fragment render helpers.
+- Cloudflare Worker adapter.
+- Browser fragment navigation.
+- Shadow DOM component helpers.
+- Agent skill shipped with the package.
 
-## Getting Started
+## Package Exports
 
 ```js
-import { createCloudflareHandler } from "@nativefragments/nativefragments/cloudflare";
-import { routes } from "./site/routes.js";
-import { shell } from "./site/shell.js";
-
-export default createCloudflareHandler({
-  routes,
-  shell
-});
+import { html, route } from "@nativefragments/core/server";
+import { createCloudflareHandler } from "@nativefragments/core/cloudflare";
 ```
 
-## Links
+Browser helpers are plain ES modules that can be served from your app's
+`public/nativefragments` directory:
 
-- Docs: https://nativefragments.org/docs
-- GitHub: https://github.com/somedudeokay/nativefragments
-- npm: https://www.npmjs.com/package/@nativefragments/nativefragments
-
-## What It Gives You
-
-- Server-rendered pages and fragments.
-- Client-side fragment navigation.
-- Metadata updates on navigation.
-- Native custom element islands.
-- Shadow DOM scoped styles.
-- Cloudflare Worker adapter.
-
-## Local Package Development
-
-Apps can point at this folder while the package is still local:
-
-```json
-{
-    "dependencies": {
-    "@nativefragments/nativefragments": "file:../nativefragments"
-  }
-}
+```js
+import { installFragmentNavigation } from "/nativefragments/router.js";
+import { shadow, sheet } from "/nativefragments/component.js";
 ```
-
-Server code imports from `@nativefragments/nativefragments/server` or
-`@nativefragments/nativefragments/cloudflare`. Browser helpers can be copied or
-served from `public/nativefragments` with no bundler.
 
 ## Agent Skill
 
-The package ships a skill that agents can read from:
+Agents can read the shipped framework conventions from:
 
 ```sh
-node_modules/@nativefragments/nativefragments/skills/nativefragments/SKILL.md
+node_modules/@nativefragments/core/skills/nativefragments/SKILL.md
 ```
 
-Use it as the project convention brief before editing a Native Fragments app.
+Use that file as the editing brief before changing a Native Fragments app.
 
-## What It Does Not Ship
+## API Reference
 
-- No Vite.
-- No JSX.
-- No virtual DOM.
-- No runtime dependencies.
-- No bundled test framework.
+See [docs/api-reference.md](docs/api-reference.md).
 
-For tests, the docs recommend plain HTTP smoke checks and optional Web Test
-Runner examples for component tests.
+## Links
+
+- Docs: https://nativefragments.org
+- GitHub: https://github.com/somedudeokay/nativefragments
+- npm: https://www.npmjs.com/package/@nativefragments/core
