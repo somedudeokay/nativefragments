@@ -1,6 +1,6 @@
 {
   "name": "@nativefragments/create-app",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Create a zero-build Native Fragments app.",
   "type": "module",
   "bin": {
