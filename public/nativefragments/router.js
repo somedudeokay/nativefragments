@@ -44,6 +44,26 @@ const fetchFragment = async (url, signal, ttl) => {
   return html;
 };
 
+/**
+ * @typedef {object} FragmentNavigationOptions
+ * @property {string} [slot="#content-slot"] Selector for the element replaced
+ * by fragment responses.
+ * @property {number} [ttl=30000] Fragment cache time in milliseconds.
+ * @property {(event: { meta: object | null, url: URL }) => void} [afterNavigate]
+ * Callback fired after a successful client-side navigation.
+ */
+
+/**
+ * Install same-origin fragment navigation.
+ *
+ * Clicked links are fetched with `x-fragment: true`, the configured content
+ * slot is replaced, document metadata is updated, and history state is pushed.
+ * External links and modified clicks keep normal browser behavior.
+ *
+ * @param {FragmentNavigationOptions} [options={}] Navigation options.
+ * @returns {((href: string, pushState?: boolean) => Promise<void>) | undefined}
+ * Navigate function, or `undefined` if the slot does not exist.
+ */
 export const installFragmentNavigation = ({
   slot = defaultSlot,
   ttl = 30_000,

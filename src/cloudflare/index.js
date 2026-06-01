@@ -19,6 +19,30 @@ const securityHeaders = {
   "X-Content-Type-Options": "nosniff",
 };
 
+/**
+ * @typedef {import("../server/router.js").Route} Route
+ */
+
+/**
+ * @typedef {object} CloudflareHandlerOptions
+ * @property {Route[]} routes App route definitions.
+ * @property {(rendered: { body: string, meta: object }) => string} shell
+ * Function that wraps a rendered route body in a full HTML document.
+ * @property {Route} [notFound] Optional 404 route.
+ * @property {string} [assetsBinding="ASSETS"] Cloudflare assets binding name.
+ */
+
+/**
+ * Create a Cloudflare Worker module for a Native Fragments app.
+ *
+ * Static assets are served from the configured assets binding. Normal document
+ * requests render the app shell. Requests with `x-fragment: true` return only
+ * the route body plus fragment metadata.
+ *
+ * @param {CloudflareHandlerOptions} options Worker adapter options.
+ * @returns {{ fetch(request: Request, env: Record<string, unknown>): Promise<Response> }}
+ * Cloudflare Worker module.
+ */
 export const createCloudflareHandler = ({
   routes,
   shell,
