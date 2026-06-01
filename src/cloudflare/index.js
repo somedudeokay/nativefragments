@@ -1,5 +1,6 @@
 import {
   createRoutes,
+  jsonScript,
   notFoundRoute,
   renderFragment,
   renderRoute,
@@ -22,6 +23,61 @@ const securityHeaders = {
   "X-Content-Type-Options": "nosniff",
 };
 
+const htmlRewriterAvailable = () => typeof HTMLRewriter !== "undefined";
+
+const responseIsHtml = (response) =>
+  response.headers.get("Content-Type")?.includes("text/html");
+
+const fragmentManifestScript = (manifest) =>
+  `<script type="application/json" data-fragment-manifest>${jsonScript(manifest)}</script>`;
+
+const appendFragmentManifest = (response) => {
+  if (!htmlRewriterAvailable() || !responseIsHtml(response)) return response;
+
+  const slots = new Set();
+  const links = [];
+
+  const collectSlot = {
+    element(element) {
+      const slot = element.getAttribute("data-fragment-slot");
+      if (slot) slots.add(slot);
+    },
+  };
+
+  const collectLink = {
+    element(element) {
+      const href = element.getAttribute("href");
+      if (!href) return;
+
+      const slot = element.getAttribute("data-fragment-slot");
+      const prefetch = element.getAttribute("data-fragment-prefetch");
+      if (!slot && !prefetch) return;
+
+      links.push({
+        href,
+        ...(slot ? { slot } : {}),
+        ...(prefetch ? { prefetch } : {}),
+      });
+    },
+  };
+
+  const appendManifest = {
+    element(element) {
+      element.onEndTag((tag) => {
+        const manifest = { slots: [...slots], links };
+        if (manifest.slots.length === 0 && manifest.links.length === 0) return;
+        tag.before(fragmentManifestScript(manifest), { html: true });
+      });
+    },
+  };
+
+  return new HTMLRewriter()
+    .on("[data-fragment-slot]", collectSlot)
+    .on("a[href]", collectLink)
+    .on("body", appendManifest)
+    .transform(response);
+};
+
 /**
  * @typedef {import("../server/router.js").Route} Route
  */
@@ -37,6 +93,8 @@ const securityHeaders = {
  * @property {string} [apiPrefix="/api"] URL prefix handled by `api`.
  * @property {Route} [notFound] Optional 404 route.
  * @property {string} [assetsBinding="ASSETS"] Cloudflare assets binding name.
+ * @property {boolean} [fragmentManifest=true] Whether to inject a declarative
+ * fragment manifest with Cloudflare `HTMLRewriter` when available.
  */
 
 /**
@@ -58,6 +116,7 @@ export const createCloudflareHandler = ({
   apiPrefix = "/api",
   notFound = notFoundRoute,
   assetsBinding = "ASSETS",
+  fragmentManifest = true,
 }) => {
   const manifest = createRoutes(routes);
 
@@ -83,13 +142,17 @@ export const createCloudflareHandler = ({
         ? renderFragment(rendered)
         : shell(rendered);
 
-      return new Response(body, {
+      const response = new Response(body, {
         headers: {
           "Content-Type": "text/html; charset=utf-8",
           ...securityHeaders,
         },
         status,
       });
+
+      return fragmentManifest && !requestWantsFragment(request)
+        ? appendFragmentManifest(response)
+        : response;
     },
   };
 };
