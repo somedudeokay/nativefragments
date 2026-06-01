@@ -18,7 +18,14 @@ installFragmentNavigation({
 });
 ```
 
-The router intercepts same-origin clicks, fetches the route with `x-fragment: true`, replaces the slot, updates metadata, pushes history, and keeps external links as normal browser navigation.
+The router intercepts same-origin app-route clicks, fetches the route with `x-fragment: true`, replaces the slot, updates metadata, pushes history, and keeps external links as normal browser navigation.
+
+Document-like URLs such as `/agents.txt`, `/robots.txt`, `/feed.xml`, and `/guide.pdf` also keep normal browser navigation. Add `data-nativefragments-reload` or `data-fragment-navigation="false"` to any same-origin link that should opt out of fragment navigation:
+
+```html
+<a href="/agents.txt" data-nativefragments-reload>Get started for agents</a>
+<a href="/account/export" data-fragment-navigation="false">Export data</a>
+```
 
 ## Nested Fragments
 

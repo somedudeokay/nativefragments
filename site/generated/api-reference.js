@@ -60,7 +60,7 @@ export const apiSections = [
       },
       {
         "name": "declarativeShadow",
-        "description": "Render a declarative Shadow DOM template for server-rendered components. Put this as the first child of a custom element to avoid a flash of unstyled light DOM before the component module loads. Pair it with the browser {@link shadow} helper, which preserves an existing declarative shadow root on first upgrade.",
+        "description": "Render a declarative Shadow DOM template for server-rendered components. Put this as the first child of a custom element to avoid a flash of unstyled light DOM before the component module loads. Pair it with the browser {@link shadow} helper, which preserves an existing declarative shadow root on first upgrade and materializes declarative shadow templates inserted during fragment navigation.",
         "params": [
           "{DeclarativeShadowOptions} [options={}] Shadow template options."
         ],
@@ -100,7 +100,8 @@ export const apiSections = [
         "description": "",
         "properties": [
           "{Request} request Original request.",
-          "{URL} url Parsed request URL."
+          "{URL} url Parsed request URL.",
+          "{Record<string, string>} params Path parameters captured from a route pattern like `/posts/:slug`."
         ],
         "type": "object"
       },
@@ -110,7 +111,8 @@ export const apiSections = [
         "properties": [
           "{string} [title] Document title.",
           "{string} [description] Meta description.",
-          "{string} [canonical] Canonical URL."
+          "{string} [canonical] Canonical URL.",
+          "{{ hreflang: string, href: string }[]} [alternates] Alternate language URLs for `<link rel=\"alternate\" hreflang=\"...\">`."
         ],
         "type": "object"
       },
@@ -145,7 +147,7 @@ export const apiSections = [
         "name": "Route",
         "description": "",
         "properties": [],
-        "type": "RouteDefinition & { path: string }"
+        "type": "RouteDefinition & { path: string, params?: Record<string, string> }"
       }
     ],
     "symbols": [
@@ -164,7 +166,7 @@ export const apiSections = [
         "name": "route",
         "description": "Create a normalized route definition.",
         "params": [
-          "{string} path URL path for the route.",
+          "{string} path URL path for the route. Use `:name` segments for path params, for example `/posts/:slug`.",
           "{RouteDefinition} definition Route metadata and render functions."
         ],
         "properties": [],
@@ -173,7 +175,7 @@ export const apiSections = [
       },
       {
         "name": "createRoutes",
-        "description": "Create a route manifest that can match normalized paths.",
+        "description": "Create a route manifest that can match normalized paths. Exact static routes win first, then parameterized routes are matched in declaration order.",
         "params": [
           "{Route[]} routes Route definitions."
         ],
@@ -286,12 +288,12 @@ export const apiSections = [
           "{{ slot?: string, ttl?: number, signal?: AbortSignal }} [options={}] Prefetch options."
         ],
         "properties": [],
-        "returns": "{Promise<string | null>} Prefetched fragment HTML, or `null` for skipped cross-origin URLs.",
+        "returns": "{Promise<string | null>} Prefetched fragment HTML, or `null` for skipped cross-origin URLs and document-like URLs such as `/agents.txt`.",
         "type": ""
       },
       {
         "name": "installFragmentNavigation",
-        "description": "Install same-origin fragment navigation. Clicked links are fetched with `x-fragment: true`, the configured content slot is replaced, document metadata is updated, and history state is pushed. Links with `data-fragment-slot=\"name\"` replace only the matching `[data-fragment-slot=\"name\"]` container and send `x-fragment-slot: name`. External links and modified clicks keep normal browser behavior.",
+        "description": "Install same-origin fragment navigation. Clicked links are fetched with `x-fragment: true`, the configured content slot is replaced, document metadata is updated, and history state is pushed. Links with `data-fragment-slot=\"name\"` replace only the matching `[data-fragment-slot=\"name\"]` container and send `x-fragment-slot: name`. External links, document-like URLs such as `/agents.txt`, modified clicks, and links with `data-nativefragments-reload` or `data-fragment-navigation=\"false\"` keep normal browser behavior.",
         "params": [
           "{FragmentNavigationOptions} [options={}] Navigation options."
         ],
@@ -330,7 +332,7 @@ export const apiSections = [
       },
       {
         "name": "shadow",
-        "description": "Attach or reuse an open shadow root, adopt stylesheets, and set its HTML. If the element already has a declarative shadow root from server HTML, the first call preserves that DOM by default. Later calls update the HTML as usual, which keeps stateful components simple while avoiding refresh FOUC.",
+        "description": "Attach or reuse an open shadow root, adopt stylesheets, and set its HTML. If the element already has declarative shadow DOM from server HTML, the first call preserves that DOM by default. Fragment navigation inserts HTML with `template.innerHTML`, so declarative shadow templates are materialized manually before hydration to keep server-rendered components visible.",
         "params": [
           "{HTMLElement} element Custom element receiving the shadow root.",
           "{ShadowOptions} [options={}] Shadow render options."

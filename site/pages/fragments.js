@@ -23,6 +23,15 @@ installFragmentNavigation({
         history, real HTML. JavaScript upgrades navigation without owning the
         whole page.
       </p>
+      <p>
+        External links, document-like URLs such as <code>/agents.txt</code>,
+        modified clicks, and links marked with
+        <code>data-nativefragments-reload</code> or
+        <code>data-fragment-navigation="false"</code> keep normal browser
+        navigation.
+      </p>
+      ${code(`<a href="/agents.txt" data-nativefragments-reload>Get started for agents</a>
+<a href="/account/export" data-fragment-navigation="false">Export data</a>`)}
       <h2>Nested fragments</h2>
       <p>
         Add <code>data-fragment-slot</code> to a link and target container when
