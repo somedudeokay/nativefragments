@@ -20,6 +20,16 @@ building fast, maintainable, AI-friendly web applications.
 - Cloudflare Workers first, with more adapters later.
 - Stable, boring modules that agents can edit safely.
 
+## Rendering Preference
+
+- Server-render any initially visible custom element with
+  `declarativeShadow()` and hydrate it with `shadow()` in the browser.
+- Treat empty above-the-fold custom element shells as a FOUC and layout-shift
+  bug, not as something to hide with reserved height.
+- Share component HTML and CSS between server and browser modules when that is
+  the cleanest way to keep declarative Shadow DOM output identical to hydrated
+  client output.
+
 ## Structure
 
 - `src/server`: HTML helpers, route helpers, metadata, and rendering.

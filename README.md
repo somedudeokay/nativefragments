@@ -149,6 +149,11 @@ html`<app-card>${declarativeShadow({
 The browser `shadow()` helper preserves that server-rendered shadow root on the
 first upgrade, then updates normally on later renders.
 
+Do not ship an empty above-the-fold custom element and fill it only after the
+browser imports the component module. That is a layout-shift bug. For non-trivial
+components, put the shadow HTML and CSS in a shared template module and import it
+from both the server renderer and browser component.
+
 ## Agent Skill
 
 Agents can read the shipped framework conventions from:

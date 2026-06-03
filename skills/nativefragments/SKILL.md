@@ -19,8 +19,10 @@ Use this skill when creating or editing a Native Fragments app.
 - Use Web Workers for expensive client-side work like search, filtering,
   parsing, and background preparation.
 - Put component styling inside Shadow DOM.
-- Avoid refresh FOUC by server-rendering important custom elements with
-  declarative Shadow DOM.
+- Server-render initially visible custom elements with declarative Shadow DOM,
+  then hydrate them with `shadow()` on the client.
+- Treat an empty above-the-fold custom element that is filled only after module
+  load as a FOUC and layout-shift bug.
 - Make files obvious for agents: one route, one renderer, one component file.
 
 ## Default Structure
@@ -131,7 +133,17 @@ large `ArrayBuffer` payloads that should move without copying.
 
 For any component visible during initial render, include a declarative shadow
 template in the server HTML. This prevents the browser from painting unstyled
-light DOM before the component module upgrades.
+light DOM before the component module upgrades and prevents the component from
+appearing as an empty box until JavaScript loads.
+
+Prefer a shared template module for non-trivial components:
+
+- Export the component's shadow CSS as a string.
+- Export the component's shadow HTML as a string or `html` value.
+- Import that module from both the server renderer and the browser custom
+  element.
+- Keep the server-rendered declarative shadow output identical to the hydrated
+  client output unless there is a deliberate no-JavaScript fallback.
 
 Server renderer:
 
