@@ -36,6 +36,7 @@ export const shell = ({ body, meta }) => {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>${meta.title}</title>
     <meta name="description" content="${meta.description}" />
+    <meta name="google-site-verification" content="JjtSSqZr2dhqfTA7wWejjridMsTwUuGDTKPBdIRdBl4" />
     <link rel="canonical" href="${meta.canonical}" />
     <script>
       document.documentElement.classList.add("js");
