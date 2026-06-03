@@ -16,9 +16,9 @@ export const criticalStyles = `
     --shadow-md: 0 10px 30px -12px rgba(20, 20, 20, 0.18);
     --shadow-lg: 0 30px 60px -20px rgba(20, 20, 20, 0.25);
     --ease: cubic-bezier(0.16, 1, 0.3, 1);
-    --display: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    --sans: "Geist", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --display: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     --accent: var(--green);
   }
 
@@ -87,7 +87,7 @@ export const criticalStyles = `
   }
 
   .hero {
-    align-items: center;
+    align-items: start;
     display: grid;
     gap: clamp(2rem, 5vw, 4.5rem);
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
@@ -96,32 +96,6 @@ export const criticalStyles = `
     padding-block: clamp(3.5rem, 7vw, 6rem);
     padding-inline: max(var(--pad), calc((100% - var(--container)) / 2));
     position: relative;
-  }
-
-  .hero::before {
-    background:
-      radial-gradient(40% 55% at 12% 18%, color-mix(in srgb, var(--green) 26%, transparent), transparent 70%),
-      radial-gradient(38% 50% at 88% 8%, color-mix(in srgb, var(--orange) 18%, transparent), transparent 72%);
-    content: "";
-    filter: blur(8px);
-    inset: -10% -5% auto -5%;
-    height: 70%;
-    pointer-events: none;
-    position: absolute;
-    z-index: -2;
-  }
-
-  .hero::after {
-    background-image: radial-gradient(color-mix(in srgb, var(--ink) 14%, transparent) 1px, transparent 1.4px);
-    background-size: 22px 22px;
-    content: "";
-    inset: 0;
-    -webkit-mask-image: radial-gradient(70% 60% at 30% 30%, #000, transparent 75%);
-    mask-image: radial-gradient(70% 60% at 30% 30%, #000, transparent 75%);
-    opacity: 0.5;
-    pointer-events: none;
-    position: absolute;
-    z-index: -1;
   }
 
   .hero-copy {
@@ -203,6 +177,21 @@ export const criticalStyles = `
     background: var(--surface);
   }
 
+  .agent-action {
+    padding-left: 0.95rem;
+  }
+
+  .agent-glyph {
+    color: var(--green);
+    flex: none;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    font-weight: 600;
+    inline-size: 1.15rem;
+    line-height: 1;
+    text-align: center;
+  }
+
   .cta-arrow {
     align-items: center;
     background: color-mix(in srgb, var(--green) 90%, transparent);
@@ -219,4 +208,5 @@ export const criticalStyles = `
       grid-template-columns: 1fr;
     }
   }
+
 `;

@@ -1,4 +1,8 @@
-import { html } from "@nativefragments/core/server";
+import { declarativeShadow, html } from "@nativefragments/core/server";
+import {
+  runtimeMapHtml,
+  runtimeMapStyles,
+} from "../../public/app/components/runtime-map-template.js";
 import { codeBlock } from "../code.js";
 
 const installExample = `npm create @nativefragments/app@latest my-app
@@ -87,7 +91,12 @@ export const homePage = () => html`<section class="hero">
       <a class="secondary-action" href="https://docs.nativefragments.org/reference">API reference</a>
     </div>
   </div>
-  <nf-runtime-map></nf-runtime-map>
+  <nf-runtime-map>
+    ${declarativeShadow({
+      styles: [runtimeMapStyles],
+      html: runtimeMapHtml,
+    })}
+  </nf-runtime-map>
 </section>
 
 <section class="proof-strip" aria-label="Framework goals">

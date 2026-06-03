@@ -2,9 +2,6 @@ import { html, raw } from "@nativefragments/core/server";
 import { criticalStyles } from "./critical-styles.js";
 import { siteHeader } from "./header.js";
 
-const fontHref =
-  "https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@500;600;700&display=swap";
-
 const headLinks = ({ meta }) => html`
   <title>${meta.title}</title>
   <meta name="description" content="${meta.description}" />
@@ -15,15 +12,6 @@ const headLinks = ({ meta }) => html`
     document.documentElement.classList.add("js");
   </script>
   <style>${raw(criticalStyles)}</style>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    rel="preload"
-    href="${fontHref}"
-    as="style"
-    onload="this.onload=null;this.rel='stylesheet'"
-  />
-  <noscript><link rel="stylesheet" href="${fontHref}" /></noscript>
   <link
     rel="preload"
     href="/app/styles.css"
