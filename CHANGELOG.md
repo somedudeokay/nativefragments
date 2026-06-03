@@ -1,5 +1,11 @@
 # @nativefragments/core
 
+## 0.4.2
+
+### Patch Changes
+
+- 4d12658: Document declarative Shadow DOM server rendering as the preferred pattern for initially visible custom elements.
+
 ## 0.4.1
 
 ### Patch Changes
