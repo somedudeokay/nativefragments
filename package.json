@@ -5,9 +5,12 @@
   "type": "module",
   "scripts": {
     "generate:api": "node scripts/generate-api-reference.js",
-    "dev": "npm run generate:api && npx wrangler dev",
-    "deploy": "npm run generate:api && npx wrangler deploy",
-    "check": "npm run generate:api && node --check worker.js && find site public/app public/nativefragments scripts -name '*.js' -print0 | xargs -0 -n1 node --check"
+    "generate:md": "node scripts/generate-md-mirrors.js",
+    "generate:search": "node scripts/generate-search-index.js",
+    "generate": "npm run generate:api && npm run generate:md && npm run generate:search",
+    "dev": "npm run generate && npx wrangler dev",
+    "deploy": "npm run generate && npx wrangler deploy",
+    "check": "npm run generate && node --check worker.js && find site public/app public/nativefragments scripts -name '*.js' -print0 | xargs -0 -n1 node --check"
   },
   "dependencies": {
     "@nativefragments/core": "^0.4.1"

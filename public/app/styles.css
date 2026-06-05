@@ -138,6 +138,47 @@ a {
   font-weight: 600;
 }
 
+/* Search trigger */
+.search-trigger {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  gap: 0.5rem;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 0.6rem;
+  transition: border-color 0.2s var(--ease);
+  width: 100%;
+}
+
+.search-trigger:hover {
+  border-color: var(--line-strong);
+}
+
+.search-trigger-key {
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  flex: none;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  padding: 0.12rem 0.32rem;
+}
+
+@media (max-width: 860px) {
+  .search-trigger {
+    margin-bottom: 0;
+    width: auto;
+  }
+}
+
 /* Document */
 .doc {
   max-width: 880px;
@@ -410,6 +451,100 @@ li code {
 
 .api-symbol li {
   font-size: 0.95rem;
+}
+
+.api-symbol h3 {
+  scroll-margin-top: 84px;
+}
+
+.api-sig {
+  background: var(--code);
+  border-radius: 10px;
+  color: var(--paper);
+  font-size: 0.82rem;
+  margin: 0.85rem 0 0;
+  overflow-x: auto;
+  padding: 0.7rem 0.95rem;
+}
+
+.api-sig code {
+  color: #7ee787;
+  white-space: pre;
+}
+
+.api-meta {
+  font-size: 0.95rem;
+}
+
+.api-meta span {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  margin-right: 0.5rem;
+  text-transform: uppercase;
+}
+
+.api-params {
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin: 0.95rem 0 0;
+  width: 100%;
+}
+
+.api-params th {
+  border-bottom: 1px solid var(--line-strong);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  padding: 0.45rem 0.7rem 0.45rem 0;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.api-params td {
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.9rem;
+  padding: 0.55rem 0.7rem 0.55rem 0;
+  vertical-align: top;
+}
+
+.api-params td:first-child,
+.api-params th:first-child {
+  white-space: nowrap;
+}
+
+.api-params .req {
+  color: color-mix(in srgb, var(--orange) 80%, var(--ink));
+  font-family: var(--mono);
+  font-size: 0.72rem;
+}
+
+.api-seealso {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.api-seealso span {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.api-seealso a {
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 /* Responsive */
