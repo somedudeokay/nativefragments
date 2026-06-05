@@ -6,416 +6,552 @@
 
 Module: `@nativefragments/core/server`
 
-Source: `src/server/html.js`
-
 ### RawHtml
 
-Type: `{ [RAW]: true, value: string }`
+`{ [RAW]: true, value: string }`
 
 
 
 ### DeclarativeShadowOptions
 
-Type: `object`
+`object`
 
 
 
-Properties:
+**Parameters**
 
-- `{string[]} [styles=[]] CSS text rendered into `<style>` tags inside the declarative shadow root.`
-- `{string} [html=""] Trusted shadow root HTML. Build dynamic HTML with {@link html} before passing it here.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `styles` | `string[]` | `[]` | CSS text rendered into `<style>` tags inside the declarative shadow root. |
+| `html` | `string` | `""` | Trusted shadow root HTML. Build dynamic HTML with [`html`](#html) before passing it here. |
 
 ### HtmlAttrs
 
-Type: `Record<string, string | number | boolean | null | undefined>`
+`Record<string, string | number | boolean | null | undefined>`
 
 
 
 ### raw
 
-Mark a value as trusted HTML. Use this only for framework-generated markup or content that has already been validated. Ordinary interpolated values in {@link html} are escaped by default.
+```js
+raw(value?) → RawHtml
+```
 
-Parameters:
+Mark a value as trusted HTML. Use this only for framework-generated markup or content that has already been validated. Ordinary interpolated values in [`html`](#html) are escaped by default.
 
-- `{unknown} [value=""] HTML to insert without escaping.`
+**Parameters**
 
-Returns: `{RawHtml} Trusted HTML wrapper.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `unknown` | `""` | HTML to insert without escaping. |
+
+**Returns** — `RawHtml`. Trusted HTML wrapper.
 
 ### escapeHtml
 
+```js
+escapeHtml(value) → string
+```
+
 Escape a value for safe insertion into HTML text or attribute context.
 
-Parameters:
+**Parameters**
 
-- `{unknown} value Value to escape.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `unknown` | required | Value to escape. |
 
-Returns: `{string} Escaped HTML string.`
+**Returns** — `string`. Escaped HTML string.
 
 ### html
 
-Server-side HTML template tag with escaped interpolation by default. Arrays are flattened, `null`, `undefined`, and `false` become empty strings, and values returned by {@link raw} are inserted as trusted HTML.
+```js
+html(strings, ...values) → string
+```
 
-Parameters:
+Server-side HTML template tag with escaped interpolation by default. Arrays are flattened, `null`, `undefined`, and `false` become empty strings, and values returned by [`raw`](#raw) are inserted as trusted HTML.
 
-- `{TemplateStringsArray} strings Template literal string parts.`
-- `{...unknown} values Interpolated values.`
+**Parameters**
 
-Returns: `{string} Rendered HTML.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `strings` | `TemplateStringsArray` | required | Template literal string parts. |
+| `values` | `...unknown` | required | Interpolated values. |
+
+**Returns** — `string`. Rendered HTML.
 
 ### declarativeShadow
 
-Render a declarative Shadow DOM template for server-rendered components. Put this as the first child of a custom element to avoid a flash of unstyled light DOM before the component module loads. Pair it with the browser {@link shadow} helper, which preserves an existing declarative shadow root on first upgrade and materializes declarative shadow templates inserted during fragment navigation.
+```js
+declarativeShadow(options?) → RawHtml
+```
 
-Parameters:
+Render a declarative Shadow DOM template for server-rendered components. Put this as the first child of a custom element to avoid a flash of unstyled light DOM before the component module loads. Pair it with the browser [`shadow`](#shadow) helper, which preserves an existing declarative shadow root on first upgrade and materializes declarative shadow templates inserted during fragment navigation.
 
-- `{DeclarativeShadowOptions} [options={}] Shadow template options.`
+**Parameters**
 
-Returns: `{RawHtml} Trusted declarative shadow template.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `options` | `DeclarativeShadowOptions` | `{}` | Shadow template options. |
+
+**Returns** — `RawHtml`. Trusted declarative shadow template.
 
 ### jsonScript
 
+```js
+jsonScript(value) → string
+```
+
 Serialize JSON for safe embedding inside an inline script tag. `<` characters are escaped so embedded JSON cannot accidentally terminate the script element.
 
-Parameters:
+**Parameters**
 
-- `{unknown} value Value to serialize.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `unknown` | required | Value to serialize. |
 
-Returns: `{string} JSON string safe for script text.`
+**Returns** — `string`. JSON string safe for script text.
 
 ### attrs
 
+```js
+attrs(attributes?) → RawHtml
+```
+
 Build escaped HTML attributes from an object. `false`, `null`, and `undefined` values are omitted. `true` values render as boolean attributes.
 
-Parameters:
+**Parameters**
 
-- `{HtmlAttrs} [attributes={}] Attribute map.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `attributes` | `HtmlAttrs` | `{}` | Attribute map. |
 
-Returns: `{RawHtml} Trusted HTML attribute string.`
+**Returns** — `RawHtml`. Trusted HTML attribute string.
 
 ## Server Routing
 
 Module: `@nativefragments/core/server`
 
-Source: `src/server/router.js`
-
 ### RouteContext
 
-Type: `object`
+`object`
 
 
 
-Properties:
+**Parameters**
 
-- `{Request} request Original request.`
-- `{URL} url Parsed request URL.`
-- `{Record<string, string>} params Path parameters captured from a route pattern like `/posts/:slug`.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `request` | `Request` | required | Original request. |
+| `url` | `URL` | required | Parsed request URL. |
+| `params` | `Record<string, string>` | required | Path parameters captured from a route pattern like `/posts/:slug`. |
 
 ### RouteMeta
 
-Type: `object`
+`object`
 
 
 
-Properties:
+**Parameters**
 
-- `{string} [title] Document title.`
-- `{string} [description] Meta description.`
-- `{string} [canonical] Canonical URL.`
-- `{{ hreflang: string, href: string }[]} [alternates] Alternate language URLs for `<link rel="alternate" hreflang="...">`.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `string` | — | Document title. |
+| `description` | `string` | — | Meta description. |
+| `canonical` | `string` | — | Canonical URL. |
+| `alternates` | `{ hreflang: string, href: string }[]` | — | Alternate language URLs for `<link rel="alternate" hreflang="...">`. |
 
 ### FragmentRenderer
 
-Type: `(context: RouteContext) => string | Promise<string>`
+`(context: RouteContext) => string | Promise<string>`
 
 
 
 ### FragmentDefinition
 
-Type: `object`
+`object`
 
 
 
-Properties:
+**Parameters**
 
-- `{string} name Fragment slot name.`
-- `{FragmentRenderer} render Fragment renderer.`
-- `{(attributes?: import("./html.js").HtmlAttrs) => import("./html.js").RawHtml} attrs Attributes for links and target containers using this fragment slot.`
-- `{(mode?: "intent" | "visible" | "load" | "none", attributes?: import("./html.js").HtmlAttrs) => import("./html.js").RawHtml} prefetchAttrs Attributes for links using this fragment slot with a prefetch mode.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | `string` | required | Fragment slot name. |
+| `render` | `FragmentRenderer` | required | Fragment renderer. |
+| `attrs` | `(attributes?: import("./html.js").HtmlAttrs) => import("./html.js").RawHtml` | required | Attributes for links and target containers using this fragment slot. |
+| `prefetchAttrs` | `(mode?: "intent" | "visible" | "load" | "none", attributes?: import("./html.js").HtmlAttrs) => import("./html.js").RawHtml` | required | Attributes for links using this fragment slot with a prefetch mode. |
 
 ### RouteDefinition
 
-Type: `object`
+`object`
 
 
 
-Properties:
+**Parameters**
 
-- `{(context: RouteContext) => RouteMeta | Promise<RouteMeta>} [meta] Function that returns metadata for the route.`
-- `{(context: RouteContext) => string | Promise<string>} render Function that renders route body HTML.`
-- `{Record<string, FragmentRenderer> | FragmentDefinition[]} [fragments] Named fragment renderers used by nested fragment slots.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `meta` | `(context: RouteContext) => RouteMeta | Promise<RouteMeta>` | — | Function that returns metadata for the route. |
+| `render` | `(context: RouteContext) => string | Promise<string>` | required | Function that renders route body HTML. |
+| `fragments` | `Record<string, FragmentRenderer> | FragmentDefinition[]` | — | Named fragment renderers used by nested fragment slots. |
 
 ### Route
 
-Type: `RouteDefinition & { path: string, params?: Record<string, string> }`
+`RouteDefinition & { path: string, params?: Record<string, string> }`
 
 
 
 ### fragment
 
+```js
+fragment(name, render) → FragmentDefinition
+```
+
 Create a named fragment definition. Use this when a route has a nested region with its own navigation. The returned object can be registered in `route(..., { fragments: [item] })` and its attributes can be reused on links and target containers.
 
-Parameters:
+**Parameters**
 
-- `{string} name Fragment slot name.`
-- `{FragmentRenderer} render Fragment renderer.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | `string` | required | Fragment slot name. |
+| `render` | `FragmentRenderer` | required | Fragment renderer. |
 
-Returns: `{FragmentDefinition} Fragment definition.`
+**Returns** — `FragmentDefinition`. Fragment definition.
 
 ### route
 
+```js
+route(path, definition) → Route
+```
+
 Create a normalized route definition.
 
-Parameters:
+**Parameters**
 
-- `{string} path URL path for the route. Use `:name` segments for path params, for example `/posts/:slug`.`
-- `{RouteDefinition} definition Route metadata and render functions.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `path` | `string` | required | URL path for the route. Use `:name` segments for path params, for example `/posts/:slug`. |
+| `definition` | `RouteDefinition` | required | Route metadata and render functions. |
 
-Returns: `{Route} Normalized route.`
+**Returns** — `Route`. Normalized route.
 
 ### createRoutes
 
+```js
+createRoutes(routes) → { all: Route[], match(pathname: string): Route | null }
+```
+
 Create a route manifest that can match normalized paths. Exact static routes win first, then parameterized routes are matched in declaration order.
 
-Parameters:
+**Parameters**
 
-- `{Route[]} routes Route definitions.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `routes` | `Route[]` | required | Route definitions. |
 
-Returns: `{{ all: Route[], match(pathname: string): Route | null }} Route manifest.`
+**Returns** — `{ all: Route[], match(pathname: string): Route | null }`. Route manifest.
 
 ### fragmentMeta
 
+```js
+fragmentMeta(meta) → string
+```
+
 Render fragment metadata for the browser fragment router.
 
-Parameters:
+**Parameters**
 
-- `{RouteMeta} meta Metadata to embed in the fragment response.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `meta` | `RouteMeta` | required | Metadata to embed in the fragment response. |
 
-Returns: `{string} Script tag containing serialized metadata.`
+**Returns** — `string`. Script tag containing serialized metadata.
 
 ### renderRoute
 
+```js
+renderRoute(options) → Promise<{ body: string, meta: Required<RouteMeta> }>
+```
+
 Render a matched route and normalize metadata defaults.
 
-Parameters:
+**Parameters**
 
-- `{{ match: Route, request: Request, slot?: string | null }} options Render options. When `slot` matches `RouteDefinition.fragments`, only that named fragment is rendered.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `options` | `{ match: Route, request: Request, slot?: string | null }` | required | Render options. When `slot` matches `RouteDefinition.fragments`, only that named fragment is rendered. |
 
-Returns: `{Promise<{ body: string, meta: Required<RouteMeta> }>} Rendered route.`
+**Returns** — `Promise<{ body: string, meta: Required<RouteMeta> }>`. Rendered route.
 
 ### renderFragment
 
+```js
+renderFragment(rendered) → string
+```
+
 Render a fragment response body with embedded metadata.
 
-Parameters:
+**Parameters**
 
-- `{{ body: string, meta: RouteMeta }} rendered Rendered route body and metadata.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `rendered` | `{ body: string, meta: RouteMeta }` | required | Rendered route body and metadata. |
 
-Returns: `{string} Fragment HTML.`
+**Returns** — `string`. Fragment HTML.
 
 ### notFoundRoute
+
+```js
+notFoundRoute
+```
 
 Default 404 route used by adapters when a route is not matched.
 
 Type: `{Route}`
 
-
-
 ## Cloudflare Adapter
 
 Module: `@nativefragments/core/cloudflare`
 
-Source: `src/cloudflare/index.js`
-
 ### Route
 
-Type: `import("../server/router.js").Route`
+`import("../server/router.js").Route`
 
 
 
 ### CloudflareHandlerOptions
 
-Type: `object`
+`object`
 
 
 
-Properties:
+**Parameters**
 
-- `{Route[]} routes App route definitions.`
-- `{(rendered: { body: string, meta: object }) => string} shell Function that wraps a rendered route body in a full HTML document.`
-- `{{ fetch(request: Request, env: Record<string, unknown>, context?: unknown): Promise<Response> | Response }} [api] Optional Web Standards API router. Hono apps work here because they expose a compatible `fetch` method.`
-- `{string} [apiPrefix="/api"] URL prefix handled by `api`.`
-- `{Route} [notFound] Optional 404 route.`
-- `{string} [assetsBinding="ASSETS"] Cloudflare assets binding name.`
-- `{boolean} [fragmentManifest=true] Whether to inject a declarative fragment manifest with Cloudflare `HTMLRewriter` when available.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `routes` | `Route[]` | required | App route definitions. |
+| `shell` | `(rendered: { body: string, meta: object }) => string` | required | Function that wraps a rendered route body in a full HTML document. |
+| `api` | `{ fetch(request: Request, env: Record<string, unknown>, context?: unknown): Promise<Response> | Response }` | — | Optional Web Standards API router. Hono apps work here because they expose a compatible `fetch` method. |
+| `apiPrefix` | `string` | `"/api"` | URL prefix handled by `api`. |
+| `notFound` | `Route` | — | Optional 404 route. |
+| `assetsBinding` | `string` | `"ASSETS"` | Cloudflare assets binding name. |
+| `fragmentManifest` | `boolean` | `true` | Whether to inject a declarative fragment manifest with Cloudflare `HTMLRewriter` when available. |
 
 ### createCloudflareHandler
 
+```js
+createCloudflareHandler(options) → { fetch(request: Request, env: Record<string, unknown>): Promise<Response> }
+```
+
 Create a Cloudflare Worker module for a Native Fragments app. Static assets are served from the configured assets binding. Normal document requests render the app shell. Requests with `x-fragment: true` return only the route body plus fragment metadata. Requests under `apiPrefix` are delegated to the optional API router before app route matching.
 
-Parameters:
+**Parameters**
 
-- `{CloudflareHandlerOptions} options Worker adapter options.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `options` | `CloudflareHandlerOptions` | required | Worker adapter options. |
 
-Returns: `{{ fetch(request: Request, env: Record<string, unknown>): Promise<Response> }} Cloudflare Worker module.`
+**Returns** — `{ fetch(request: Request, env: Record<string, unknown>): Promise<Response> }`. Cloudflare Worker module.
 
 ## Browser Router
 
 Module: `/nativefragments/router.js`
 
-Source: `public/nativefragments/router.js`
-
 ### FragmentNavigationOptions
 
-Type: `object`
+`object`
 
 
 
-Properties:
+**Parameters**
 
-- `{string} [slot="#content-slot"] Selector for the element replaced by fragment responses.`
-- `{number} [ttl=30000] Fragment cache time in milliseconds.`
-- `{boolean | "none" | "intent" | "visible" | "load"} [prefetch="intent"] Default fragment prefetch behavior. Links can override this with `data-fragment-prefetch="intent|visible|load|none"`.`
-- `{(event: { meta: object | null, url: URL, slot: string }) => void} [afterNavigate] Callback fired after a successful client-side navigation.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `slot` | `string` | `"#content-slot"` | Selector for the element replaced by fragment responses. |
+| `ttl` | `number` | `30000` | Fragment cache time in milliseconds. |
+| `prefetch` | `boolean | "none" | "intent" | "visible" | "load"` | `"intent"` | Default fragment prefetch behavior. Links can override this with `data-fragment-prefetch="intent|visible|load|none"`. |
+| `afterNavigate` | `(event: { meta: object | null, url: URL, slot: string }) => void` | — | Callback fired after a successful client-side navigation. |
 
 ### prefetchFragment
 
+```js
+prefetchFragment(href, options?) → Promise<string | null>
+```
+
 Prefetch a same-origin fragment into the shared fragment cache.
 
-Parameters:
+**Parameters**
 
-- `{string | URL} href URL to prefetch.`
-- `{{ slot?: string, ttl?: number, signal?: AbortSignal }} [options={}] Prefetch options.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `href` | `string | URL` | required | URL to prefetch. |
+| `options` | `{ slot?: string, ttl?: number, signal?: AbortSignal }` | `{}` | Prefetch options. |
 
-Returns: `{Promise<string | null>} Prefetched fragment HTML, or `null` for skipped cross-origin URLs and document-like URLs such as `/agents.txt`.`
+**Returns** — `Promise<string | null>`. Prefetched fragment HTML, or `null` for skipped cross-origin URLs and document-like URLs such as `/agents.txt`.
 
 ### installFragmentNavigation
 
+```js
+installFragmentNavigation(options?) → ((href: string, pushState?: boolean, nextSlot?: string) => Promise<void>) | undefined
+```
+
 Install same-origin fragment navigation. Clicked links are fetched with `x-fragment: true`, the configured content slot is replaced, document metadata is updated, and history state is pushed. Links with `data-fragment-slot="name"` replace only the matching `[data-fragment-slot="name"]` container and send `x-fragment-slot: name`. External links, document-like URLs such as `/agents.txt`, modified clicks, and links with `data-nativefragments-reload` or `data-fragment-navigation="false"` keep normal browser behavior.
 
-Parameters:
+**Parameters**
 
-- `{FragmentNavigationOptions} [options={}] Navigation options.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `options` | `FragmentNavigationOptions` | `{}` | Navigation options. |
 
-Returns: `{((href: string, pushState?: boolean, nextSlot?: string) => Promise<void>) | undefined} Navigate function, or `undefined` if the slot does not exist.`
+**Returns** — `((href: string, pushState?: boolean, nextSlot?: string) => Promise<void>) | undefined`. Navigate function, or `undefined` if the slot does not exist.
 
 ## Shadow DOM Components
 
 Module: `/nativefragments/component.js`
 
-Source: `public/nativefragments/component.js`
-
 ### ShadowOptions
 
-Type: `object`
+`object`
 
 
 
-Properties:
+**Parameters**
 
-- `{CSSStyleSheet[]} [styles=[]] Constructable stylesheets to adopt.`
-- `{string} [html=""] Shadow root HTML.`
-- `{boolean} [hydrate=true] Preserve an existing declarative shadow root on the first render so server-rendered components do not flash.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `styles` | `CSSStyleSheet[]` | `[]` | Constructable stylesheets to adopt. |
+| `html` | `string` | `""` | Shadow root HTML. |
+| `hydrate` | `boolean` | `true` | Preserve an existing declarative shadow root on the first render so server-rendered components do not flash. |
 
 ### sheet
 
+```js
+sheet(cssText) → CSSStyleSheet
+```
+
 Create a constructable stylesheet for Shadow DOM components.
 
-Parameters:
+**Parameters**
 
-- `{string} cssText CSS source.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `cssText` | `string` | required | CSS source. |
 
-Returns: `{CSSStyleSheet} Constructable stylesheet.`
+**Returns** — `CSSStyleSheet`. Constructable stylesheet.
 
 ### shadow
 
+```js
+shadow(element, options?) → ShadowRoot
+```
+
 Attach or reuse an open shadow root, adopt stylesheets, and set its HTML. If the element already has declarative shadow DOM from server HTML, the first call preserves that DOM by default. Fragment navigation inserts HTML with `template.innerHTML`, so declarative shadow templates are materialized manually before hydration to keep server-rendered components visible.
 
-Parameters:
+**Parameters**
 
-- `{HTMLElement} element Custom element receiving the shadow root.`
-- `{ShadowOptions} [options={}] Shadow render options.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `element` | `HTMLElement` | required | Custom element receiving the shadow root. |
+| `options` | `ShadowOptions` | `{}` | Shadow render options. |
 
-Returns: `{ShadowRoot} The element's shadow root.`
+**Returns** — `ShadowRoot`. The element's shadow root.
 
 ## Web Workers
 
 Module: `/nativefragments/worker.js`
 
-Source: `public/nativefragments/worker.js`
-
 ### WorkerClientOptions
 
-Type: `object`
+`object`
 
 
 
-Properties:
+**Parameters**
 
-- `{number} [timeout=30000] Request timeout in milliseconds.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `timeout` | `number` | `30000` | Request timeout in milliseconds. |
 
 ### NativeWorkerClient
 
-Type: `object`
+`object`
 
 
 
-Properties:
+**Parameters**
 
-- `{(type: string, payload?: unknown, transfer?: Transferable[]) => Promise<unknown>} call Call a named worker handler.`
-- `{() => void} dispose Reject pending calls and remove listeners.`
-- `{Worker} worker The wrapped Worker instance.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `call` | `(type: string, payload?: unknown, transfer?: Transferable[]) => Promise<unknown>` | required | Call a named worker handler. |
+| `dispose` | `() => void` | required | Reject pending calls and remove listeners. |
+| `worker` | `Worker` | required | The wrapped Worker instance. |
 
 ### transferResult
 
+```js
+transferResult(payload, transfer?) → { payload: T, transfer: Transferable[], [transferMarker]: true }
+```
+
 Wrap a worker response with Transferable objects.
 
-Parameters:
+**Parameters**
 
-- `{T} payload Response payload.`
-- `{Transferable[]} [transfer=[]] Transferable objects to move.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `payload` | `T` | required | Response payload. |
+| `transfer` | `Transferable[]` | `[]` | Transferable objects to move. |
 
-Returns: `{{ payload: T, transfer: Transferable[], [transferMarker]: true }}`
+**Returns** — `{ payload: T, transfer: Transferable[], [transferMarker]: true }`. 
 
 ### workerClient
 
+```js
+workerClient(worker, options?) → NativeWorkerClient
+```
+
 Create a tiny RPC client for a dedicated Web Worker.
 
-Parameters:
+**Parameters**
 
-- `{Worker} worker Worker instance.`
-- `{WorkerClientOptions} [options={}] Client options.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `worker` | `Worker` | required | Worker instance. |
+| `options` | `WorkerClientOptions` | `{}` | Client options. |
 
-Returns: `{NativeWorkerClient} Worker client.`
+**Returns** — `NativeWorkerClient`. Worker client.
 
 ### createWorkerClient
 
+```js
+createWorkerClient(workerOrUrl, options?) → NativeWorkerClient
+```
+
 Create a module worker and wrap it with `workerClient`.
 
-Parameters:
+**Parameters**
 
-- `{string | URL | Worker} workerOrUrl Existing Worker or worker module URL.`
-- `{WorkerClientOptions & { workerOptions?: WorkerOptions }} [options={}] Client and Worker constructor options.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `workerOrUrl` | `string | URL | Worker` | required | Existing Worker or worker module URL. |
+| `options` | `WorkerClientOptions & { workerOptions?: WorkerOptions }` | `{}` | Client and Worker constructor options. |
 
-Returns: `{NativeWorkerClient} Worker client.`
+**Returns** — `NativeWorkerClient`. Worker client.
 
 ### exposeWorker
 
+```js
+exposeWorker(handlers, scope?) → () => void
+```
+
 Expose named handlers inside a dedicated Web Worker.
 
-Parameters:
+**Parameters**
 
-- `{Record<string, (payload: unknown, context: { event: MessageEvent, type: string }) => unknown | Promise<unknown>>} handlers Worker handlers keyed by message type.`
-- `{DedicatedWorkerGlobalScope} [scope=globalThis] Worker global scope.`
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `handlers` | `Record<string, (payload: unknown, context: { event: MessageEvent, type: string }) => unknown | Promise<unknown>>` | required | Worker handlers keyed by message type. |
+| `scope` | `DedicatedWorkerGlobalScope` | `globalThis` | Worker global scope. |
 
-Returns: `{() => void} Cleanup function.`
+**Returns** — `() => void`. Cleanup function.
 
