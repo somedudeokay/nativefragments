@@ -1,4 +1,5 @@
 import { route } from "@nativefragments/core/server";
+import { agentFriendlyPage } from "./pages/agent-friendly.js";
 import { apiRoutesPage } from "./pages/api-routes.js";
 import { aiPage } from "./pages/ai.js";
 import { componentsPage } from "./pages/components.js";
@@ -90,7 +91,7 @@ export const routes = [
         "Agent-Friendly Applications",
         "Why Native Fragments output is easy for agents to inspect and maintain.",
       ),
-    render: aiPage,
+    render: agentFriendlyPage,
   }),
   route("/reference", {
     meta: () =>

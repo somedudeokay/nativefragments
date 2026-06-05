@@ -1,64 +1,91 @@
 import { html } from "@nativefragments/core/server";
-import { code, docPage } from "./blocks.js";
+import { callout, code, docPage } from "./blocks.js";
 
 export const fragmentsPage = () =>
   docPage({
     eyebrow: "Concepts",
-    title: "Fragments keep the document alive.",
+    title: "Fragments",
     intro:
-      "Normal requests return a full HTML document. Client navigations request only the route body and metadata with the x-fragment header.",
+      "A normal request returns a full HTML document. A fragment request returns only a region of the page plus its metadata, so navigation swaps content without reloading the document.",
     body: html`
-      <h2>Install navigation</h2>
-      ${code(`import { installFragmentNavigation } from "/nativefragments/router.js";
+      <h2>The navigation model</h2>
+      <p>
+        A link click is fetched with an <code>x-fragment: true</code> header. The
+        server runs the <em>same</em> route, returns just the body and metadata,
+        and the browser swaps it into the content slot and updates the document
+        head. The same route still serves a full page for a direct visit.
+      </p>
+
+      <h2>Installing navigation</h2>
+      <p>
+        Call <a href="/reference#installFragmentNavigation"><code>installFragmentNavigation</code></a>
+        once after the shell loads. It upgrades real links into fragment swaps.
+      </p>
+      ${code(`// public/app/client.js
+import { installFragmentNavigation } from "/nativefragments/router.js";
 
 installFragmentNavigation({
-  prefetch: "intent",
+  prefetch: "intent", // warm the cache on hover/focus (the default)
   afterNavigate({ meta, url }) {
     console.log(meta.title, url.pathname);
-  }
+  },
 });`)}
-      <h2>Why it matters</h2>
-      <p>
-        The app keeps browser-native navigation semantics: real links, real
-        history, real HTML. JavaScript upgrades navigation without owning the
-        whole page.
-      </p>
+
+      <h2>Opting out</h2>
       <p>
         External links, document-like URLs such as <code>/agents.txt</code>,
-        modified clicks, and links marked with
+        modified clicks, and links marked
         <code>data-nativefragments-reload</code> or
-        <code>data-fragment-navigation="false"</code> keep normal browser
+        <code>data-fragment-navigation="false"</code> use normal browser
         navigation.
       </p>
-      ${code(`<a href="/agents.txt" data-nativefragments-reload>Get started for agents</a>
-<a href="/account/export" data-fragment-navigation="false">Export data</a>`)}
+      ${code(`<a href="/agents.txt" data-nativefragments-reload>Agent guide</a>
+<a href="/account/export" data-fragment-navigation="false">Export data</a>`, "js")}
+
       <h2>Nested fragments</h2>
       <p>
-        Add <code>data-fragment-slot</code> to a link and target container when
-        only one region should update.
+        To update one region instead of the whole body, define a named
+        <a href="/reference#fragment"><code>fragment</code></a> on the route and
+        mark the link and target with the same slot. The link sends
+        <code>x-fragment-slot</code>; only the matching container is replaced.
       </p>
-      ${code(`<a href="/settings/profile" data-fragment-slot="settings-panel" data-fragment-prefetch="intent">
-  Profile
-</a>
+      ${code(`<a href="/settings/profile"
+   data-fragment-slot="settings-panel"
+   data-fragment-prefetch="intent">Profile</a>
 
-<section data-fragment-slot="settings-panel">
-  ...
-</section>`)}
-      <h2>Prefetch</h2>
+<section data-fragment-slot="settings-panel">…</section>`, "js")}
+
+      <h2>Prefetch modes</h2>
       <p>
-        Same-origin fragments are prefetched on hover and focus by default.
-        Use declarative attributes for links that should prefetch when visible,
-        immediately on page load, or never.
+        Prefetching warms the fragment cache so the swap is instant. Set a
+        default in <code>installFragmentNavigation</code>, or per link with
+        <code>data-fragment-prefetch</code>.
       </p>
-      ${code(`<a href="/reports" data-fragment-prefetch="visible">Reports</a>
-<a href="/settings" data-fragment-prefetch="load">Settings</a>
-<a href="/logout" data-fragment-prefetch="none">Log out</a>`)}
-      <h2>Declarative manifest</h2>
+      ${code(`<a href="/reports" data-fragment-prefetch="visible">Reports</a> <!-- when scrolled into view -->
+<a href="/settings" data-fragment-prefetch="load">Settings</a>   <!-- immediately on load -->
+<a href="/logout" data-fragment-prefetch="none">Log out</a>      <!-- never -->`, "js")}
       <p>
-        On Cloudflare, the Worker can use <code>HTMLRewriter</code> to detect
-        fragment slots and prefetch links in the rendered markup, then append a
-        <code>data-fragment-manifest</code> JSON script for the browser router
-        and agents to inspect.
+        For imperative control, call
+        <a href="/reference#prefetchFragment"><code>prefetchFragment</code></a>.
       </p>
+
+      <h2>The fragment manifest</h2>
+      <p>
+        On Cloudflare, the adapter uses <code>HTMLRewriter</code> to find
+        fragment slots and prefetch links in the rendered markup, then appends a
+        <code>data-fragment-manifest</code> JSON script the router and agents can
+        read. Disable it with <code>fragmentManifest: false</code>.
+      </p>
+      ${callout(
+        "Good to know",
+        "Fragment responses are produced by renderFragment — the route body plus a data-fragment-meta script the router uses to update the head.",
+      )}
+
+      <h2>See also</h2>
+      <ul>
+        <li><a href="/concepts/routing">Routing</a> — define the routes fragments navigate between.</li>
+        <li><a href="/concepts/components">Components</a> — keep components alive across swaps.</li>
+        <li><a href="/reference#installFragmentNavigation">Reference: <code>installFragmentNavigation</code></a>, <a href="/reference#fragment"><code>fragment</code></a>, <a href="/reference#prefetchFragment"><code>prefetchFragment</code></a>.</li>
+      </ul>
     `,
   });
