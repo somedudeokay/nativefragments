@@ -124,18 +124,55 @@ a {
   font-size: 0.92rem;
   font-weight: 500;
   padding: 0.45rem 0.6rem;
+  position: relative;
   text-decoration: none;
+  z-index: 1;
 }
 
 .sidebar a:hover {
-  background: color-mix(in srgb, var(--ink) 5%, transparent);
   color: var(--ink);
 }
 
 .sidebar a[aria-current="page"] {
-  background: color-mix(in srgb, var(--green) 16%, transparent);
   color: var(--ink);
   font-weight: 600;
+}
+
+/* No-JS / pre-init fallback; replaced by the sliding indicator once active. */
+.sidebar:not([data-sliding]) a:hover {
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+.sidebar:not([data-sliding]) a[aria-current="page"] {
+  background: color-mix(in srgb, var(--green) 16%, transparent);
+}
+
+/* Sliding active indicator — a single pill that moves between links. The
+   sidebar lives in the shell, so it persists (and animates) across fragment
+   navigation. */
+.nav-indicator {
+  background: color-mix(in srgb, var(--green) 16%, transparent);
+  border-radius: 8px;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  z-index: 0;
+}
+
+.nav-indicator[data-ready] {
+  transition:
+    transform 0.28s var(--ease),
+    width 0.28s var(--ease),
+    height 0.28s var(--ease),
+    opacity 0.2s var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-indicator[data-ready] {
+    transition: opacity 0.2s var(--ease);
+  }
 }
 
 /* Search trigger */
@@ -561,7 +598,7 @@ li code {
     gap: 1rem;
     height: auto;
     overflow-x: auto;
-    position: static;
+    position: relative;
     white-space: nowrap;
   }
 
