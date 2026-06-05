@@ -6,7 +6,7 @@ export const signalsPage = () =>
     eyebrow: "Concepts",
     title: "State",
     intro:
-      "Core has no reactive state. Add the optional @nativefragments/signals package when an island needs local state and DOM bindings. Its API is based on the TC39 Signals proposal.",
+      "Core has no reactive state. Add the optional @nativefragments/signals package when an island needs local state and DOM bindings. Its API is a thin layer over the TC39 Signals proposal (shipped with a polyfill).",
     body: html`
       ${callout(
         "Note",
@@ -21,23 +21,69 @@ export const signalsPage = () =>
       ${code(`npm i @nativefragments/signals
 cp node_modules/@nativefragments/signals/public/nativefragments/*.js public/nativefragments/`, "shell")}
 
-      <h2>State and bindings</h2>
+      <h2>Signals</h2>
       <p>
-        <code>state</code> holds a value, <code>computed</code> derives one, and
-        the <code>bind*</code> helpers wire a signal to the DOM. Pair them with a
-        <a href="/concepts/components">Shadow DOM component</a> to drive a small
-        interactive island.
+        <code>state(initial)</code> creates a writable signal with
+        <code>.get()</code> and <code>.set()</code>. <code>computed(fn)</code>
+        derives a read-only signal that recomputes when its dependencies change.
       </p>
       ${code(`// public/app/components/counter.js
-import { bindText, computed, state } from "/nativefragments/signals.js";
+import { computed, state } from "/nativefragments/signals.js";
 
 const count = state(0);
 const label = computed(() => \`Count \${count.get()}\`);
 
-bindText(root.querySelector("[data-count]"), label);
-root.querySelector("button").addEventListener("click", () => {
-  count.set(count.get() + 1);
-});`)}
+count.set(count.get() + 1);
+label.get(); // "Count 1"`)}
+      <p>
+        <code>isSignal(value)</code> tests whether a value is a signal.
+        <code>read(value)</code> unwraps one: it calls <code>.get()</code> on a
+        signal, invokes a function, or returns a plain value unchanged — which is
+        why every binder below accepts a signal, a getter, or a static value.
+      </p>
+
+      <h2>Effects</h2>
+      <p>
+        <code>effect(fn)</code> runs <code>fn</code> immediately, then re-runs it
+        whenever a signal it read changes (batched on the microtask queue).
+        Return a function from <code>fn</code> to clean up before the next run.
+        <code>effect</code> returns a dispose function that stops it.
+      </p>
+      ${code(`import { effect, state } from "/nativefragments/signals.js";
+
+const open = state(false);
+
+const stop = effect(() => {
+  document.body.classList.toggle("locked", open.get());
+  return () => document.body.classList.remove("locked"); // cleanup
+});
+
+stop(); // tear the effect down`)}
+
+      <h2>DOM bindings</h2>
+      <p>
+        The <code>bind*</code> helpers wire a signal to the DOM with an effect.
+        Each accepts a signal, a getter, or a plain value, and returns a dispose
+        function.
+      </p>
+      <ul>
+        <li><code>bindText(node, value)</code> — sets <code>textContent</code>.</li>
+        <li><code>bindHTML(element, value)</code> — sets <code>innerHTML</code> (trusted markup only).</li>
+        <li><code>bindAttr(element, name, value)</code> — sets an attribute; <code>false</code>/<code>null</code>/<code>undefined</code> removes it, <code>true</code> renders it empty.</li>
+        <li><code>bindProperty(element, property, value)</code> — assigns a DOM property.</li>
+        <li><code>bindClass(element, name, value)</code> — toggles a class on truthiness.</li>
+        <li><code>bindStyle(element, name, value)</code> — sets a style property; nullish removes it.</li>
+        <li><code>model(element, signal, eventName = "input")</code> — two-way binds <code>element.value</code> to a signal.</li>
+      </ul>
+      ${code(`// public/app/components/search-box.js
+import { bindClass, bindText, computed, model, state } from "/nativefragments/signals.js";
+
+const query = state("");
+const empty = computed(() => query.get() === "");
+
+model(root.querySelector("input"), query);            // input -> signal -> input
+bindText(root.querySelector("[data-echo]"), query);   // mirror the value
+bindClass(root.querySelector(".hint"), "hidden", empty); // hide hint while typing`)}
 
       <h2>Shared state across fragments</h2>
       <p>
