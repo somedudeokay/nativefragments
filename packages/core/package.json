@@ -64,7 +64,8 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/somedudeokay/nativefragments.git"
+    "url": "git+https://github.com/somedudeokay/nativefragments.git",
+    "directory": "packages/core"
   },
   "bugs": {
     "url": "https://github.com/somedudeokay/nativefragments/issues"

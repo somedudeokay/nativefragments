@@ -23,10 +23,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/somedudeokay/nativefragments-signals.git"
+    "url": "git+https://github.com/somedudeokay/nativefragments.git",
+    "directory": "packages/signals"
   },
   "bugs": {
-    "url": "https://github.com/somedudeokay/nativefragments-signals/issues"
+    "url": "https://github.com/somedudeokay/nativefragments/issues"
   },
   "homepage": "https://nativefragments.org/docs/signals",
   "publishConfig": {

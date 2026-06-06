@@ -14,7 +14,8 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/somedudeokay/nativefragments-create-app.git"
+    "url": "git+https://github.com/somedudeokay/nativefragments.git",
+    "directory": "packages/create-app"
   },
   "homepage": "https://nativefragments.org/docs",
   "publishConfig": {
