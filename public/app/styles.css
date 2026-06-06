@@ -759,6 +759,66 @@ p code {
   padding: 0.26rem 0.55rem;
 }
 
+.demo-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding: 0;
+}
+
+.demo-metric {
+  align-items: baseline;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  display: inline-flex;
+  gap: 0.35rem;
+  padding: 0.32rem 0.6rem;
+}
+
+.demo-metric__value {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.84rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.demo-metric__label {
+  align-self: center;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.demo-metric--lh {
+  background: color-mix(in srgb, var(--green) 13%, var(--surface));
+  border-color: color-mix(in srgb, var(--green) 34%, var(--line));
+}
+
+.demo-metric--lh .demo-metric__value::before {
+  background: var(--green);
+  border-radius: 50%;
+  content: "";
+  display: inline-block;
+  height: 0.42rem;
+  margin-right: 0.34rem;
+  vertical-align: 0.05em;
+  width: 0.42rem;
+}
+
+.demo-metric--deps {
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+  border-color: var(--line-strong);
+}
+
 .demo-actions {
   display: flex;
   flex-wrap: wrap;
