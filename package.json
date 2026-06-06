@@ -1,0 +1,30 @@
+{
+  "name": "nativefragments",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Native Fragments monorepo: framework packages and websites.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "check": "npm run check --workspaces --if-present",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish",
+    "dev:web": "npm run dev -w apps/web",
+    "deploy:web": "npm run deploy -w apps/web",
+    "dev:docs": "npm run dev -w apps/docs",
+    "deploy:docs": "npm run deploy -w apps/docs"
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.7.0",
+    "@changesets/cli": "^2.31.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/somedudeokay/nativefragments.git"
+  },
+  "license": "MIT"
+}
