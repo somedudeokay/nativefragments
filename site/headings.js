@@ -23,3 +23,21 @@ export const withHeadingIds = (htmlString) =>
       return id ? `<${tag} id="${id}">${inner}</${tag}>` : match;
     },
   );
+
+/**
+ * Pull the h2/h3 headings (with their ids) out of rendered HTML, for building
+ * an "On this page" table of contents. Run after {@link withHeadingIds}.
+ */
+export const extractHeadings = (htmlString) => {
+  const headings = [];
+  const pattern = /<(h[23])[^>]*\sid="([^"]+)"[^>]*>([\s\S]*?)<\/\1>/g;
+  let match;
+  while ((match = pattern.exec(htmlString)) !== null) {
+    headings.push({
+      level: Number(match[1][1]),
+      id: match[2],
+      text: match[3].replace(/<[^>]+>/g, "").trim(),
+    });
+  }
+  return headings;
+};

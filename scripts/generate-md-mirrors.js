@@ -55,6 +55,9 @@ const toMarkdown = (htmlString) => {
 
   let html = htmlString;
 
+  // Drop the "On this page" navigation — it is chrome, not content.
+  html = html.replace(/<nav class="toc"[^>]*>[\s\S]*?<\/nav>/g, "");
+
   // Extract code + callouts first so the whitespace collapse cannot corrupt
   // highlighted token spacing inside code.
   html = html.replace(

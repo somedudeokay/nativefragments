@@ -53,7 +53,11 @@ for (const route of routes) {
   if (route.path === "404") continue;
 
   const meta = (await route.meta?.(context(route.path))) ?? {};
-  const rendered = await route.render(context(route.path));
+  // Drop the "On this page" navigation so its labels don't pollute the index.
+  const rendered = (await route.render(context(route.path))).replace(
+    /<nav class="toc"[^>]*>[\s\S]*?<\/nav>/g,
+    "",
+  );
 
   const title = stripTags(firstMatch(rendered, /<h1[^>]*>([\s\S]*?)<\/h1>/));
   const eyebrow = stripTags(firstMatch(rendered, /<p class="eyebrow">([\s\S]*?)<\/p>/));
