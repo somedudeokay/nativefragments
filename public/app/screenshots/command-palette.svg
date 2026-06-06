@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="540" viewBox="0 0 840 540" role="img" aria-labelledby="title">
+  <title id="title">Command Palette demo screenshot</title>
+  <rect width="840" height="540" fill="#101010"/>
+  <rect x="36" y="36" width="768" height="468" rx="18" fill="#f7f3e8"/>
+  <text x="72" y="126" fill="#141414" font-family="ui-sans-serif, system-ui" font-size="46" font-weight="800">Command palette</text>
+  <rect x="138" y="164" width="564" height="276" rx="18" fill="#141414"/>
+  <rect x="168" y="194" width="504" height="54" rx="27" fill="#232323" stroke="#3a3a3a"/>
+  <text x="198" y="229" fill="#f7f3e8" font-family="ui-monospace, monospace" font-size="20">Jump to...</text>
+  <g fill="#f7f3e8" font-family="ui-sans-serif, system-ui" font-size="20" font-weight="700">
+    <text x="190" y="300">Open dashboard</text><text x="190" y="350">Toggle theme</text><text x="190" y="400">Copy deploy URL</text>
+  </g>
+  <rect x="548" y="280" width="86" height="34" rx="17" fill="#1ed760"/>
+</svg>

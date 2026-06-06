@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="540" viewBox="0 0 840 540" role="img" aria-labelledby="title">
+  <title id="title">Todo App demo screenshot</title>
+  <rect width="840" height="540" fill="#202020"/>
+  <rect x="36" y="36" width="768" height="468" rx="18" fill="#f7f3e8"/>
+  <text x="72" y="126" fill="#141414" font-family="ui-sans-serif, system-ui" font-size="52" font-weight="800">Today</text>
+  <rect x="72" y="160" width="500" height="54" rx="27" fill="#fffdf6" stroke="#ddd4c3"/>
+  <rect x="590" y="160" width="142" height="54" rx="27" fill="#1ed760"/>
+  <g font-family="ui-sans-serif, system-ui" font-size="26" font-weight="700">
+    <rect x="72" y="260" width="660" height="56" rx="12" fill="#fffdf6"/><text x="130" y="297" fill="#141414">Draft launch notes</text><path d="M95 288 l12 12 24 -30" fill="none" stroke="#1ed760" stroke-width="6" stroke-linecap="round"/>
+    <rect x="72" y="334" width="660" height="56" rx="12" fill="#fffdf6"/><text x="130" y="371" fill="#141414">Review dashboard copy</text><circle cx="106" cy="354" r="14" fill="none" stroke="#141414" stroke-width="4"/>
+    <rect x="72" y="408" width="660" height="56" rx="12" fill="#fffdf6"/><text x="130" y="445" fill="#141414">Ship zero-dep demo</text><circle cx="106" cy="428" r="14" fill="none" stroke="#141414" stroke-width="4"/>
+  </g>
+</svg>

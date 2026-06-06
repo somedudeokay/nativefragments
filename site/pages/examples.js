@@ -1,52 +1,15 @@
 import { html } from "@nativefragments/core/server";
-import { codeBlock } from "../code.js";
+import { demoRows } from "../demo-catalog.js";
 
-const smokeExample = `curl -f http://127.0.0.1:8787/
-curl -f http://127.0.0.1:8787/docs \\
-  -H "x-fragment: true"`;
-
-const wtrExample = `npm i -D @web/test-runner @open-wc/testing
-
-wtr test/**/*.test.js --node-resolve`;
-
-const shadowTestExample = `import { expect, fixture, html } from "@open-wc/testing";
-import "../public/app/components/app-counter.js";
-
-const el = await fixture(html\`<app-counter></app-counter>\`);
-el.shadowRoot.querySelector("button").click();
-expect(el.count).to.equal(1);`;
-
-const esbuildExample = `# only if you need TypeScript or npm browser deps
-npx esbuild public/app/client.js \\
-  --bundle --format=esm --outfile=public/app.bundle.js`;
-
-export const examplesPage = () => html`<section class="page-hero compact">
+export const examplesPage = () => html`<section class="page-hero compact examples-hero">
   <p class="eyebrow">Examples</p>
-  <h1>Copy the boring parts.</h1>
+  <h1>Modern apps, almost no dependencies.</h1>
   <p>
-    The framework does not ship a test stack. If you want tests, add the
-    smallest thing that proves the behavior you care about.
+    Each example is its own Cloudflare Worker package in the demos monorepo.
+    The apps use Native Fragments, platform APIs, and focused Node tests.
   </p>
 </section>
 
-<section class="docs-grid">
-  <article>
-    <h2>HTTP smoke</h2>
-    ${codeBlock(smokeExample, "shell")}
-  </article>
-
-  <article>
-    <h2>Web Test Runner component test</h2>
-    ${codeBlock(wtrExample, "shell")}
-  </article>
-
-  <article>
-    <h2>Shadow DOM assertion</h2>
-    ${codeBlock(shadowTestExample)}
-  </article>
-
-  <article>
-    <h2>Build escape hatch</h2>
-    ${codeBlock(esbuildExample, "shell")}
-  </article>
+<section class="demo-list" aria-label="Native Fragments examples">
+  ${demoRows()}
 </section>`;

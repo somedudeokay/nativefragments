@@ -37,7 +37,7 @@ export const routes = [
       meta(
         "/examples",
         "Examples",
-        "Copy minimal Native Fragments examples for routes, components, and optional browser tests.",
+        "Explore deployed Native Fragments demo applications built as small Cloudflare Worker packages.",
       ),
     render: examplesPage,
   }),
@@ -46,7 +46,7 @@ export const routes = [
       meta(
         "/demos",
         "Demos",
-        "Native Fragments demos are coming soon.",
+        "Inspect complete Native Fragments demos built with almost zero dependencies.",
       ),
     render: demosPage,
   }),

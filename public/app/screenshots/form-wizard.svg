@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="540" viewBox="0 0 840 540" role="img" aria-labelledby="title">
+  <title id="title">Form Wizard demo screenshot</title>
+  <rect width="840" height="540" fill="#f5d7e3"/>
+  <rect x="36" y="36" width="768" height="468" rx="18" fill="#fffdf6"/>
+  <text x="74" y="122" fill="#141414" font-family="ui-sans-serif, system-ui" font-size="46" font-weight="800">Form wizard</text>
+  <g transform="translate(78 164)">
+    <circle cx="30" cy="30" r="24" fill="#1ed760"/><circle cx="180" cy="30" r="24" fill="#141414"/><circle cx="330" cy="30" r="24" fill="#ddd4c3"/><path d="M54 30 H156 M204 30 H306" stroke="#141414" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <rect x="78" y="256" width="650" height="64" rx="12" fill="#f7f3e8" stroke="#d8d0c1"/>
+  <rect x="78" y="342" width="650" height="64" rx="12" fill="#f7f3e8" stroke="#d8d0c1"/>
+  <rect x="548" y="430" width="180" height="50" rx="25" fill="#141414"/>
+  <text x="638" y="463" text-anchor="middle" fill="#f7f3e8" font-family="ui-sans-serif, system-ui" font-size="18" font-weight="800">Continue</text>
+</svg>
