@@ -12,13 +12,7 @@ const headLinks = ({ meta }) => html`
     document.documentElement.classList.add("js");
   </script>
   <style>${raw(criticalStyles)}</style>
-  <link
-    rel="preload"
-    href="/app/styles.css"
-    as="style"
-    onload="this.onload=null;this.rel='stylesheet'"
-  />
-  <noscript><link rel="stylesheet" href="/app/styles.css" /></noscript>
+  <link rel="stylesheet" href="/app/styles.css" />
   <script type="module" src="/app/client.js"></script>
 `;
 
