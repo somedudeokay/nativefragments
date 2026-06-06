@@ -1,5 +1,5 @@
 import { escapeHtml, html, raw } from "@nativefragments/core/server";
-import { apiSections } from "../generated/api-reference.js";
+import { apiSections, apiTypes } from "../generated/api-reference.js";
 import { codeBlock } from "../code.js";
 import { docPage } from "./blocks.js";
 
@@ -129,28 +129,36 @@ const seeAlso = {
   transferResult: [["Workers", "/concepts/workers"]],
 };
 
-const paramsTable = (params) =>
-  params.length
-    ? `<table class="api-params">
-        <thead><tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
-        <tbody>${params
-          .map(
-            (param) => `<tr>
-              <td><code>${escapeHtml(param.name)}</code></td>
-              <td>${param.type ? `<code>${escapeHtml(param.type)}</code>` : "—"}</td>
-              <td>${
-                param.default
-                  ? `<code>${escapeHtml(param.default)}</code>`
-                  : param.optional
-                    ? "—"
-                    : '<span class="req">required</span>'
-              }</td>
-              <td>${inline(param.description)}</td>
-            </tr>`,
-          )
-          .join("")}</tbody>
-      </table>`
-    : "";
+const appendixNames = [...apiTypes]
+  .map((type) => type.name)
+  .sort((a, b) => b.length - a.length);
+
+// Link any appendix type name inside a type string to its anchor.
+const linkTypes = (typeText) => {
+  let out = escapeHtml(typeText ?? "");
+  for (const name of appendixNames) {
+    out = out.replace(
+      new RegExp(`\\b${name}\\b`, "g"),
+      `<a class="api-typelink" href="#${name}">${name}</a>`,
+    );
+  }
+  return out;
+};
+
+// A parameter / option / property as an indented field line.
+const renderField = (field) => `<li class="api-field">
+  <div class="api-field-head">
+    <code class="api-fname">${escapeHtml(field.name)}</code>
+    ${field.type ? `<span class="api-ftype">${linkTypes(field.type)}</span>` : ""}
+    ${field.optional ? `<span class="api-badge">optional</span>` : ""}
+    ${field.default ? `<span class="api-default">= ${escapeHtml(field.default)}</span>` : ""}
+  </div>
+  ${field.description ? `<p class="api-fdesc">${inline(field.description)}</p>` : ""}
+  ${field.fields?.length ? `<ul class="api-fields api-nested">${field.fields.map(renderField).join("")}</ul>` : ""}
+</li>`;
+
+const fieldList = (fields) =>
+  fields?.length ? `<ul class="api-fields">${fields.map(renderField).join("")}</ul>` : "";
 
 const seeAlsoLine = (name) =>
   seeAlso[name]
@@ -193,25 +201,33 @@ const renderSymbol = (symbol) => `<article class="api-symbol">
   <h3 id="${symbol.name}">${symbolLink(symbol.name, symbol.source)}</h3>
   <pre class="api-sig"><code>${escapeHtml(symbol.signature)}</code></pre>
   ${symbol.description ? `<p>${inline(symbol.description)}</p>` : ""}
-  ${symbol.type ? `<p class="api-meta"><span>Type</span> <code>${escapeHtml(symbol.type)}</code></p>` : ""}
-  ${paramsTable(symbol.params)}
+  ${symbol.type ? `<p class="api-label">Type</p><p class="api-returns-line"><code>${linkTypes(symbol.type)}</code></p>` : ""}
+  ${
+    symbol.params.length
+      ? `<p class="api-label">Parameters</p>${fieldList(symbol.params)}`
+      : symbol.signature.includes("(")
+        ? `<p class="api-empty">Takes no parameters.</p>`
+        : ""
+  }
   ${
     symbol.returns?.type || symbol.returns?.description
-      ? `<p class="api-meta"><span>Returns</span> ${
-          symbol.returns.type ? `<code>${escapeHtml(symbol.returns.type)}</code>` : ""
-        } ${inline(symbol.returns.description)}</p>`
+      ? `<p class="api-label">Returns</p>
+        <p class="api-returns-line"><span class="api-ftype">${linkTypes(symbol.returns.type)}</span>${
+          symbol.returns.description ? ` — ${inline(symbol.returns.description)}` : ""
+        }</p>
+        ${symbol.returnFields?.length ? fieldList(symbol.returnFields) : ""}`
       : ""
   }
   ${examples[symbol.name] ? codeBlock(examples[symbol.name]).value : ""}
   ${seeAlsoLine(symbol.name)}
 </article>`;
 
-const renderType = (type) => `<article class="api-symbol type-symbol">
-  <h3 id="${type.name}">${symbolLink(type.name, type.source)}</h3>
+const renderAppendixType = (type) => `<div class="api-type" id="${type.name}">
+  <h4 class="api-type-name">${symbolLink(type.name, type.source)}</h4>
   <pre class="api-sig"><code>${escapeHtml(type.type)}</code></pre>
   ${type.description ? `<p>${inline(type.description)}</p>` : ""}
-  ${paramsTable(type.properties)}
-</article>`;
+  ${type.properties?.length ? `<p class="api-label">Properties</p>${fieldList(type.properties)}` : ""}
+</div>`;
 
 export const referencePage = () =>
   docPage({
@@ -220,16 +236,23 @@ export const referencePage = () =>
     intro:
       "Generated from JSDoc in @nativefragments/core. Each symbol links back to the concept guide that explains it.",
     body: html`${raw(
-      apiSections
+      `${apiSections
         .map(
           (section) => `<section class="api-section">
             <p class="module">${section.module}</p>
             <h2>${section.title}</h2>
             ${sectionIntro(section)}
-            ${section.types.map(renderType).join("")}
             ${section.symbols.map(renderSymbol).join("")}
           </section>`,
         )
-        .join(""),
+        .join("")}${
+        apiTypes.length
+          ? `<section class="api-section api-appendix">
+            <h2>Types</h2>
+            <p class="api-section-desc">Shared object shapes referenced by the functions above.</p>
+            ${apiTypes.map(renderAppendixType).join("")}
+          </section>`
+          : ""
+      }`,
     )}`,
   });

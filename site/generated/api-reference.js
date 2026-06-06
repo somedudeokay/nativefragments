@@ -137,7 +137,25 @@ export const apiSections = [
             "optional": true,
             "default": "{}",
             "description": "Shadow template options.",
-            "rest": false
+            "rest": false,
+            "fields": [
+              {
+                "name": "styles",
+                "type": "string[]",
+                "optional": true,
+                "default": "[]",
+                "description": "CSS text rendered into `<style>` tags inside the declarative shadow root.",
+                "rest": false
+              },
+              {
+                "name": "html",
+                "type": "string",
+                "optional": true,
+                "default": "\"\"",
+                "description": "Trusted shadow root HTML. Build dynamic HTML with {@link html} before passing it here.",
+                "rest": false
+              }
+            ]
           }
         ],
         "properties": [],
@@ -397,7 +415,41 @@ export const apiSections = [
           "description": "Fragment definition."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L108"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L108",
+        "returnFields": [
+          {
+            "name": "name",
+            "type": "string",
+            "optional": false,
+            "default": "",
+            "description": "Fragment slot name.",
+            "rest": false
+          },
+          {
+            "name": "render",
+            "type": "FragmentRenderer",
+            "optional": false,
+            "default": "",
+            "description": "Fragment renderer.",
+            "rest": false
+          },
+          {
+            "name": "attrs",
+            "type": "(attributes?: import(\"./html.js\").HtmlAttrs) => import(\"./html.js\").RawHtml",
+            "optional": false,
+            "default": "",
+            "description": "Attributes for links and target containers using this fragment slot.",
+            "rest": false
+          },
+          {
+            "name": "prefetchAttrs",
+            "type": "(mode?: \"intent\" | \"visible\" | \"load\" | \"none\", attributes?: import(\"./html.js\").HtmlAttrs) => import(\"./html.js\").RawHtml",
+            "optional": false,
+            "default": "",
+            "description": "Attributes for links using this fragment slot with a prefetch mode.",
+            "rest": false
+          }
+        ]
       },
       {
         "name": "route",
@@ -419,7 +471,33 @@ export const apiSections = [
             "optional": false,
             "default": "",
             "description": "Route metadata and render functions.",
-            "rest": false
+            "rest": false,
+            "fields": [
+              {
+                "name": "meta",
+                "type": "(context: RouteContext) => RouteMeta | Promise<RouteMeta>",
+                "optional": true,
+                "default": "",
+                "description": "Function that returns metadata for the route.",
+                "rest": false
+              },
+              {
+                "name": "render",
+                "type": "(context: RouteContext) => string | Promise<string>",
+                "optional": false,
+                "default": "",
+                "description": "Function that renders route body HTML.",
+                "rest": false
+              },
+              {
+                "name": "fragments",
+                "type": "Record<string, FragmentRenderer> | FragmentDefinition[]",
+                "optional": true,
+                "default": "",
+                "description": "Named fragment renderers used by nested fragment slots.",
+                "rest": false
+              }
+            ]
           }
         ],
         "properties": [],
@@ -465,7 +543,41 @@ export const apiSections = [
             "optional": false,
             "default": "",
             "description": "Metadata to embed in the fragment response.",
-            "rest": false
+            "rest": false,
+            "fields": [
+              {
+                "name": "title",
+                "type": "string",
+                "optional": true,
+                "default": "",
+                "description": "Document title.",
+                "rest": false
+              },
+              {
+                "name": "description",
+                "type": "string",
+                "optional": true,
+                "default": "",
+                "description": "Meta description.",
+                "rest": false
+              },
+              {
+                "name": "canonical",
+                "type": "string",
+                "optional": true,
+                "default": "",
+                "description": "Canonical URL.",
+                "rest": false
+              },
+              {
+                "name": "alternates",
+                "type": "{ hreflang: string, href: string }[]",
+                "optional": true,
+                "default": "",
+                "description": "Alternate language URLs for `<link rel=\"alternate\" hreflang=\"...\">`.",
+                "rest": false
+              }
+            ]
           }
         ],
         "properties": [],
@@ -628,7 +740,65 @@ export const apiSections = [
             "optional": false,
             "default": "",
             "description": "Worker adapter options.",
-            "rest": false
+            "rest": false,
+            "fields": [
+              {
+                "name": "routes",
+                "type": "Route[]",
+                "optional": false,
+                "default": "",
+                "description": "App route definitions.",
+                "rest": false
+              },
+              {
+                "name": "shell",
+                "type": "(rendered: { body: string, meta: object }) => string",
+                "optional": false,
+                "default": "",
+                "description": "Function that wraps a rendered route body in a full HTML document.",
+                "rest": false
+              },
+              {
+                "name": "api",
+                "type": "{ fetch(request: Request, env: Record<string, unknown>, context?: unknown): Promise<Response> | Response }",
+                "optional": true,
+                "default": "",
+                "description": "Optional Web Standards API router. Hono apps work here because they expose a compatible `fetch` method.",
+                "rest": false
+              },
+              {
+                "name": "apiPrefix",
+                "type": "string",
+                "optional": true,
+                "default": "\"/api\"",
+                "description": "URL prefix handled by `api`.",
+                "rest": false
+              },
+              {
+                "name": "notFound",
+                "type": "Route",
+                "optional": true,
+                "default": "",
+                "description": "Optional 404 route.",
+                "rest": false
+              },
+              {
+                "name": "assetsBinding",
+                "type": "string",
+                "optional": true,
+                "default": "\"ASSETS\"",
+                "description": "Cloudflare assets binding name.",
+                "rest": false
+              },
+              {
+                "name": "fragmentManifest",
+                "type": "boolean",
+                "optional": true,
+                "default": "true",
+                "description": "Whether to inject a declarative fragment manifest with Cloudflare `HTMLRewriter` when available.",
+                "rest": false
+              }
+            ]
           }
         ],
         "properties": [],
@@ -733,7 +903,41 @@ export const apiSections = [
             "optional": true,
             "default": "{}",
             "description": "Navigation options.",
-            "rest": false
+            "rest": false,
+            "fields": [
+              {
+                "name": "slot",
+                "type": "string",
+                "optional": true,
+                "default": "\"#content-slot\"",
+                "description": "Selector for the element replaced by fragment responses.",
+                "rest": false
+              },
+              {
+                "name": "ttl",
+                "type": "number",
+                "optional": true,
+                "default": "30000",
+                "description": "Fragment cache time in milliseconds.",
+                "rest": false
+              },
+              {
+                "name": "prefetch",
+                "type": "boolean | \"none\" | \"intent\" | \"visible\" | \"load\"",
+                "optional": true,
+                "default": "\"intent\"",
+                "description": "Default fragment prefetch behavior. Links can override this with `data-fragment-prefetch=\"intent|visible|load|none\"`.",
+                "rest": false
+              },
+              {
+                "name": "afterNavigate",
+                "type": "(event: { meta: object | null, url: URL, slot: string }) => void",
+                "optional": true,
+                "default": "",
+                "description": "Callback fired after a successful client-side navigation.",
+                "rest": false
+              }
+            ]
           }
         ],
         "properties": [],
@@ -830,7 +1034,33 @@ export const apiSections = [
             "optional": true,
             "default": "{}",
             "description": "Shadow render options.",
-            "rest": false
+            "rest": false,
+            "fields": [
+              {
+                "name": "styles",
+                "type": "CSSStyleSheet[]",
+                "optional": true,
+                "default": "[]",
+                "description": "Constructable stylesheets to adopt.",
+                "rest": false
+              },
+              {
+                "name": "html",
+                "type": "string",
+                "optional": true,
+                "default": "\"\"",
+                "description": "Shadow root HTML.",
+                "rest": false
+              },
+              {
+                "name": "hydrate",
+                "type": "boolean",
+                "optional": true,
+                "default": "true",
+                "description": "Preserve an existing declarative shadow root on the first render so server-rendered components do not flash.",
+                "rest": false
+              }
+            ]
           }
         ],
         "properties": [],
@@ -952,7 +1182,17 @@ export const apiSections = [
             "optional": true,
             "default": "{}",
             "description": "Client options.",
-            "rest": false
+            "rest": false,
+            "fields": [
+              {
+                "name": "timeout",
+                "type": "number",
+                "optional": true,
+                "default": "30000",
+                "description": "Request timeout in milliseconds.",
+                "rest": false
+              }
+            ]
           }
         ],
         "properties": [],
@@ -961,7 +1201,33 @@ export const apiSections = [
           "description": "Worker client."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/public/nativefragments/worker.js#L59"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/public/nativefragments/worker.js#L59",
+        "returnFields": [
+          {
+            "name": "call",
+            "type": "(type: string, payload?: unknown, transfer?: Transferable[]) => Promise<unknown>",
+            "optional": false,
+            "default": "",
+            "description": "Call a named worker handler.",
+            "rest": false
+          },
+          {
+            "name": "dispose",
+            "type": "() => void",
+            "optional": false,
+            "default": "",
+            "description": "Reject pending calls and remove listeners.",
+            "rest": false
+          },
+          {
+            "name": "worker",
+            "type": "Worker",
+            "optional": false,
+            "default": "",
+            "description": "The wrapped Worker instance.",
+            "rest": false
+          }
+        ]
       },
       {
         "name": "createWorkerClient",
@@ -983,7 +1249,24 @@ export const apiSections = [
             "optional": true,
             "default": "{}",
             "description": "Client and Worker constructor options.",
-            "rest": false
+            "rest": false,
+            "fields": [
+              {
+                "name": "timeout",
+                "type": "number",
+                "optional": true,
+                "default": "30000",
+                "description": "Request timeout in milliseconds.",
+                "rest": false
+              },
+              {
+                "name": "workerOptions",
+                "type": "WorkerOptions",
+                "optional": true,
+                "default": "",
+                "description": ""
+              }
+            ]
           }
         ],
         "properties": [],
@@ -1026,5 +1309,73 @@ export const apiSections = [
         "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/public/nativefragments/worker.js#L139"
       }
     ]
+  }
+];
+
+export const apiTypes = [
+  {
+    "name": "RawHtml",
+    "description": "",
+    "properties": [],
+    "type": "{ [RAW]: true, value: string }",
+    "line": 3,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/html.js#L3"
+  },
+  {
+    "name": "HtmlAttrs",
+    "description": "",
+    "properties": [],
+    "type": "Record<string, string | number | boolean | null | undefined>",
+    "line": 103,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/html.js#L103"
+  },
+  {
+    "name": "RouteContext",
+    "description": "",
+    "properties": [
+      {
+        "name": "request",
+        "type": "Request",
+        "optional": false,
+        "default": "",
+        "description": "Original request.",
+        "rest": false
+      },
+      {
+        "name": "url",
+        "type": "URL",
+        "optional": false,
+        "default": "",
+        "description": "Parsed request URL.",
+        "rest": false
+      },
+      {
+        "name": "params",
+        "type": "Record<string, string>",
+        "optional": false,
+        "default": "",
+        "description": "Path parameters captured from a route pattern like `/posts/:slug`.",
+        "rest": false
+      }
+    ],
+    "type": "object",
+    "line": 3,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L3"
+  },
+  {
+    "name": "FragmentRenderer",
+    "description": "",
+    "properties": [],
+    "type": "(context: RouteContext) => string | Promise<string>",
+    "line": 20,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L20"
+  },
+  {
+    "name": "Route",
+    "description": "",
+    "properties": [],
+    "type": "RouteDefinition & { path: string, params?: Record<string, string> }",
+    "line": 44,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L44"
   }
 ];

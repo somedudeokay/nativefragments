@@ -731,6 +731,126 @@ li code {
   font-weight: 500;
 }
 
+/* Parameter / option / property field lists */
+.api-label {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  margin: 1.25rem 0 0.5rem;
+  text-transform: uppercase;
+}
+
+.api-fields {
+  display: grid;
+  gap: 0.65rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.api-nested {
+  border-left: 2px solid var(--line);
+  gap: 0.55rem;
+  margin: 0.55rem 0 0.2rem;
+  padding-left: 0.9rem;
+}
+
+.api-field-head {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.api-fname {
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  font-size: 0.82rem;
+  padding: 0.05rem 0.35rem;
+}
+
+.api-ftype {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+}
+
+.api-badge {
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  border-radius: var(--radius-pill);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  padding: 0.08rem 0.45rem;
+  text-transform: uppercase;
+}
+
+.api-default {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.76rem;
+}
+
+.api-fdesc {
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  margin: 0.25rem 0 0;
+}
+
+.api-returns-line {
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.api-returns-line .api-ftype {
+  font-size: 0.82rem;
+}
+
+.api-empty {
+  color: var(--muted);
+  font-size: 0.92rem;
+  margin: 1rem 0 0;
+}
+
+.api-typelink {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 2px;
+}
+
+.api-typelink:hover {
+  color: var(--green);
+}
+
+/* Types appendix */
+.api-appendix h2 {
+  color: var(--ink);
+}
+
+.api-type {
+  border-top: 1px solid var(--line);
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+}
+
+.api-type-name {
+  font-family: var(--mono);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+  scroll-margin-top: 84px;
+}
+
 /* Responsive */
 @media (max-width: 860px) {
   .layout,

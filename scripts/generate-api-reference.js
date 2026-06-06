@@ -273,6 +273,78 @@ ${symbol.type ? `\nType: \`${symbol.type}\`\n` : ""}${mdParamTable(symbol.params
 
 const REPO = "https://github.com/somedudeokay/nativefragments";
 
+// ---- Resolve typedefs into the functions that use them ----
+// Only functions/values are sections; option-bag typedefs fold into their
+// parameter, single return shapes fold into Returns, and the rest become a
+// de-emphasized "Types" appendix.
+
+const stripWrappers = (typeText) => {
+  let value = String(typeText ?? "").trim();
+  const wrapped = value.match(/^(?:Promise|Required|Readonly|Partial)<([\s\S]+)>$/);
+  if (wrapped) value = wrapped[1].trim();
+  return value.replace(/\[\]$/, "").trim();
+};
+
+const baseTypeName = (typeText) => {
+  const match = stripWrappers(typeText).match(/^([A-Za-z_$][\w$]*)/);
+  return match ? match[1] : "";
+};
+
+// Parse the inline extras in `Base & { a?: T; b: U }` into field rows.
+const intersectionExtras = (typeText) => {
+  const match = String(typeText).match(/&\s*\{([\s\S]*)\}/);
+  if (!match) return [];
+  return match[1]
+    .split(/[;,]/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => {
+      const field = part.match(/^([A-Za-z_$][\w$]*)(\?)?\s*:\s*([\s\S]+)$/);
+      return field
+        ? { name: field[1], type: field[3].trim(), optional: Boolean(field[2]), default: "", description: "" }
+        : null;
+    })
+    .filter(Boolean);
+};
+
+const resolveTypes = (sections) => {
+  const typeByName = new Map();
+  for (const section of sections) {
+    for (const type of section.types) {
+      if (!typeByName.has(type.name)) typeByName.set(type.name, type);
+    }
+  }
+
+  const inlined = new Set();
+
+  // Option-bag params: fold the typedef's fields under the parameter.
+  for (const section of sections) {
+    for (const symbol of section.symbols) {
+      for (const param of symbol.params) {
+        const type = typeByName.get(baseTypeName(param.type));
+        if (type && type.properties.length) {
+          param.fields = [...type.properties, ...intersectionExtras(param.type)];
+          inlined.add(type.name);
+        }
+      }
+    }
+  }
+
+  // Return shapes: fold under Returns when not already used as an option.
+  for (const section of sections) {
+    for (const symbol of section.symbols) {
+      const type = typeByName.get(baseTypeName(symbol.returns?.type));
+      if (type && type.properties.length && !inlined.has(type.name)) {
+        symbol.returnFields = type.properties;
+        inlined.add(type.name);
+      }
+    }
+  }
+
+  // Everything else becomes the appendix.
+  return [...typeByName.values()].filter((type) => !inlined.has(type.name));
+};
+
 const main = async () => {
   // Pin source links to the exact published version the docs are generated from,
   // so line numbers always match.
@@ -301,14 +373,16 @@ const main = async () => {
     });
   }
 
+  const apiTypes = resolveTypes(sections);
+
   await mkdir(path.dirname(outputPath), { recursive: true });
   await mkdir(path.dirname(markdownOutputPath), { recursive: true });
   await writeFile(
     outputPath,
-    `export const apiSections = ${JSON.stringify(sections, null, 2)};\n`,
+    `export const apiSections = ${JSON.stringify(sections, null, 2)};\n\nexport const apiTypes = ${JSON.stringify(apiTypes, null, 2)};\n`,
   );
   await writeFile(markdownOutputPath, renderMarkdown(sections));
-  console.log(`api reference: ${sections.length} modules`);
+  console.log(`api reference: ${sections.length} modules, ${apiTypes.length} appendix types`);
 };
 
 main().catch((error) => {
