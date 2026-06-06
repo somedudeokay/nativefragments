@@ -1,0 +1,11 @@
+name = "nativefragments"
+main = "worker.js"
+compatibility_date = "2026-06-01"
+routes = [
+  { pattern = "nativefragments.org", custom_domain = true },
+  { pattern = "www.nativefragments.org", custom_domain = true }
+]
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
