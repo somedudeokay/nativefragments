@@ -1,0 +1,57 @@
+{
+  "name": "@nativefragments/signals",
+  "version": "0.1.1",
+  "description": "Signal-based reactive state helpers for Native Fragments apps.",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./client/signals.js": "./public/nativefragments/signals.js",
+    "./client/signal-polyfill.js": "./public/nativefragments/signal-polyfill.js",
+    "./skills/nativefragments-signals": "./skills/nativefragments-signals/SKILL.md"
+  },
+  "files": [
+    "src",
+    "public/nativefragments",
+    "skills",
+    "scripts",
+    "third-party",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/somedudeokay/nativefragments-signals.git"
+  },
+  "bugs": {
+    "url": "https://github.com/somedudeokay/nativefragments-signals/issues"
+  },
+  "homepage": "https://nativefragments.org/docs/signals",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "check": "find src public/nativefragments scripts -name '*.js' -print0 | xargs -0 -n1 node --check",
+    "smoke": "node scripts/smoke.mjs",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "npm run check && npm run smoke && changeset publish"
+  },
+  "keywords": [
+    "signals",
+    "nativefragments",
+    "web-components",
+    "zero-build",
+    "ai-friendly-apps"
+  ],
+  "dependencies": {
+    "signal-polyfill": "^0.2.2"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.7.0",
+    "@changesets/cli": "^2.31.0"
+  }
+}
