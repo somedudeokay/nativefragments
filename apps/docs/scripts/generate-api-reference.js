@@ -2,17 +2,22 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const root = process.cwd();
-const coreRoot = path.join(root, "node_modules/@nativefragments/core");
+// Read sibling workspace packages directly (monorepo layout: apps/docs/../../packages/*).
+const coreRoot = path.resolve(root, "../../packages/core");
+const signalsRoot = path.resolve(root, "../../packages/signals");
 const outputPath = path.join(root, "site/generated/api-reference.js");
 const markdownOutputPath = path.join(root, "public/reference.md");
 
+// Each source: the package dir to read from, the file within it, its path in the
+// monorepo (for GitHub links), and how it appears in the reference.
 const sources = [
-  { file: "src/server/html.js", module: "@nativefragments/core/server", title: "Server HTML" },
-  { file: "src/server/router.js", module: "@nativefragments/core/server", title: "Server Routing" },
-  { file: "src/cloudflare/index.js", module: "@nativefragments/core/cloudflare", title: "Cloudflare Adapter" },
-  { file: "public/nativefragments/router.js", module: "/nativefragments/router.js", title: "Browser Router" },
-  { file: "public/nativefragments/component.js", module: "/nativefragments/component.js", title: "Shadow DOM Components" },
-  { file: "public/nativefragments/worker.js", module: "/nativefragments/worker.js", title: "Web Workers" },
+  { root: coreRoot, file: "src/server/html.js", repoPath: "packages/core/src/server/html.js", module: "@nativefragments/core/server", title: "Server HTML" },
+  { root: coreRoot, file: "src/server/router.js", repoPath: "packages/core/src/server/router.js", module: "@nativefragments/core/server", title: "Server Routing" },
+  { root: coreRoot, file: "src/cloudflare/index.js", repoPath: "packages/core/src/cloudflare/index.js", module: "@nativefragments/core/cloudflare", title: "Cloudflare Adapter" },
+  { root: coreRoot, file: "public/nativefragments/router.js", repoPath: "packages/core/public/nativefragments/router.js", module: "/nativefragments/router.js", title: "Browser Router" },
+  { root: coreRoot, file: "public/nativefragments/component.js", repoPath: "packages/core/public/nativefragments/component.js", module: "/nativefragments/component.js", title: "Shadow DOM Components" },
+  { root: coreRoot, file: "public/nativefragments/worker.js", repoPath: "packages/core/public/nativefragments/worker.js", module: "/nativefragments/worker.js", title: "Web Workers" },
+  { root: signalsRoot, file: "public/nativefragments/signals.js", repoPath: "packages/signals/public/nativefragments/signals.js", module: "@nativefragments/signals", title: "State" },
 ];
 
 const cleanLine = (line) => line.replace(/^\s*\* ?/, "");
@@ -346,29 +351,28 @@ const resolveTypes = (sections) => {
 };
 
 const main = async () => {
-  // Pin source links to the exact published version the docs are generated from,
-  // so line numbers always match.
-  const { version } = JSON.parse(
-    await readFile(path.join(coreRoot, "package.json"), "utf8"),
-  );
-  const ref = `v${version}`;
-  const blob = (file, line) =>
-    `${REPO}/blob/${ref}/${file}${line ? `#L${line}` : ""}`;
+  // Link to the monorepo on the default branch (paths are stable; individual
+  // releases are tagged per package).
+  const ref = "main";
+  const blob = (repoPath, line) =>
+    `${REPO}/blob/${ref}/${repoPath}${line ? `#L${line}` : ""}`;
 
   const sections = [];
 
   for (const source of sources) {
-    const code = await readFile(path.join(coreRoot, source.file), "utf8");
+    const code = await readFile(path.join(source.root, source.file), "utf8");
     sections.push({
-      ...source,
-      source: blob(source.file),
+      module: source.module,
+      title: source.title,
+      file: source.repoPath,
+      source: blob(source.repoPath),
       types: findTypedefs(code).map((type) => ({
         ...type,
-        source: blob(source.file, type.line),
+        source: blob(source.repoPath, type.line),
       })),
       symbols: findExports(code).map((symbol) => ({
         ...symbol,
-        source: blob(source.file, symbol.line),
+        source: blob(source.repoPath, symbol.line),
       })),
     });
   }

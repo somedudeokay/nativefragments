@@ -555,3 +555,214 @@ Expose named handlers inside a dedicated Web Worker.
 
 **Returns** — `() => void`. Cleanup function.
 
+## State
+
+Module: `@nativefragments/signals`
+
+
+### state
+
+```js
+state(initial, options?) → Signal.State
+```
+
+Create a writable signal. Read it with `.get()` and update it with `.set()`.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `initial` | `unknown` | required | Initial value. |
+| `options` | `object` | — | Signal options (custom equality, etc.). |
+
+**Returns** — `Signal.State`. A writable signal.
+
+### computed
+
+```js
+computed(callback, options?) → Signal.Computed
+```
+
+Create a read-only signal derived from other signals. It recomputes lazily when a dependency changes.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `callback` | `() => unknown` | required | Computation that reads other signals. |
+| `options` | `object` | — | Signal options. |
+
+**Returns** — `Signal.Computed`. A derived, read-only signal.
+
+### isSignal
+
+```js
+isSignal(value) → boolean
+```
+
+Test whether a value is a signal (state or computed).
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `unknown` | required | Value to test. |
+
+**Returns** — `boolean`. True for a state or computed signal.
+
+### read
+
+```js
+read(value) → unknown
+```
+
+Resolve a value: call `.get()` on a signal, invoke a function, or return a plain value unchanged. Lets every binding helper accept a signal, a getter, or a static value.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `unknown` | required | Signal, getter, or plain value. |
+
+**Returns** — `unknown`. The current value.
+
+### effect
+
+```js
+effect(callback) → () => void
+```
+
+Run a callback immediately and re-run it whenever a signal it read changes (batched on the microtask queue). Return a function from the callback to run cleanup before the next run.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `callback` | `() => (void | (() => void))` | required | Effect; may return a cleanup. |
+
+**Returns** — `() => void`. Dispose function that stops the effect.
+
+### bindText
+
+```js
+bindText(node, value) → () => void
+```
+
+Bind a node's text content to a signal.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `node` | `Node` | required | Target node. |
+| `value` | `unknown` | required | Signal, getter, or value. |
+
+**Returns** — `() => void`. Dispose function.
+
+### bindHTML
+
+```js
+bindHTML(element, value) → () => void
+```
+
+Bind an element's `innerHTML` to a signal. Use trusted HTML only.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `element` | `Element` | required | Target element. |
+| `value` | `unknown` | required | Signal, getter, or value. |
+
+**Returns** — `() => void`. Dispose function.
+
+### bindAttr
+
+```js
+bindAttr(element, name, value) → () => void
+```
+
+Bind an attribute to a signal. `false`, `null`, and `undefined` remove the attribute; `true` renders it empty.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `element` | `Element` | required | Target element. |
+| `name` | `string` | required | Attribute name. |
+| `value` | `unknown` | required | Signal, getter, or value. |
+
+**Returns** — `() => void`. Dispose function.
+
+### bindProperty
+
+```js
+bindProperty(element, property, value) → () => void
+```
+
+Bind a DOM property to a signal.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `element` | `Element` | required | Target element. |
+| `property` | `string` | required | Property name. |
+| `value` | `unknown` | required | Signal, getter, or value. |
+
+**Returns** — `() => void`. Dispose function.
+
+### bindClass
+
+```js
+bindClass(element, name, value) → () => void
+```
+
+Toggle a class on an element based on a signal's truthiness.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `element` | `Element` | required | Target element. |
+| `name` | `string` | required | Class name. |
+| `value` | `unknown` | required | Signal, getter, or value. |
+
+**Returns** — `() => void`. Dispose function.
+
+### bindStyle
+
+```js
+bindStyle(element, name, value) → () => void
+```
+
+Bind a style property to a signal. `false`, `null`, and `undefined` remove the property.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `element` | `Element` | required | Target element. |
+| `name` | `string` | required | CSS property name. |
+| `value` | `unknown` | required | Signal, getter, or value. |
+
+**Returns** — `() => void`. Dispose function.
+
+### model
+
+```js
+model(element, signal, eventName?) → () => void
+```
+
+Two-way bind an input-like element's `value` to a writable signal: the signal drives the element, and the element updates the signal on `eventName`.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `element` | `HTMLElement` | required | Target element with a `value`. |
+| `signal` | `Signal.State` | required | Writable signal to sync. |
+| `eventName` | `string` | `"input"` | DOM event that updates the signal. |
+
+**Returns** — `() => void`. Dispose function.
+

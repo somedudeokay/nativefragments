@@ -1,9 +1,9 @@
 export const apiSections = [
   {
-    "file": "src/server/html.js",
     "module": "@nativefragments/core/server",
     "title": "Server HTML",
-    "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/html.js",
+    "file": "packages/core/src/server/html.js",
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js",
     "types": [
       {
         "name": "RawHtml",
@@ -11,7 +11,7 @@ export const apiSections = [
         "properties": [],
         "type": "{ [RAW]: true, value: string }",
         "line": 3,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/html.js#L3"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L3"
       },
       {
         "name": "DeclarativeShadowOptions",
@@ -36,7 +36,7 @@ export const apiSections = [
         ],
         "type": "object",
         "line": 64,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/html.js#L64"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L64"
       },
       {
         "name": "HtmlAttrs",
@@ -44,7 +44,7 @@ export const apiSections = [
         "properties": [],
         "type": "Record<string, string | number | boolean | null | undefined>",
         "line": 103,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/html.js#L103"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L103"
       }
     ],
     "symbols": [
@@ -69,7 +69,7 @@ export const apiSections = [
           "description": "Trusted HTML wrapper."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/html.js#L19"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L19"
       },
       {
         "name": "escapeHtml",
@@ -92,7 +92,7 @@ export const apiSections = [
           "description": "Escaped HTML string."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/html.js#L30"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L30"
       },
       {
         "name": "html",
@@ -123,7 +123,7 @@ export const apiSections = [
           "description": "Rendered HTML."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/html.js#L55"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L55"
       },
       {
         "name": "declarativeShadow",
@@ -164,7 +164,7 @@ export const apiSections = [
           "description": "Trusted declarative shadow template."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/html.js#L84"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L84"
       },
       {
         "name": "jsonScript",
@@ -187,7 +187,7 @@ export const apiSections = [
           "description": "JSON string safe for script text."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/html.js#L100"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L100"
       },
       {
         "name": "attrs",
@@ -210,15 +210,15 @@ export const apiSections = [
           "description": "Trusted HTML attribute string."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/html.js#L116"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L116"
       }
     ]
   },
   {
-    "file": "src/server/router.js",
     "module": "@nativefragments/core/server",
     "title": "Server Routing",
-    "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js",
+    "file": "packages/core/src/server/router.js",
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js",
     "types": [
       {
         "name": "RouteContext",
@@ -251,7 +251,7 @@ export const apiSections = [
         ],
         "type": "object",
         "line": 3,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L3"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L3"
       },
       {
         "name": "RouteMeta",
@@ -292,7 +292,7 @@ export const apiSections = [
         ],
         "type": "object",
         "line": 11,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L11"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L11"
       },
       {
         "name": "FragmentRenderer",
@@ -300,7 +300,7 @@ export const apiSections = [
         "properties": [],
         "type": "(context: RouteContext) => string | Promise<string>",
         "line": 20,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L20"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L20"
       },
       {
         "name": "FragmentDefinition",
@@ -341,7 +341,7 @@ export const apiSections = [
         ],
         "type": "object",
         "line": 24,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L24"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L24"
       },
       {
         "name": "RouteDefinition",
@@ -374,7 +374,7 @@ export const apiSections = [
         ],
         "type": "object",
         "line": 34,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L34"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L34"
       },
       {
         "name": "Route",
@@ -382,7 +382,7 @@ export const apiSections = [
         "properties": [],
         "type": "RouteDefinition & { path: string, params?: Record<string, string> }",
         "line": 44,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L44"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L44"
       }
     ],
     "symbols": [
@@ -415,7 +415,7 @@ export const apiSections = [
           "description": "Fragment definition."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L108",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L108",
         "returnFields": [
           {
             "name": "name",
@@ -506,7 +506,7 @@ export const apiSections = [
           "description": "Normalized route."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L128"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L128"
       },
       {
         "name": "createRoutes",
@@ -529,7 +529,7 @@ export const apiSections = [
           "description": "Route manifest."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L141"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L141"
       },
       {
         "name": "fragmentMeta",
@@ -586,7 +586,7 @@ export const apiSections = [
           "description": "Script tag containing serialized metadata."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L167"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L167"
       },
       {
         "name": "renderRoute",
@@ -609,7 +609,7 @@ export const apiSections = [
           "description": "Rendered route."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L180"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L180"
       },
       {
         "name": "renderFragment",
@@ -632,7 +632,7 @@ export const apiSections = [
           "description": "Fragment HTML."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L203"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L203"
       },
       {
         "name": "notFoundRoute",
@@ -643,15 +643,15 @@ export const apiSections = [
         "properties": [],
         "returns": null,
         "type": "{Route}",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L211"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L211"
       }
     ]
   },
   {
-    "file": "src/cloudflare/index.js",
     "module": "@nativefragments/core/cloudflare",
     "title": "Cloudflare Adapter",
-    "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/cloudflare/index.js",
+    "file": "packages/core/src/cloudflare/index.js",
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js",
     "types": [
       {
         "name": "Route",
@@ -659,7 +659,7 @@ export const apiSections = [
         "properties": [],
         "type": "import(\"../server/router.js\").Route",
         "line": 81,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/cloudflare/index.js#L81"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L81"
       },
       {
         "name": "CloudflareHandlerOptions",
@@ -724,7 +724,7 @@ export const apiSections = [
         ],
         "type": "object",
         "line": 85,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/cloudflare/index.js#L85"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L85"
       }
     ],
     "symbols": [
@@ -807,15 +807,15 @@ export const apiSections = [
           "description": "Cloudflare Worker module."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/cloudflare/index.js#L112"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L112"
       }
     ]
   },
   {
-    "file": "public/nativefragments/router.js",
     "module": "/nativefragments/router.js",
     "title": "Browser Router",
-    "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/public/nativefragments/router.js",
+    "file": "packages/core/public/nativefragments/router.js",
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/router.js",
     "types": [
       {
         "name": "FragmentNavigationOptions",
@@ -856,7 +856,7 @@ export const apiSections = [
         ],
         "type": "object",
         "line": 287,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/public/nativefragments/router.js#L287"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/router.js#L287"
       }
     ],
     "symbols": [
@@ -889,7 +889,7 @@ export const apiSections = [
           "description": "Prefetched fragment HTML, or `null` for skipped cross-origin URLs and document-like URLs such as `/agents.txt`."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/public/nativefragments/router.js#L200"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/router.js#L200"
       },
       {
         "name": "installFragmentNavigation",
@@ -946,15 +946,15 @@ export const apiSections = [
           "description": "Navigate function, or `undefined` if the slot does not exist."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/public/nativefragments/router.js#L314"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/router.js#L314"
       }
     ]
   },
   {
-    "file": "public/nativefragments/component.js",
     "module": "/nativefragments/component.js",
     "title": "Shadow DOM Components",
-    "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/public/nativefragments/component.js",
+    "file": "packages/core/public/nativefragments/component.js",
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/component.js",
     "types": [
       {
         "name": "ShadowOptions",
@@ -987,7 +987,7 @@ export const apiSections = [
         ],
         "type": "object",
         "line": 13,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/public/nativefragments/component.js#L13"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/component.js#L13"
       }
     ],
     "symbols": [
@@ -1012,7 +1012,7 @@ export const apiSections = [
           "description": "Constructable stylesheet."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/public/nativefragments/component.js#L7"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/component.js#L7"
       },
       {
         "name": "shadow",
@@ -1069,15 +1069,15 @@ export const apiSections = [
           "description": "The element's shadow root."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/public/nativefragments/component.js#L53"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/component.js#L53"
       }
     ]
   },
   {
-    "file": "public/nativefragments/worker.js",
     "module": "/nativefragments/worker.js",
     "title": "Web Workers",
-    "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/public/nativefragments/worker.js",
+    "file": "packages/core/public/nativefragments/worker.js",
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/worker.js",
     "types": [
       {
         "name": "WorkerClientOptions",
@@ -1094,7 +1094,7 @@ export const apiSections = [
         ],
         "type": "object",
         "line": 39,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/public/nativefragments/worker.js#L39"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/worker.js#L39"
       },
       {
         "name": "NativeWorkerClient",
@@ -1127,7 +1127,7 @@ export const apiSections = [
         ],
         "type": "object",
         "line": 44,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/public/nativefragments/worker.js#L44"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/worker.js#L44"
       }
     ],
     "symbols": [
@@ -1160,7 +1160,7 @@ export const apiSections = [
           "description": ""
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/public/nativefragments/worker.js#L33"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/worker.js#L33"
       },
       {
         "name": "workerClient",
@@ -1201,7 +1201,7 @@ export const apiSections = [
           "description": "Worker client."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/public/nativefragments/worker.js#L59",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/worker.js#L59",
         "returnFields": [
           {
             "name": "call",
@@ -1275,7 +1275,7 @@ export const apiSections = [
           "description": "Worker client."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/public/nativefragments/worker.js#L121"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/worker.js#L121"
       },
       {
         "name": "exposeWorker",
@@ -1306,7 +1306,404 @@ export const apiSections = [
           "description": "Cleanup function."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/public/nativefragments/worker.js#L139"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/worker.js#L139"
+      }
+    ]
+  },
+  {
+    "module": "@nativefragments/signals",
+    "title": "State",
+    "file": "packages/signals/public/nativefragments/signals.js",
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/signals/public/nativefragments/signals.js",
+    "types": [],
+    "symbols": [
+      {
+        "name": "state",
+        "signature": "state(initial, options?) → Signal.State",
+        "line": 44,
+        "description": "Create a writable signal. Read it with `.get()` and update it with `.set()`.",
+        "params": [
+          {
+            "name": "initial",
+            "type": "unknown",
+            "optional": false,
+            "default": "",
+            "description": "Initial value.",
+            "rest": false
+          },
+          {
+            "name": "options",
+            "type": "object",
+            "optional": true,
+            "default": "",
+            "description": "Signal options (custom equality, etc.).",
+            "rest": false
+          }
+        ],
+        "properties": [],
+        "returns": {
+          "type": "Signal.State",
+          "description": "A writable signal."
+        },
+        "type": "",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/signals/public/nativefragments/signals.js#L44"
+      },
+      {
+        "name": "computed",
+        "signature": "computed(callback, options?) → Signal.Computed",
+        "line": 54,
+        "description": "Create a read-only signal derived from other signals. It recomputes lazily when a dependency changes.",
+        "params": [
+          {
+            "name": "callback",
+            "type": "() => unknown",
+            "optional": false,
+            "default": "",
+            "description": "Computation that reads other signals.",
+            "rest": false
+          },
+          {
+            "name": "options",
+            "type": "object",
+            "optional": true,
+            "default": "",
+            "description": "Signal options.",
+            "rest": false
+          }
+        ],
+        "properties": [],
+        "returns": {
+          "type": "Signal.Computed",
+          "description": "A derived, read-only signal."
+        },
+        "type": "",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/signals/public/nativefragments/signals.js#L54"
+      },
+      {
+        "name": "isSignal",
+        "signature": "isSignal(value) → boolean",
+        "line": 62,
+        "description": "Test whether a value is a signal (state or computed).",
+        "params": [
+          {
+            "name": "value",
+            "type": "unknown",
+            "optional": false,
+            "default": "",
+            "description": "Value to test.",
+            "rest": false
+          }
+        ],
+        "properties": [],
+        "returns": {
+          "type": "boolean",
+          "description": "True for a state or computed signal."
+        },
+        "type": "",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/signals/public/nativefragments/signals.js#L62"
+      },
+      {
+        "name": "read",
+        "signature": "read(value) → unknown",
+        "line": 73,
+        "description": "Resolve a value: call `.get()` on a signal, invoke a function, or return a plain value unchanged. Lets every binding helper accept a signal, a getter, or a static value.",
+        "params": [
+          {
+            "name": "value",
+            "type": "unknown",
+            "optional": false,
+            "default": "",
+            "description": "Signal, getter, or plain value.",
+            "rest": false
+          }
+        ],
+        "properties": [],
+        "returns": {
+          "type": "unknown",
+          "description": "The current value."
+        },
+        "type": "",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/signals/public/nativefragments/signals.js#L73"
+      },
+      {
+        "name": "effect",
+        "signature": "effect(callback) → () => void",
+        "line": 87,
+        "description": "Run a callback immediately and re-run it whenever a signal it read changes (batched on the microtask queue). Return a function from the callback to run cleanup before the next run.",
+        "params": [
+          {
+            "name": "callback",
+            "type": "() => (void | (() => void))",
+            "optional": false,
+            "default": "",
+            "description": "Effect; may return a cleanup.",
+            "rest": false
+          }
+        ],
+        "properties": [],
+        "returns": {
+          "type": "() => void",
+          "description": "Dispose function that stops the effect."
+        },
+        "type": "",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/signals/public/nativefragments/signals.js#L87"
+      },
+      {
+        "name": "bindText",
+        "signature": "bindText(node, value) → () => void",
+        "line": 112,
+        "description": "Bind a node's text content to a signal.",
+        "params": [
+          {
+            "name": "node",
+            "type": "Node",
+            "optional": false,
+            "default": "",
+            "description": "Target node.",
+            "rest": false
+          },
+          {
+            "name": "value",
+            "type": "unknown",
+            "optional": false,
+            "default": "",
+            "description": "Signal, getter, or value.",
+            "rest": false
+          }
+        ],
+        "properties": [],
+        "returns": {
+          "type": "() => void",
+          "description": "Dispose function."
+        },
+        "type": "",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/signals/public/nativefragments/signals.js#L112"
+      },
+      {
+        "name": "bindHTML",
+        "signature": "bindHTML(element, value) → () => void",
+        "line": 124,
+        "description": "Bind an element's `innerHTML` to a signal. Use trusted HTML only.",
+        "params": [
+          {
+            "name": "element",
+            "type": "Element",
+            "optional": false,
+            "default": "",
+            "description": "Target element.",
+            "rest": false
+          },
+          {
+            "name": "value",
+            "type": "unknown",
+            "optional": false,
+            "default": "",
+            "description": "Signal, getter, or value.",
+            "rest": false
+          }
+        ],
+        "properties": [],
+        "returns": {
+          "type": "() => void",
+          "description": "Dispose function."
+        },
+        "type": "",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/signals/public/nativefragments/signals.js#L124"
+      },
+      {
+        "name": "bindAttr",
+        "signature": "bindAttr(element, name, value) → () => void",
+        "line": 138,
+        "description": "Bind an attribute to a signal. `false`, `null`, and `undefined` remove the attribute; `true` renders it empty.",
+        "params": [
+          {
+            "name": "element",
+            "type": "Element",
+            "optional": false,
+            "default": "",
+            "description": "Target element.",
+            "rest": false
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "optional": false,
+            "default": "",
+            "description": "Attribute name.",
+            "rest": false
+          },
+          {
+            "name": "value",
+            "type": "unknown",
+            "optional": false,
+            "default": "",
+            "description": "Signal, getter, or value.",
+            "rest": false
+          }
+        ],
+        "properties": [],
+        "returns": {
+          "type": "() => void",
+          "description": "Dispose function."
+        },
+        "type": "",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/signals/public/nativefragments/signals.js#L138"
+      },
+      {
+        "name": "bindProperty",
+        "signature": "bindProperty(element, property, value) → () => void",
+        "line": 156,
+        "description": "Bind a DOM property to a signal.",
+        "params": [
+          {
+            "name": "element",
+            "type": "Element",
+            "optional": false,
+            "default": "",
+            "description": "Target element.",
+            "rest": false
+          },
+          {
+            "name": "property",
+            "type": "string",
+            "optional": false,
+            "default": "",
+            "description": "Property name.",
+            "rest": false
+          },
+          {
+            "name": "value",
+            "type": "unknown",
+            "optional": false,
+            "default": "",
+            "description": "Signal, getter, or value.",
+            "rest": false
+          }
+        ],
+        "properties": [],
+        "returns": {
+          "type": "() => void",
+          "description": "Dispose function."
+        },
+        "type": "",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/signals/public/nativefragments/signals.js#L156"
+      },
+      {
+        "name": "bindClass",
+        "signature": "bindClass(element, name, value) → () => void",
+        "line": 169,
+        "description": "Toggle a class on an element based on a signal's truthiness.",
+        "params": [
+          {
+            "name": "element",
+            "type": "Element",
+            "optional": false,
+            "default": "",
+            "description": "Target element.",
+            "rest": false
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "optional": false,
+            "default": "",
+            "description": "Class name.",
+            "rest": false
+          },
+          {
+            "name": "value",
+            "type": "unknown",
+            "optional": false,
+            "default": "",
+            "description": "Signal, getter, or value.",
+            "rest": false
+          }
+        ],
+        "properties": [],
+        "returns": {
+          "type": "() => void",
+          "description": "Dispose function."
+        },
+        "type": "",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/signals/public/nativefragments/signals.js#L169"
+      },
+      {
+        "name": "bindStyle",
+        "signature": "bindStyle(element, name, value) → () => void",
+        "line": 183,
+        "description": "Bind a style property to a signal. `false`, `null`, and `undefined` remove the property.",
+        "params": [
+          {
+            "name": "element",
+            "type": "Element",
+            "optional": false,
+            "default": "",
+            "description": "Target element.",
+            "rest": false
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "optional": false,
+            "default": "",
+            "description": "CSS property name.",
+            "rest": false
+          },
+          {
+            "name": "value",
+            "type": "unknown",
+            "optional": false,
+            "default": "",
+            "description": "Signal, getter, or value.",
+            "rest": false
+          }
+        ],
+        "properties": [],
+        "returns": {
+          "type": "() => void",
+          "description": "Dispose function."
+        },
+        "type": "",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/signals/public/nativefragments/signals.js#L183"
+      },
+      {
+        "name": "model",
+        "signature": "model(element, signal, eventName?) → () => void",
+        "line": 202,
+        "description": "Two-way bind an input-like element's `value` to a writable signal: the signal drives the element, and the element updates the signal on `eventName`.",
+        "params": [
+          {
+            "name": "element",
+            "type": "HTMLElement",
+            "optional": false,
+            "default": "",
+            "description": "Target element with a `value`.",
+            "rest": false
+          },
+          {
+            "name": "signal",
+            "type": "Signal.State",
+            "optional": false,
+            "default": "",
+            "description": "Writable signal to sync.",
+            "rest": false
+          },
+          {
+            "name": "eventName",
+            "type": "string",
+            "optional": true,
+            "default": "\"input\"",
+            "description": "DOM event that updates the signal.",
+            "rest": false
+          }
+        ],
+        "properties": [],
+        "returns": {
+          "type": "() => void",
+          "description": "Dispose function."
+        },
+        "type": "",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/signals/public/nativefragments/signals.js#L202"
       }
     ]
   }
@@ -1319,7 +1716,7 @@ export const apiTypes = [
     "properties": [],
     "type": "{ [RAW]: true, value: string }",
     "line": 3,
-    "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/html.js#L3"
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L3"
   },
   {
     "name": "HtmlAttrs",
@@ -1327,7 +1724,7 @@ export const apiTypes = [
     "properties": [],
     "type": "Record<string, string | number | boolean | null | undefined>",
     "line": 103,
-    "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/html.js#L103"
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L103"
   },
   {
     "name": "RouteContext",
@@ -1360,7 +1757,7 @@ export const apiTypes = [
     ],
     "type": "object",
     "line": 3,
-    "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L3"
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L3"
   },
   {
     "name": "FragmentRenderer",
@@ -1368,7 +1765,7 @@ export const apiTypes = [
     "properties": [],
     "type": "(context: RouteContext) => string | Promise<string>",
     "line": 20,
-    "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L20"
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L20"
   },
   {
     "name": "Route",
@@ -1376,6 +1773,6 @@ export const apiTypes = [
     "properties": [],
     "type": "RouteDefinition & { path: string, params?: Record<string, string> }",
     "line": 44,
-    "source": "https://github.com/somedudeokay/nativefragments/blob/v0.4.1/src/server/router.js#L44"
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L44"
   }
 ];
