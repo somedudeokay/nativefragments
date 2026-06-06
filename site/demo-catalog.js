@@ -40,7 +40,7 @@ export const demos = [
     slug: "worker-search",
     title: "Worker Search",
     summary:
-      "Large-list filtering through the Native Fragments worker RPC helper.",
+      "Search and sort 45,716 NASA meteorite landing records in a browser Worker.",
     url: "https://worker-search.nativefragments.org",
   },
   {
