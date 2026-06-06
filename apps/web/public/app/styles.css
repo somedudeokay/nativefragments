@@ -690,12 +690,15 @@ p code {
   display: block;
   min-height: clamp(13rem, 24vw, 20rem);
   overflow: hidden;
+  position: relative;
 }
 
 .demo-shot {
   display: block;
   height: 100%;
+  inset: 0;
   object-fit: cover;
+  position: absolute;
   width: 100%;
 }
 
@@ -1002,6 +1005,7 @@ p code {
   }
 
   .demo-shot-link {
+    aspect-ratio: 1280 / 832;
     min-height: 13rem;
   }
 
