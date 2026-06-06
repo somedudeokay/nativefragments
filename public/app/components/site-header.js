@@ -175,7 +175,6 @@ class NativeFragmentsHeader extends HTMLElement {
       { href: "/", label: "Native Fragments" },
       { href: "https://docs.nativefragments.org", label: "Docs" },
       { href: "/examples", label: "Examples" },
-      { href: "/demos", label: "Demos" },
       { href: "/manifesto", label: "Manifesto" },
     ];
     const path = window.location.pathname.replace(/\/$/, "") || "/";

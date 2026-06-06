@@ -91,10 +91,10 @@ export const demoRows = () =>
             <img
               alt="${demo.title} screenshot"
               class="demo-shot"
-              height="540"
+              height="832"
               loading="eager"
-              src="/app/screenshots/${demo.slug}.svg"
-              width="840"
+              src="/app/screenshots/${demo.slug}.webp"
+              width="1280"
             />
           </a>
           <div class="demo-row-copy">

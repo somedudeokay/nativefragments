@@ -5,7 +5,7 @@ export const examplesPage = () => html`<section class="page-hero compact example
   <p class="eyebrow">Examples</p>
   <h1>Modern apps, almost no dependencies.</h1>
   <p>
-    Each example is its own Cloudflare Worker package in the demos monorepo.
+    Each example is its own Cloudflare Worker package in the examples monorepo.
     The apps use Native Fragments, platform APIs, and focused Node tests.
   </p>
 </section>
