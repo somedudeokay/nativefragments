@@ -35,6 +35,7 @@ export const shell = ({ body, meta }) => {
     <meta name="description" content="${meta.description}" />
     <meta name="google-site-verification" content="JjtSSqZr2dhqfTA7wWejjridMsTwUuGDTKPBdIRdBl4" />
     <link rel="canonical" href="${meta.canonical}" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <script>
       document.documentElement.classList.add("js");
     </script>
