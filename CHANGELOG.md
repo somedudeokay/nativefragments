@@ -1,5 +1,11 @@
 # @nativefragments/core
 
+## 0.4.3
+
+### Patch Changes
+
+- Document declarative shadow DOM hydration parity guidance in the shipped agent skill.
+
 ## 0.4.2
 
 ### Patch Changes

@@ -144,6 +144,15 @@ Prefer a shared template module for non-trivial components:
   element.
 - Keep the server-rendered declarative shadow output identical to the hydrated
   client output unless there is a deliberate no-JavaScript fallback.
+- Treat server/client visual mismatches as hydration bugs. The declarative
+  shadow DOM should use the same spacing, responsive rules, typography, icons,
+  CSS variables, and stable element dimensions as the hydrated component.
+- Avoid placeholder markup or reserved-height boxes for initially visible
+  custom elements. Prefer real server-rendered shadow markup. Use placeholders
+  only when the product intentionally has no meaningful server-rendered state.
+- Keep server-rendered shadow DOM visible through the first component upgrade,
+  then remove or replace it only after the hydrated component has rendered. A
+  blank intermediate frame is a FOUC bug.
 
 Server renderer:
 
@@ -188,6 +197,12 @@ customElements.define("app-card", AppCard);
 The `shadow()` helper preserves an existing declarative shadow root on first
 upgrade, then updates normally on later renders. Use `{ hydrate: false }` only
 when a component must intentionally discard server-rendered shadow DOM.
+
+For layout-sensitive components, add a browser regression test that captures
+key bounding boxes from the server-rendered declarative shadow DOM, waits for
+hydration, and verifies the hydrated component keeps those boxes stable. This
+is especially important for above-the-fold navigation, game boards, dashboards,
+and other elements where a small shift is visible on refresh.
 
 ## Testing Guidance
 
