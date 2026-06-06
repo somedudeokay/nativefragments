@@ -55,15 +55,40 @@ export const shell = ({ body, meta }) => {
     </p>
     ${siteHeader()}
     <div class="layout">
-      <aside class="sidebar">
+      <aside class="sidebar" id="docs-sidebar">
         <button type="button" class="search-trigger" data-search-trigger aria-label="Search documentation">
           <span class="search-trigger-label">Search the docs…</span>
           <kbd class="search-trigger-key">⌘K</kbd>
         </button>
         ${raw(renderNav(pathname))}
+        <section class="sidebar-site">
+          <h2>Native Fragments</h2>
+          <a href="https://nativefragments.org/">Home</a>
+          <a href="https://nativefragments.org/examples">Examples</a>
+          <a href="https://nativefragments.org/demos">Demos</a>
+          <a href="https://nativefragments.org/manifesto">Manifesto</a>
+          <a href="https://github.com/somedudeokay/nativefragments">GitHub</a>
+        </section>
       </aside>
       <main id="content-slot">${raw(body)}</main>
     </div>
+    <div class="menu-scrim" data-menu-close></div>
+    <nav class="mobile-bar" aria-label="Mobile">
+      <button type="button" class="mobile-bar-btn" data-search-trigger aria-label="Search documentation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <span>Search</span>
+      </button>
+      <button type="button" class="mobile-bar-btn mobile-menu-toggle" data-menu-toggle aria-expanded="false" aria-controls="docs-sidebar">
+        <span class="mb-open">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"></path></svg>
+          Menu
+        </span>
+        <span class="mb-close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+          Close
+        </span>
+      </button>
+    </nav>
     <docs-search></docs-search>
   </body>
 </html>`;

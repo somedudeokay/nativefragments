@@ -121,21 +121,9 @@ const styles = sheet(`
     width: 1.6rem;
   }
 
-  @media (max-width: 560px) {
-    header {
-      align-items: flex-start;
-      flex-direction: column;
-      gap: 0.35rem;
-      padding: 0.75rem 1.25rem;
-    }
-
-    .header-links {
-      align-items: center;
-      gap: 0.45rem;
-    }
-
+  @media (max-width: 860px) {
     nav {
-      flex-wrap: wrap;
+      display: none;
     }
 
     .icon-links {
