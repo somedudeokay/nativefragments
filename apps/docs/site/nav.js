@@ -24,6 +24,7 @@ export const navGroups = [
     links: [
       { href: "/reference", label: "API Reference" },
       { href: "/ai", label: "AI Docs" },
+      { href: "https://nativefragments.org/examples", label: "Examples" },
     ],
   },
 ];

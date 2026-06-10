@@ -144,8 +144,6 @@ const headerHtml = `<header>
     <nav aria-label="Primary">
       <a href="https://docs.nativefragments.org" aria-current="page">Docs</a>
       <a href="https://nativefragments.org/examples">Examples</a>
-      <a href="https://nativefragments.org/demos">Demos</a>
-      <a href="https://nativefragments.org/manifesto">Manifesto</a>
     </nav>
     <div class="icon-links" aria-label="Package links">
       <a class="icon-link" href="https://github.com/somedudeokay/nativefragments" aria-label="GitHub" title="GitHub">${githubIcon}</a>
