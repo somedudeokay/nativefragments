@@ -41,6 +41,8 @@ export const post = route("/blog/:slug", {
         <li><code>ctx.params</code> — captured path parameters.</li>
         <li><code>ctx.url</code> — the parsed <code>URL</code>.</li>
         <li><code>ctx.request</code> — the original <code>Request</code>.</li>
+        <li><code>ctx.signal</code> — an <code>AbortSignal</code> that fires on cancellation or a deferred timeout; pass it to <code>fetch</code>.</li>
+        <li><code>ctx.defer(fragment)</code> — render a loading boundary now, <a href="/concepts/streaming">stream the fragment</a> when its data resolves.</li>
       </ul>
 
       <h2>Metadata</h2>
@@ -72,6 +74,7 @@ export const routes = [home, post];
       <h2>See also</h2>
       <ul>
         <li><a href="/concepts/fragments">Fragments</a> — partial navigation within a route.</li>
+        <li><a href="/concepts/streaming">Streaming</a> — defer slow regions with <code>ctx.defer()</code>.</li>
         <li><a href="/concepts/api-routes">API Routes</a> — JSON endpoints alongside pages.</li>
         <li><a href="/reference#route">Reference: <code>route</code></a>, <a href="/reference#createRoutes"><code>createRoutes</code></a>, <a href="/reference#notFoundRoute"><code>notFoundRoute</code></a>.</li>
       </ul>

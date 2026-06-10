@@ -30,6 +30,11 @@ export const agentFriendlyPage = () =>
           requests are an enhancement; the same route still returns a full page.
         </li>
         <li>
+          <a href="/concepts/streaming">Streamed content</a> arrives as real
+          HTML in the same response — deferred regions are crawlable without
+          executing scripts or making follow-up fetches.
+        </li>
+        <li>
           Components expose ordinary DOM that agents can inspect, even when
           styling lives in Shadow DOM.
         </li>

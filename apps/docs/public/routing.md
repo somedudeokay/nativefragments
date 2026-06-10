@@ -34,6 +34,8 @@ Every `render` and `meta` receives a [RouteContext](/reference#RouteContext):
 - `ctx.params` — captured path parameters.
 - `ctx.url` — the parsed `URL`.
 - `ctx.request` — the original `Request`.
+- `ctx.signal` — an `AbortSignal` that fires on cancellation or a deferred timeout; pass it to `fetch`.
+- `ctx.defer(fragment)` — render a loading boundary now, [stream the fragment](/concepts/streaming) when its data resolves.
 
 ## Metadata
 
@@ -56,5 +58,6 @@ export const routes = [home, post];
 ## See also
 
 - [Fragments](/concepts/fragments) — partial navigation within a route.
+- [Streaming](/concepts/streaming) — defer slow regions with `ctx.defer()`.
 - [API Routes](/concepts/api-routes) — JSON endpoints alongside pages.
 - [Reference: route](/reference#route), [createRoutes](/reference#createRoutes), [notFoundRoute](/reference#notFoundRoute).

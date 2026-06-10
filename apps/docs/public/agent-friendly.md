@@ -9,6 +9,7 @@ An agent browsing your app sees what a browser sees on the first response — no
 - Every route is a real `GET` URL rendered by [route](/reference#route), so any page can be fetched directly.
 - Content is in the initial HTML. There is no “wait for JavaScript” step before the text exists.
 - Navigation uses real `<a href>` links. Fragment requests are an enhancement; the same route still returns a full page.
+- [Streamed content](/concepts/streaming) arrives as real HTML in the same response — deferred regions are crawlable without executing scripts or making follow-up fetches.
 - Components expose ordinary DOM that agents can inspect, even when styling lives in Shadow DOM.
 
 ## Patterns to keep
