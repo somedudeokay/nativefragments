@@ -61,8 +61,13 @@ Prefetching uses the real anchors in the document. The router scans same-origin 
 
 > **Good to know:** Fragment responses are produced by renderFragment — the route body plus a data-fragment-meta script the router uses to update the head.
 
+## Deferred fragments
+
+Fragments can also stream. When a route calls `context.defer(fragment)`, the document flushes immediately with a loading boundary and the fragment's completed HTML streams in when its data resolves — out of order, on the same connection, with error boundaries and timeouts built in. See [Streaming](/concepts/streaming) for the full model.
+
 ## See also
 
 - [Routing](/concepts/routing) — define the routes fragments navigate between.
+- [Streaming](/concepts/streaming) — defer slow fragments and stream them out of order.
 - [Components](/concepts/components) — keep components alive across swaps.
 - [Reference: installFragmentNavigation](/reference#installFragmentNavigation), [fragment](/reference#fragment), [prefetchFragment](/reference#prefetchFragment).

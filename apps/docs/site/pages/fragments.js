@@ -80,9 +80,20 @@ installFragmentNavigation({
         "Fragment responses are produced by renderFragment — the route body plus a data-fragment-meta script the router uses to update the head.",
       )}
 
+      <h2>Deferred fragments</h2>
+      <p>
+        Fragments can also stream. When a route calls
+        <code>context.defer(fragment)</code>, the document flushes immediately
+        with a loading boundary and the fragment's completed HTML streams in
+        when its data resolves — out of order, on the same connection, with
+        error boundaries and timeouts built in. See
+        <a href="/concepts/streaming">Streaming</a> for the full model.
+      </p>
+
       <h2>See also</h2>
       <ul>
         <li><a href="/concepts/routing">Routing</a> — define the routes fragments navigate between.</li>
+        <li><a href="/concepts/streaming">Streaming</a> — defer slow fragments and stream them out of order.</li>
         <li><a href="/concepts/components">Components</a> — keep components alive across swaps.</li>
         <li><a href="/reference#installFragmentNavigation">Reference: <code>installFragmentNavigation</code></a>, <a href="/reference#fragment"><code>fragment</code></a>, <a href="/reference#prefetchFragment"><code>prefetchFragment</code></a>.</li>
       </ul>

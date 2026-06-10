@@ -14,6 +14,7 @@
 
 - [Routing](https://docs.nativefragments.org/routing.md)
 - [Fragments](https://docs.nativefragments.org/fragments.md)
+- [Streaming](https://docs.nativefragments.org/streaming.md)
 - [Components](https://docs.nativefragments.org/components.md)
 - [API Routes](https://docs.nativefragments.org/api-routes.md)
 - [Workers](https://docs.nativefragments.org/workers.md)

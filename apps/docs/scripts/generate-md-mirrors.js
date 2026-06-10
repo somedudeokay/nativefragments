@@ -16,6 +16,7 @@ const mirrors = {
   "/getting-started": "getting-started",
   "/concepts/routing": "routing",
   "/concepts/fragments": "fragments",
+  "/concepts/streaming": "streaming",
   "/concepts/components": "components",
   "/concepts/api-routes": "api-routes",
   "/concepts/workers": "workers",

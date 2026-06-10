@@ -11,6 +11,7 @@ export const navGroups = [
     links: [
       { href: "/concepts/routing", label: "Routing" },
       { href: "/concepts/fragments", label: "Fragments" },
+      { href: "/concepts/streaming", label: "Streaming" },
       { href: "/concepts/components", label: "Components" },
       { href: "/concepts/api-routes", label: "API Routes" },
       { href: "/concepts/workers", label: "Workers" },

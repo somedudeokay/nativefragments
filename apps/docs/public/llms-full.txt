@@ -23,6 +23,7 @@ npm run dev
 - https://docs.nativefragments.org/getting-started.md
 - https://docs.nativefragments.org/routing.md
 - https://docs.nativefragments.org/fragments.md
+- https://docs.nativefragments.org/streaming.md
 - https://docs.nativefragments.org/components.md
 - https://docs.nativefragments.org/api-routes.md
 - https://docs.nativefragments.org/workers.md
@@ -64,6 +65,20 @@ Fragment prefetch:
 ```html
 <a href="/reports" data-fragment-prefetch="visible">Reports</a>
 <a href="/settings" data-fragment-prefetch="load">Settings</a>
+```
+
+Deferred streaming:
+
+```js
+const panel = fragment("related", {
+  loading: () => html`<p>Loading…</p>`,
+  error: () => html`<p role="status">Unavailable.</p>`,
+  render: async (context) => html`…await data…`,
+});
+route("/", {
+  render: (context) => html`${context.defer(panel)}`,
+  fragments: [panel],
+});
 ```
 
 ## Optional Signals Package

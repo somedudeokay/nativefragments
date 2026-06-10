@@ -9,6 +9,7 @@ import { homePage } from "./pages/home.js";
 import { referencePage } from "./pages/reference.js";
 import { routingPage } from "./pages/routing.js";
 import { signalsPage } from "./pages/signals.js";
+import { streamingPage } from "./pages/streaming.js";
 import { workersPage } from "./pages/workers.js";
 
 const origin = "https://docs.nativefragments.org";
@@ -47,6 +48,15 @@ export const routes = [
         "How fragment navigation works in Native Fragments.",
       ),
     render: fragmentsPage,
+  }),
+  route("/concepts/streaming", {
+    meta: () =>
+      meta(
+        "/concepts/streaming",
+        "Streaming",
+        "Deferred fragments stream completed HTML out of order on one connection.",
+      ),
+    render: streamingPage,
   }),
   route("/concepts/components", {
     meta: () =>
