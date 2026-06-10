@@ -1,31 +1,31 @@
-import { html, raw } from "@nativefragments/core/server";
+import { attrs, html, raw } from "@nativefragments/core/server";
 import { criticalStyles } from "./critical-styles.js";
 import { siteHeader } from "./header.js";
 
-const headLinks = ({ meta }) => html`
+const headLinks = ({ meta, nonce }) => html`
   <title>${meta.title}</title>
   <meta name="description" content="${meta.description}" />
     <meta name="google-site-verification" content="JjtSSqZr2dhqfTA7wWejjridMsTwUuGDTKPBdIRdBl4" />
   <link rel="canonical" href="${meta.canonical}" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <script>
+  <script${attrs({ nonce })}>
     document.documentElement.classList.add("js");
   </script>
-  <style>${raw(criticalStyles)}</style>
+  <style${attrs({ nonce })}>${raw(criticalStyles)}</style>
   <link rel="stylesheet" href="/app/styles.css" />
-  <script type="module" src="/app/client.js"></script>
+  <script${attrs({ nonce })} type="module" src="/app/client.js"></script>
 `;
 
 const activePath = (canonical) =>
   canonical?.startsWith("http") ? new URL(canonical).pathname : (canonical ?? "/");
 
-export const shell = ({ body, meta }) => html`<!doctype html>
+export const shell = ({ body, meta, nonce }) => html`<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="dark light" />
-    ${raw(headLinks({ meta }))}
+    ${raw(headLinks({ meta, nonce }))}
   </head>
   <body>
     <a class="skip-link" href="#content-slot">Skip to content</a>

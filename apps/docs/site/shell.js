@@ -1,4 +1,4 @@
-import { html, raw } from "@nativefragments/core/server";
+import { attrs, html, raw } from "@nativefragments/core/server";
 import { criticalStyles } from "./critical-styles.js";
 import { siteHeader } from "./header.js";
 import { navGroups } from "./nav.js";
@@ -21,7 +21,7 @@ const renderNav = (pathname) => html`${raw(
     .join(""),
 )}`;
 
-export const shell = ({ body, meta }) => {
+export const shell = ({ body, meta, nonce }) => {
   const pathname = meta.canonical?.startsWith("http")
     ? new URL(meta.canonical).pathname
     : (meta.canonical ?? "/");
@@ -36,17 +36,17 @@ export const shell = ({ body, meta }) => {
     <meta name="google-site-verification" content="JjtSSqZr2dhqfTA7wWejjridMsTwUuGDTKPBdIRdBl4" />
     <link rel="canonical" href="${meta.canonical}" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <script>
+    <script${attrs({ nonce })}>
       document.documentElement.classList.add("js");
     </script>
-    <style>${raw(criticalStyles)}</style>
+    <style${attrs({ nonce })}>${raw(criticalStyles)}</style>
     <link rel="preload" href="/fonts/geist-400.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/geist-500.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/geist-600.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/space-grotesk-700.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/jetbrains-mono-500.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="/app/styles.css" />
-    <script type="module" src="/app/client.js"></script>
+    <script${attrs({ nonce })} type="module" src="/app/client.js"></script>
   </head>
   <body>
     <p class="agent-index">

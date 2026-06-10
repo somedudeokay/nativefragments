@@ -86,6 +86,22 @@ export const settingsRoute = route("/settings/profile", {
 `fragment.attrs()` returns `data-fragment-slot`. `fragment.prefetchAttrs()`
 returns both `data-fragment-slot` and `data-fragment-prefetch`.
 
+Fragments can also provide `loading`, `error`, and `timeout` when they are
+rendered through `context.defer()` during a document request.
+
+```js
+const profile = fragment("profile", {
+  loading: () => html`<p>Loading profile...</p>`,
+  error: () => html`<p role="status">Profile unavailable.</p>`,
+  timeout: 5000,
+  render: async ({ signal }) => {
+    const response = await fetch("https://api.example.com/profile", { signal });
+    const data = await response.json();
+    return html`<article>${data.name}</article>`;
+  }
+});
+```
+
 ### `route(path, definition)`
 
 Creates a route definition. A route usually provides `meta` and `render`
@@ -146,8 +162,10 @@ declaration order.
 
 ### `renderRoute({ match, request, slot })`
 
-Renders a matched route and returns `{ body, meta }`. When `slot` matches a key
-in `match.fragments`, only that named fragment renderer is used.
+Renders a matched route and returns `{ body, meta, deferred }`. When `slot`
+matches a registered named fragment, only that named fragment renderer is used.
+Calls to `context.defer()` always collect deferred work; adapters decide whether
+to stream it into a full document or inline it for fragment navigation.
 
 ### `renderFragment({ body, meta })`
 
@@ -178,20 +196,48 @@ export default createCloudflareHandler({
 Options:
 
 - `routes`: Array of route definitions.
-- `shell`: Function receiving `{ body, meta }` and returning a full document.
+- `shell`: Function receiving `{ body, meta, nonce }` and returning a full
+  document. For streamed documents, a shell can return `{ before, after }` when
+  called without `body`; existing string shells remain supported.
 - `api`: Optional Web Standards router with a `fetch(request, env, context)`
   method. Hono apps can be passed directly.
 - `apiPrefix`: Optional path prefix delegated to `api`. Defaults to `/api`.
 - `notFound`: Optional 404 route.
 - `assetsBinding`: Optional Cloudflare assets binding name. Defaults to
   `ASSETS`.
-- `fragmentManifest`: Optional Cloudflare `HTMLRewriter` manifest injection.
-  Defaults to `true`.
+- `deferredTimeout`: Default timeout in milliseconds for each deferred fragment
+  renderer. Defaults to `15000`; set `null` to disable.
+- `contentSecurityPolicy`: Content Security Policy header. Defaults to
+  `frame-ancestors 'self'`. Pass a function to include the per-request `nonce`
+  in a strict production policy.
 
 Fragment requests use the `x-fragment: true` request header. Nested fragment
-requests also send `x-fragment-slot`. Full document responses inject a
-`data-fragment-manifest` JSON script on Cloudflare when `HTMLRewriter` is
-available.
+requests also send `x-fragment-slot`.
+
+During full document requests, `context.defer(fragment)` renders the shell and
+loading state immediately, then streams the completed fragment as real hidden
+DOM that the delegated reveal handler (a small nonce-carrying script streamed
+inline with the document) moves into the loading boundary. During
+fragment navigation, the same route is rendered with deferred work resolved and
+inlined before the fragment HTML is returned.
+
+Strict CSP example:
+
+```js
+createCloudflareHandler({
+  routes,
+  shell,
+  contentSecurityPolicy: ({ nonce }) =>
+    [
+      "default-src 'self'",
+      "base-uri 'none'",
+      "object-src 'none'",
+      "frame-ancestors 'none'",
+      `script-src 'self' 'nonce-${nonce}'`,
+      `style-src 'self' 'nonce-${nonce}'`
+    ].join("; ")
+});
+```
 
 ## `/nativefragments/router.js`
 

@@ -135,6 +135,7 @@ const parseBlock = (block) => {
 
   return {
     description: description.join(" "),
+    private: tags.some((tag) => tag.startsWith("@private")),
     params: tags
       .filter((tag) => tag.startsWith("@param"))
       .map((tag) => parseParam(tag.replace("@param", "").trim()))
@@ -192,6 +193,7 @@ const findExports = (source) => {
     if (blockStart === -1 || blockEnd === -1 || blockEnd < blockStart) continue;
 
     const parsed = parseBlock(source.slice(blockStart + 3, blockEnd));
+    if (parsed.private) continue;
     exports.push({
       name: match[1],
       signature: buildSignature(match[1], parsed),

@@ -34,8 +34,15 @@ export type RouteContext = {
   params: Record<string, string>;
   /** Original Fetch API request. */
   request: Request;
+  /** Signal that aborts when the request or deferred fragment times out. */
+  signal: AbortSignal;
   /** Parsed request URL. */
   url: URL;
+  /**
+   * Render a stable loading boundary for a named fragment and schedule its
+   * renderer to stream into the boundary when ready.
+   */
+  defer(fragment: FragmentDefinition | string, attributes?: HtmlAttrs): RawHtml;
 };
 
 /** Alternate language URL used for `rel="alternate"` metadata. */
@@ -63,12 +70,27 @@ export type FragmentRenderer = (
   context: RouteContext,
 ) => string | Promise<string>;
 
+/** Function that renders fast, synchronous loading HTML for a deferred fragment. */
+export type FragmentLoadingRenderer = (context: RouteContext) => string | RawHtml;
+
+/** Function that renders fallback HTML when a deferred fragment fails. */
+export type FragmentErrorRenderer = (
+  error: unknown,
+  context: RouteContext,
+) => string | Promise<string>;
+
 /** Named nested fragment with helpers for link and target attributes. */
 export type FragmentDefinition = {
   /** Fragment slot name. */
   name: string;
   /** Fragment body renderer. */
   render: FragmentRenderer;
+  /** Loading renderer used by document streaming. */
+  loading?: FragmentLoadingRenderer;
+  /** Error renderer used if streaming starts and the fragment fails later. */
+  error?: FragmentErrorRenderer;
+  /** Maximum deferred render time in milliseconds. */
+  timeout?: number | null;
   /** Build `data-fragment-slot` attributes for a target container or link. */
   attrs(attributes?: HtmlAttrs): RawHtml;
   /** Build `data-fragment-slot` and `data-fragment-prefetch` attributes. */
@@ -85,15 +107,17 @@ export type RouteDefinition = {
   /** Route body renderer. */
   render: FragmentRenderer;
   /** Named nested fragments for partial rerenders inside this route. */
-  fragments?: Record<string, FragmentRenderer> | FragmentDefinition[];
+  fragments?: Record<string, FragmentRenderer | FragmentDefinition> | FragmentDefinition[];
 };
 
 /** Normalized route stored in a route manifest. */
-export type Route = RouteDefinition & {
+export type Route = Omit<RouteDefinition, "fragments"> & {
   /** Path parameters captured when this route matched a request path. */
   params?: Record<string, string>;
   /** Normalized route path. */
   path: string;
+  /** Normalized named fragment definitions. */
+  fragments: Record<string, FragmentDefinition>;
 };
 
 /**
@@ -145,7 +169,14 @@ export function attrs(attributes?: HtmlAttrs): RawHtml;
  */
 export function fragment(
   name: string,
-  render: FragmentRenderer,
+  definition:
+    | FragmentRenderer
+    | {
+        render: FragmentRenderer;
+        loading?: FragmentLoadingRenderer;
+        error?: FragmentErrorRenderer;
+        timeout?: number | null;
+      },
 ): FragmentDefinition;
 
 /**
@@ -180,8 +211,11 @@ export function renderRoute(options: {
   match: Route;
   request: Request;
   slot?: string | null;
+  deferredTimeout?: number | null;
 }): Promise<{
   body: string;
+  /** Internal deferred work collected by `context.defer()`. */
+  deferred: unknown[];
   meta: Required<Pick<RouteMeta, "title" | "description" | "canonical">> &
     RouteMeta;
 }>;

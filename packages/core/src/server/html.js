@@ -16,10 +16,13 @@ const RAW = Symbol("nativefragments.raw");
  * @param {unknown} [value=""] HTML to insert without escaping.
  * @returns {RawHtml} Trusted HTML wrapper.
  */
-export const raw = (value = "") => ({
-  [RAW]: true,
-  value: String(value),
-});
+export const raw = (value = "") =>
+  value?.[RAW]
+    ? value
+    : {
+        [RAW]: true,
+        value: String(value),
+      };
 
 /**
  * Escape a value for safe insertion into HTML text or attribute context.

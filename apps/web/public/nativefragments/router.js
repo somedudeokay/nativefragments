@@ -63,17 +63,6 @@ const setHead = (meta) => {
   }
 };
 
-const readFragmentManifest = () => {
-  const node = document.querySelector("script[data-fragment-manifest]");
-  if (!node?.textContent) return { slots: [], links: [] };
-
-  try {
-    return JSON.parse(node.textContent);
-  } catch {
-    return { slots: [], links: [] };
-  }
-};
-
 const cachedFragment = (url, ttl, slot) => {
   const cached = cache.get(fragmentCacheKey(url, slot));
   return cached && Date.now() - cached.timestamp < ttl ? cached.html : null;
@@ -251,16 +240,6 @@ const prefetchLinks = ({ ttl, slot, mode, fallback = "none" }) => {
   }
 };
 
-const prefetchManifestLinks = ({ ttl, slot, mode, fallback = "none", manifest }) => {
-  for (const link of manifest.links ?? []) {
-    if (prefetchMode(link.prefetch ?? fallback) !== mode) continue;
-    prefetchFragment(link.href, {
-      ttl,
-      slot: link.slot ?? slot,
-    }).catch(() => {});
-  }
-};
-
 const installVisiblePrefetch = ({ ttl, slot, fallback = "none" }) => {
   if (!("IntersectionObserver" in window)) return;
 
@@ -320,7 +299,6 @@ export const installFragmentNavigation = ({
   if (!slotTarget(slot)) return;
   let currentController = null;
   const defaultPrefetch = prefetchMode(prefetch);
-  const manifest = readFragmentManifest();
 
   const navigate = async (href, pushState = true, nextSlot = slot) => {
     const url = new URL(href, window.location.origin);
@@ -381,13 +359,11 @@ export const installFragmentNavigation = ({
   });
 
   installIntentPrefetch({ ttl, slot, prefetch: defaultPrefetch });
-  prefetchManifestLinks({ ttl, slot, mode: "load", fallback: defaultPrefetch, manifest });
   prefetchLinks({ ttl, slot, mode: "load", fallback: defaultPrefetch });
   installVisiblePrefetch({ ttl, slot, fallback: defaultPrefetch });
 
   window.nativeFragmentsNavigate = navigate;
   window.nativeFragmentsPrefetch = (href, nextSlot = slot) =>
     prefetchFragment(href, { ttl, slot: nextSlot });
-  window.nativeFragmentsManifest = manifest;
   return navigate;
 };

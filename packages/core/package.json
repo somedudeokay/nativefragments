@@ -76,6 +76,7 @@
   },
   "scripts": {
     "check": "find src public/nativefragments -name '*.js' -print0 | xargs -0 -n1 node --check",
+    "test": "node --test",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "npm run check && changeset publish"

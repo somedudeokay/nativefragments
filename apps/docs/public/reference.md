@@ -143,8 +143,10 @@ Module: `@nativefragments/core/server`
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `request` | `Request` | required | Original request. |
+| `signal` | `AbortSignal` | required | Request cancellation signal. |
 | `url` | `URL` | required | Parsed request URL. |
 | `params` | `Record<string, string>` | required | Path parameters captured from a route pattern like `/posts/:slug`. |
+| `defer` | `(fragment: FragmentDefinition | string, attributes?: import("./html.js").HtmlAttrs) => import("./html.js").RawHtml` | required | Render a stable loading boundary and collect a named fragment for deferred document streaming. |
 
 ### RouteMeta
 
@@ -167,6 +169,18 @@ Module: `@nativefragments/core/server`
 
 
 
+### FragmentLoadingRenderer
+
+`(context: RouteContext) => string`
+
+
+
+### FragmentErrorRenderer
+
+`(error: unknown, context: RouteContext) => string | Promise<string>`
+
+
+
 ### FragmentDefinition
 
 `object`
@@ -179,6 +193,9 @@ Module: `@nativefragments/core/server`
 | --- | --- | --- | --- |
 | `name` | `string` | required | Fragment slot name. |
 | `render` | `FragmentRenderer` | required | Fragment renderer. |
+| `loading` | `FragmentLoadingRenderer` | — | Loading renderer used by deferred document streaming. |
+| `error` | `FragmentErrorRenderer` | — | Error renderer used when a deferred fragment fails after the document response has started. |
+| `timeout` | `number` | — | Maximum deferred render time in milliseconds. |
 | `attrs` | `(attributes?: import("./html.js").HtmlAttrs) => import("./html.js").RawHtml` | required | Attributes for links and target containers using this fragment slot. |
 | `prefetchAttrs` | `(mode?: "intent" | "visible" | "load" | "none", attributes?: import("./html.js").HtmlAttrs) => import("./html.js").RawHtml` | required | Attributes for links using this fragment slot with a prefetch mode. |
 
@@ -194,7 +211,7 @@ Module: `@nativefragments/core/server`
 | --- | --- | --- | --- |
 | `meta` | `(context: RouteContext) => RouteMeta | Promise<RouteMeta>` | — | Function that returns metadata for the route. |
 | `render` | `(context: RouteContext) => string | Promise<string>` | required | Function that renders route body HTML. |
-| `fragments` | `Record<string, FragmentRenderer> | FragmentDefinition[]` | — | Named fragment renderers used by nested fragment slots. |
+| `fragments` | `Record<string, FragmentRenderer | FragmentDefinition> | FragmentDefinition[]` | — | Named fragment renderers used by nested fragment slots. |
 
 ### Route
 
@@ -205,7 +222,7 @@ Module: `@nativefragments/core/server`
 ### fragment
 
 ```js
-fragment(name, render) → FragmentDefinition
+fragment(name, definition) → FragmentDefinition
 ```
 
 Create a named fragment definition. Use this when a route has a nested region with its own navigation. The returned object can be registered in `route(..., { fragments: [item] })` and its attributes can be reused on links and target containers.
@@ -215,7 +232,7 @@ Create a named fragment definition. Use this when a route has a nested region wi
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `name` | `string` | required | Fragment slot name. |
-| `render` | `FragmentRenderer` | required | Fragment renderer. |
+| `definition` | `FragmentRenderer | Omit<FragmentDefinition, "name" | "attrs" | "prefetchAttrs">` | required | Fragment renderer or full fragment definition. |
 
 **Returns** — `FragmentDefinition`. Fragment definition.
 
@@ -271,7 +288,7 @@ Render fragment metadata for the browser fragment router.
 ### renderRoute
 
 ```js
-renderRoute(options) → Promise<{ body: string, meta: Required<RouteMeta> }>
+renderRoute(options) → Promise<{ body: string, meta: Required<RouteMeta>, deferred: unknown[] }>
 ```
 
 Render a matched route and normalize metadata defaults.
@@ -280,9 +297,9 @@ Render a matched route and normalize metadata defaults.
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `options` | `{ match: Route, request: Request, slot?: string | null }` | required | Render options. When `slot` matches `RouteDefinition.fragments`, only that named fragment is rendered. |
+| `options` | `{ match: Route, request: Request, slot?: string | null, deferredTimeout?: number | null }` | required | Render options. When `slot` matches a registered named fragment, only that fragment renderer is used. Calls to `context.defer()` always collect deferred work for the adapter to stream or inline. |
 
-**Returns** — `Promise<{ body: string, meta: Required<RouteMeta> }>`. Rendered route.
+**Returns** — `Promise<{ body: string, meta: Required<RouteMeta>, deferred: unknown[] }>`. Rendered route.
 
 ### renderFragment
 
@@ -331,12 +348,13 @@ Module: `@nativefragments/core/cloudflare`
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `routes` | `Route[]` | required | App route definitions. |
-| `shell` | `(rendered: { body: string, meta: object }) => string` | required | Function that wraps a rendered route body in a full HTML document. |
+| `shell` | `(rendered: { body?: string, meta: object, nonce?: string }) => string | { before: string, after: string }` | required | Function that wraps a rendered route body in a full HTML document. |
 | `api` | `{ fetch(request: Request, env: Record<string, unknown>, context?: unknown): Promise<Response> | Response }` | — | Optional Web Standards API router. Hono apps work here because they expose a compatible `fetch` method. |
 | `apiPrefix` | `string` | `"/api"` | URL prefix handled by `api`. |
 | `notFound` | `Route` | — | Optional 404 route. |
 | `assetsBinding` | `string` | `"ASSETS"` | Cloudflare assets binding name. |
-| `fragmentManifest` | `boolean` | `true` | Whether to inject a declarative fragment manifest with Cloudflare `HTMLRewriter` when available. |
+| `deferredTimeout` | `number | null` | `15000` | Default timeout in milliseconds for each deferred fragment renderer. Set `null` to disable. |
+| `contentSecurityPolicy` | `string | false | ((options: { nonce: string, request: Request }) => string | false)` | — | Content Security Policy header. Defaults to `frame-ancestors 'self'`. Pass a function to build a nonce-based strict policy. |
 
 ### createCloudflareHandler
 

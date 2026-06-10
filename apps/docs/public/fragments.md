@@ -55,9 +55,9 @@ Prefetching warms the fragment cache so the swap is instant. Set a default in `i
 
 For imperative control, call [prefetchFragment](/reference#prefetchFragment).
 
-## The fragment manifest
+## Prefetch discovery
 
-On Cloudflare, the adapter uses `HTMLRewriter` to find fragment slots and prefetch links in the rendered markup, then appends a `data-fragment-manifest` JSON script the router and agents can read. Disable it with `fragmentManifest: false`.
+Prefetching uses the real anchors in the document. The router scans same-origin links and reads `data-fragment-prefetch` directly, so browsers, developers, and agents inspect the same HTML.
 
 > **Good to know:** Fragment responses are produced by renderFragment — the route body plus a data-fragment-meta script the router uses to update the head.
 

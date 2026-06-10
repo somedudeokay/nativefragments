@@ -69,12 +69,11 @@ installFragmentNavigation({
         <a href="/reference#prefetchFragment"><code>prefetchFragment</code></a>.
       </p>
 
-      <h2>The fragment manifest</h2>
+      <h2>Prefetch discovery</h2>
       <p>
-        On Cloudflare, the adapter uses <code>HTMLRewriter</code> to find
-        fragment slots and prefetch links in the rendered markup, then appends a
-        <code>data-fragment-manifest</code> JSON script the router and agents can
-        read. Disable it with <code>fragmentManifest: false</code>.
+        Prefetching uses the real anchors in the document. The router scans
+        same-origin links and reads <code>data-fragment-prefetch</code> directly,
+        so browsers, developers, and agents inspect the same HTML.
       </p>
       ${callout(
         "Good to know",

@@ -167,8 +167,8 @@ export const homePage = () => html`<section class="hero">
   <div class="section-copy">
     <p>
       Mark the part of the page that can update, then let the route expose the
-      same fragment on the server. The Worker can emit a fragment manifest, and
-      the browser router can prefetch intent, visible, or load-time links.
+      same fragment on the server. The browser router reads real anchors and
+      can prefetch intent, visible, or load-time links.
     </p>
     <p>
       The contract stays in the markup: <code>data-fragment-slot</code> names

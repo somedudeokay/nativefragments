@@ -1,4 +1,4 @@
-import { html, jsonScript, raw } from "@nativefragments/core/server";
+import { attrs, html, jsonScript, raw } from "@nativefragments/core/server";
 import { appHeader } from "./header.js";
 
 const fontHref =
@@ -12,7 +12,7 @@ const activePath = (canonical) =>
 
 const clickCount = (meta) => Number(meta.clickCount ?? 0);
 
-export const shell = ({ body, meta }) => html`<!doctype html>
+export const shell = ({ body, meta, nonce }) => html`<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -26,12 +26,12 @@ export const shell = ({ body, meta }) => html`<!doctype html>
     <link rel="icon" href="${faviconHref}" />
     <link rel="stylesheet" href="${fontHref}" />
     <link rel="stylesheet" href="/app/styles.css" />
-    <script>
+    <script${attrs({ nonce })}>
       window.__NATIVEFRAGMENTS_STATE__ = ${raw(
         jsonScript({ clickCount: clickCount(meta) }),
       )};
     </script>
-    <script type="module" src="/app/client.js"></script>
+    <script${attrs({ nonce })} type="module" src="/app/client.js"></script>
   </head>
   <body>
     ${appHeader({
