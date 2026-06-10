@@ -1,4 +1,14 @@
 export const criticalStyles = `
+  /* Bricolage Grotesque 700 (variable opsz), SIL OFL, self-hosted. */
+  @font-face {
+    font-family: "Bricolage Grotesque";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("/app/fonts/bricolage-grotesque-700.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+2013-2014, U+2018-201A, U+201C-201E, U+2026;
+  }
+
   :root {
     color-scheme: light;
     --paper: #f7f3e8;
@@ -16,7 +26,7 @@ export const criticalStyles = `
     --shadow-md: 0 10px 30px -12px rgba(20, 20, 20, 0.18);
     --shadow-lg: 0 30px 60px -20px rgba(20, 20, 20, 0.25);
     --ease: cubic-bezier(0.16, 1, 0.3, 1);
-    --display: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --display: "Bricolage Grotesque", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     --sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     --accent: var(--green);
@@ -74,12 +84,13 @@ export const criticalStyles = `
 
   h1 {
     font-family: var(--display);
-    font-size: clamp(2.3rem, 4.4vw, 3.4rem);
+    font-size: clamp(2.4rem, 4.6vw, 3.6rem);
     font-weight: 700;
-    letter-spacing: -0.035em;
-    line-height: 1.03;
+    letter-spacing: -0.02em;
+    line-height: 1.02;
     margin: 0;
     max-width: 18ch;
+    text-wrap: balance;
   }
 
   h1 .accent {

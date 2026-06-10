@@ -19,7 +19,7 @@ export const routes = [
       meta(
         "/",
         "Zero build web framework built for agents",
-        "Native Fragments is a zero-dependency, zero-build frontend framework for agents building AI-friendly applications.",
+        "Native Fragments streams server-rendered HTML from the edge with zero dependencies and no build step. Built for coding agents and very fast web apps.",
       ),
     render: homePage,
   }),
