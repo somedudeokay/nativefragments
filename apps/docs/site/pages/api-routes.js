@@ -53,6 +53,40 @@ export default createCloudflareHandler({ routes, shell, api });`)}
   apiPrefix: "/rpc", // /rpc and /rpc/* now go to the API
 });`)}
 
+      <h2>Content Security Policy</h2>
+      <p>
+        The Cloudflare adapter passes a per-request <code>nonce</code> to the
+        shell and to framework streaming scripts. Keep the default compatible
+        policy, or opt into a strict nonce-based policy with
+        <code>contentSecurityPolicy</code>.
+      </p>
+      ${code(`import { attrs, html, raw } from "@nativefragments/core/server";
+
+export const shell = ({ body, meta, nonce }) => html\`<!doctype html>
+<html>
+  <head>
+    <title>\${meta.title}</title>
+    <script\${attrs({ nonce })}>
+      document.documentElement.classList.add("js");
+    </script>
+  </head>
+  <body>\${raw(body)}</body>
+</html>\`;
+
+export default createCloudflareHandler({
+  routes,
+  shell,
+  contentSecurityPolicy: ({ nonce }) =>
+    [
+      "default-src 'self'",
+      "base-uri 'none'",
+      "object-src 'none'",
+      "frame-ancestors 'none'",
+      \`script-src 'self' 'nonce-\${nonce}'\`,
+      \`style-src 'self' 'nonce-\${nonce}'\`
+    ].join("; ")
+});`)}
+
       <h2>See also</h2>
       <ul>
         <li><a href="/concepts/routing">Routing</a> — page routes the adapter renders.</li>

@@ -46,16 +46,20 @@ const setHead = (meta) => {
 
   const canonical = document.head.querySelector('link[rel="canonical"]');
   if (canonical && meta.canonical) canonical.setAttribute("href", meta.canonical);
-};
 
-const readFragmentManifest = () => {
-  const node = document.querySelector("script[data-fragment-manifest]");
-  if (!node?.textContent) return { slots: [], links: [] };
+  if (Array.isArray(meta.alternates)) {
+    document.head
+      .querySelectorAll('link[rel="alternate"][hreflang]')
+      .forEach((node) => node.remove());
 
-  try {
-    return JSON.parse(node.textContent);
-  } catch {
-    return { slots: [], links: [] };
+    for (const alternate of meta.alternates) {
+      if (!alternate?.hreflang || !alternate?.href) continue;
+      const link = document.createElement("link");
+      link.rel = "alternate";
+      link.hreflang = alternate.hreflang;
+      link.href = alternate.href;
+      document.head.appendChild(link);
+    }
   }
 };
 
@@ -118,6 +122,20 @@ const applyFragment = ({ fragment, target, url, slot, pushState, scroll }) => {
 
 const routeTo = (href) => new URL(href, window.location.origin);
 
+const documentNavigationPattern =
+  /\.(?:avif|br|css|gif|gz|html?|ico|jpe?g|json|m?js|map|md|mp3|mp4|ogg|otf|pdf|png|svg|tar|ttf|txt|wasm|wav|webm|webp|woff2?|xml|zip)$/i;
+
+const requestsDocumentNavigation = (url) => documentNavigationPattern.test(url.pathname);
+
+const linkOptedOut = (link) => {
+  const mode = link.dataset.fragmentNavigation;
+  return (
+    link.hasAttribute("data-nativefragments-reload") ||
+    mode === "false" ||
+    mode === "off"
+  );
+};
+
 const shouldHandleLink = (event) =>
   !event.defaultPrevented &&
   !event.metaKey &&
@@ -132,7 +150,16 @@ const linkFromEvent = (event) =>
     .find((item) => item instanceof Element && item.matches?.("a[href]"));
 
 const fallbackToDocument = (url) => {
-  window.location.href = fragmentUrl(url);
+  window.location.href = url.href;
+};
+
+const shouldUseDocumentNavigation = (link) => {
+  if (!link || link.target || link.hasAttribute("download") || linkOptedOut(link)) {
+    return true;
+  }
+
+  const url = routeTo(link.href);
+  return url.origin !== window.location.origin || requestsDocumentNavigation(url);
 };
 
 const prefetchMode = (value) => {
@@ -148,9 +175,7 @@ const linkPrefetchMode = (link, fallback) => {
 
 const shouldPrefetchLink = (link) =>
   link &&
-  !link.target &&
-  !link.hasAttribute("download") &&
-  link.origin === window.location.origin;
+  !shouldUseDocumentNavigation(link);
 
 /**
  * Prefetch a same-origin fragment into the shared fragment cache.
@@ -159,14 +184,16 @@ const shouldPrefetchLink = (link) =>
  * @param {{ slot?: string, ttl?: number, signal?: AbortSignal }} [options={}]
  * Prefetch options.
  * @returns {Promise<string | null>} Prefetched fragment HTML, or `null` for
- * skipped cross-origin URLs.
+ * skipped cross-origin URLs and document-like URLs such as `/agents.txt`.
  */
 export const prefetchFragment = async (
   href,
   { slot = defaultSlot, ttl = 30_000, signal } = {},
 ) => {
   const url = routeTo(href);
-  if (url.origin !== window.location.origin) return null;
+  if (url.origin !== window.location.origin || requestsDocumentNavigation(url)) {
+    return null;
+  }
   return fetchFragment({ url, signal, ttl, slot });
 };
 
@@ -213,16 +240,6 @@ const prefetchLinks = ({ ttl, slot, mode, fallback = "none" }) => {
   }
 };
 
-const prefetchManifestLinks = ({ ttl, slot, mode, fallback = "none", manifest }) => {
-  for (const link of manifest.links ?? []) {
-    if (prefetchMode(link.prefetch ?? fallback) !== mode) continue;
-    prefetchFragment(link.href, {
-      ttl,
-      slot: link.slot ?? slot,
-    }).catch(() => {});
-  }
-};
-
 const installVisiblePrefetch = ({ ttl, slot, fallback = "none" }) => {
   if (!("IntersectionObserver" in window)) return;
 
@@ -265,7 +282,9 @@ const installVisiblePrefetch = ({ ttl, slot, fallback = "none" }) => {
  * slot is replaced, document metadata is updated, and history state is pushed.
  * Links with `data-fragment-slot="name"` replace only the matching
  * `[data-fragment-slot="name"]` container and send `x-fragment-slot: name`.
- * External links and modified clicks keep normal browser behavior.
+ * External links, document-like URLs such as `/agents.txt`, modified clicks,
+ * and links with `data-nativefragments-reload` or
+ * `data-fragment-navigation="false"` keep normal browser behavior.
  *
  * @param {FragmentNavigationOptions} [options={}] Navigation options.
  * @returns {((href: string, pushState?: boolean, nextSlot?: string) => Promise<void>) | undefined}
@@ -280,11 +299,10 @@ export const installFragmentNavigation = ({
   if (!slotTarget(slot)) return;
   let currentController = null;
   const defaultPrefetch = prefetchMode(prefetch);
-  const manifest = readFragmentManifest();
 
   const navigate = async (href, pushState = true, nextSlot = slot) => {
     const url = new URL(href, window.location.origin);
-    if (url.origin !== window.location.origin) {
+    if (url.origin !== window.location.origin || requestsDocumentNavigation(url)) {
       window.location.href = url.href;
       return;
     }
@@ -325,11 +343,9 @@ export const installFragmentNavigation = ({
     if (!shouldHandleLink(event)) return;
 
     const link = linkFromEvent(event);
-    if (!link || link.target || link.hasAttribute("download")) return;
+    if (shouldUseDocumentNavigation(link)) return;
 
     const url = routeTo(link.href);
-    if (url.origin !== window.location.origin) return;
-
     event.preventDefault();
     navigate(fragmentUrl(url), true, link.dataset.fragmentSlot ?? slot);
   });
@@ -343,13 +359,11 @@ export const installFragmentNavigation = ({
   });
 
   installIntentPrefetch({ ttl, slot, prefetch: defaultPrefetch });
-  prefetchManifestLinks({ ttl, slot, mode: "load", fallback: defaultPrefetch, manifest });
   prefetchLinks({ ttl, slot, mode: "load", fallback: defaultPrefetch });
   installVisiblePrefetch({ ttl, slot, fallback: defaultPrefetch });
 
   window.nativeFragmentsNavigate = navigate;
   window.nativeFragmentsPrefetch = (href, nextSlot = slot) =>
     prefetchFragment(href, { ttl, slot: nextSlot });
-  window.nativeFragmentsManifest = manifest;
   return navigate;
 };

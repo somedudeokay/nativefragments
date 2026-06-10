@@ -33,7 +33,6 @@ npm i @nativefragments/core
 - Cloudflare Worker adapter.
 - Browser fragment navigation with first-class prefetching.
 - Nested fragment slots for routes inside routes.
-- Declarative fragment manifests on Cloudflare through `HTMLRewriter`.
 - Web Worker RPC helpers for moving expensive client work off the main thread.
 - Shadow DOM component helpers, including declarative Shadow DOM support to
   avoid refresh FOUC.
@@ -107,9 +106,45 @@ default. Links can override the behavior:
 <a href="/logout" data-fragment-prefetch="none">Log out</a>
 ```
 
-Cloudflare apps inject a tiny fragment manifest with `HTMLRewriter` when the
-runtime supports it. The manifest is generated from `data-fragment-slot` and
-`data-fragment-prefetch` markup and exposed as `window.nativeFragmentsManifest`.
+Prefetching is based on real anchors in the document. Agents and browsers can
+inspect the same links; there is no separate framework manifest to understand.
+
+## Content Security Policy
+
+The Cloudflare adapter creates a per-request `nonce` and passes it to the app
+shell. Use it on inline scripts/styles when you enable a strict CSP:
+
+```js
+import { createCloudflareHandler } from "@nativefragments/core/cloudflare";
+import { attrs, html, raw } from "@nativefragments/core/server";
+import { routes } from "./routes.js";
+
+export const shell = ({ body, meta, nonce }) => html`<!doctype html>
+<html>
+  <head>
+    <script${attrs({ nonce })}>
+      document.documentElement.classList.add("js");
+    </script>
+  </head>
+  <body>${raw(body)}</body>
+</html>`;
+
+export default createCloudflareHandler({
+  routes,
+  shell,
+  contentSecurityPolicy: ({ nonce }) =>
+    [
+      "default-src 'self'",
+      "base-uri 'none'",
+      "object-src 'none'",
+      `script-src 'self' 'nonce-${nonce}'`,
+      `style-src 'self' 'nonce-${nonce}'`
+    ].join("; ")
+});
+```
+
+The default policy remains compatible: `frame-ancestors 'self'`. Strict
+`script-src`/`style-src` is opt-in so existing apps do not break.
 
 ## Worker Helpers
 

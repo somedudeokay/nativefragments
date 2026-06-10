@@ -35,16 +35,16 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 64,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L64"
+        "line": 67,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L67"
       },
       {
         "name": "HtmlAttrs",
         "description": "",
         "properties": [],
         "type": "Record<string, string | number | boolean | null | undefined>",
-        "line": 103,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L103"
+        "line": 106,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L106"
       }
     ],
     "symbols": [
@@ -53,6 +53,7 @@ export const apiSections = [
         "signature": "raw(value?) → RawHtml",
         "line": 19,
         "description": "Mark a value as trusted HTML. Use this only for framework-generated markup or content that has already been validated. Ordinary interpolated values in {@link html} are escaped by default.",
+        "private": false,
         "params": [
           {
             "name": "value",
@@ -74,8 +75,9 @@ export const apiSections = [
       {
         "name": "escapeHtml",
         "signature": "escapeHtml(value) → string",
-        "line": 30,
+        "line": 33,
         "description": "Escape a value for safe insertion into HTML text or attribute context.",
+        "private": false,
         "params": [
           {
             "name": "value",
@@ -92,13 +94,14 @@ export const apiSections = [
           "description": "Escaped HTML string."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L30"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L33"
       },
       {
         "name": "html",
         "signature": "html(strings, ...values) → string",
-        "line": 55,
+        "line": 58,
         "description": "Server-side HTML template tag with escaped interpolation by default. Arrays are flattened, `null`, `undefined`, and `false` become empty strings, and values returned by {@link raw} are inserted as trusted HTML.",
+        "private": false,
         "params": [
           {
             "name": "strings",
@@ -123,13 +126,14 @@ export const apiSections = [
           "description": "Rendered HTML."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L55"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L58"
       },
       {
         "name": "declarativeShadow",
         "signature": "declarativeShadow(options?) → RawHtml",
-        "line": 84,
+        "line": 87,
         "description": "Render a declarative Shadow DOM template for server-rendered components. Put this as the first child of a custom element to avoid a flash of unstyled light DOM before the component module loads. Pair it with the browser {@link shadow} helper, which preserves an existing declarative shadow root on first upgrade and materializes declarative shadow templates inserted during fragment navigation.",
+        "private": false,
         "params": [
           {
             "name": "options",
@@ -164,13 +168,14 @@ export const apiSections = [
           "description": "Trusted declarative shadow template."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L84"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L87"
       },
       {
         "name": "jsonScript",
         "signature": "jsonScript(value) → string",
-        "line": 100,
+        "line": 103,
         "description": "Serialize JSON for safe embedding inside an inline script tag. `<` characters are escaped so embedded JSON cannot accidentally terminate the script element.",
+        "private": false,
         "params": [
           {
             "name": "value",
@@ -187,13 +192,14 @@ export const apiSections = [
           "description": "JSON string safe for script text."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L100"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L103"
       },
       {
         "name": "attrs",
         "signature": "attrs(attributes?) → RawHtml",
-        "line": 116,
+        "line": 119,
         "description": "Build escaped HTML attributes from an object. `false`, `null`, and `undefined` values are omitted. `true` values render as boolean attributes.",
+        "private": false,
         "params": [
           {
             "name": "attributes",
@@ -210,7 +216,7 @@ export const apiSections = [
           "description": "Trusted HTML attribute string."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L116"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L119"
       }
     ]
   },
@@ -233,6 +239,14 @@ export const apiSections = [
             "rest": false
           },
           {
+            "name": "signal",
+            "type": "AbortSignal",
+            "optional": false,
+            "default": "",
+            "description": "Request cancellation signal.",
+            "rest": false
+          },
+          {
             "name": "url",
             "type": "URL",
             "optional": false,
@@ -246,6 +260,14 @@ export const apiSections = [
             "optional": false,
             "default": "",
             "description": "Path parameters captured from a route pattern like `/posts/:slug`.",
+            "rest": false
+          },
+          {
+            "name": "defer",
+            "type": "(fragment: FragmentDefinition | string, attributes?: import(\"./html.js\").HtmlAttrs) => import(\"./html.js\").RawHtml",
+            "optional": false,
+            "default": "",
+            "description": "Render a stable loading boundary and collect a named fragment for deferred document streaming.",
             "rest": false
           }
         ],
@@ -291,16 +313,32 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 11,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L11"
+        "line": 15,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L15"
       },
       {
         "name": "FragmentRenderer",
         "description": "",
         "properties": [],
         "type": "(context: RouteContext) => string | Promise<string>",
-        "line": 20,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L20"
+        "line": 24,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L24"
+      },
+      {
+        "name": "FragmentLoadingRenderer",
+        "description": "",
+        "properties": [],
+        "type": "(context: RouteContext) => string",
+        "line": 28,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L28"
+      },
+      {
+        "name": "FragmentErrorRenderer",
+        "description": "",
+        "properties": [],
+        "type": "(error: unknown, context: RouteContext) => string | Promise<string>",
+        "line": 32,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L32"
       },
       {
         "name": "FragmentDefinition",
@@ -323,6 +361,30 @@ export const apiSections = [
             "rest": false
           },
           {
+            "name": "loading",
+            "type": "FragmentLoadingRenderer",
+            "optional": true,
+            "default": "",
+            "description": "Loading renderer used by deferred document streaming.",
+            "rest": false
+          },
+          {
+            "name": "error",
+            "type": "FragmentErrorRenderer",
+            "optional": true,
+            "default": "",
+            "description": "Error renderer used when a deferred fragment fails after the document response has started.",
+            "rest": false
+          },
+          {
+            "name": "timeout",
+            "type": "number",
+            "optional": true,
+            "default": "",
+            "description": "Maximum deferred render time in milliseconds.",
+            "rest": false
+          },
+          {
             "name": "attrs",
             "type": "(attributes?: import(\"./html.js\").HtmlAttrs) => import(\"./html.js\").RawHtml",
             "optional": false,
@@ -340,8 +402,8 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 24,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L24"
+        "line": 36,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L36"
       },
       {
         "name": "RouteDefinition",
@@ -365,7 +427,7 @@ export const apiSections = [
           },
           {
             "name": "fragments",
-            "type": "Record<string, FragmentRenderer> | FragmentDefinition[]",
+            "type": "Record<string, FragmentRenderer | FragmentDefinition> | FragmentDefinition[]",
             "optional": true,
             "default": "",
             "description": "Named fragment renderers used by nested fragment slots.",
@@ -373,24 +435,25 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 34,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L34"
+        "line": 51,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L51"
       },
       {
         "name": "Route",
         "description": "",
         "properties": [],
         "type": "RouteDefinition & { path: string, params?: Record<string, string> }",
-        "line": 44,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L44"
+        "line": 61,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L61"
       }
     ],
     "symbols": [
       {
         "name": "fragment",
-        "signature": "fragment(name, render) → FragmentDefinition",
-        "line": 108,
+        "signature": "fragment(name, definition) → FragmentDefinition",
+        "line": 145,
         "description": "Create a named fragment definition. Use this when a route has a nested region with its own navigation. The returned object can be registered in `route(..., { fragments: [item] })` and its attributes can be reused on links and target containers.",
+        "private": false,
         "params": [
           {
             "name": "name",
@@ -401,11 +464,11 @@ export const apiSections = [
             "rest": false
           },
           {
-            "name": "render",
-            "type": "FragmentRenderer",
+            "name": "definition",
+            "type": "FragmentRenderer | Omit<FragmentDefinition, \"name\" | \"attrs\" | \"prefetchAttrs\">",
             "optional": false,
             "default": "",
-            "description": "Fragment renderer.",
+            "description": "Fragment renderer or full fragment definition.",
             "rest": false
           }
         ],
@@ -415,7 +478,7 @@ export const apiSections = [
           "description": "Fragment definition."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L108",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L145",
         "returnFields": [
           {
             "name": "name",
@@ -431,6 +494,30 @@ export const apiSections = [
             "optional": false,
             "default": "",
             "description": "Fragment renderer.",
+            "rest": false
+          },
+          {
+            "name": "loading",
+            "type": "FragmentLoadingRenderer",
+            "optional": true,
+            "default": "",
+            "description": "Loading renderer used by deferred document streaming.",
+            "rest": false
+          },
+          {
+            "name": "error",
+            "type": "FragmentErrorRenderer",
+            "optional": true,
+            "default": "",
+            "description": "Error renderer used when a deferred fragment fails after the document response has started.",
+            "rest": false
+          },
+          {
+            "name": "timeout",
+            "type": "number",
+            "optional": true,
+            "default": "",
+            "description": "Maximum deferred render time in milliseconds.",
             "rest": false
           },
           {
@@ -454,8 +541,9 @@ export const apiSections = [
       {
         "name": "route",
         "signature": "route(path, definition) → Route",
-        "line": 128,
+        "line": 170,
         "description": "Create a normalized route definition.",
+        "private": false,
         "params": [
           {
             "name": "path",
@@ -491,7 +579,7 @@ export const apiSections = [
               },
               {
                 "name": "fragments",
-                "type": "Record<string, FragmentRenderer> | FragmentDefinition[]",
+                "type": "Record<string, FragmentRenderer | FragmentDefinition> | FragmentDefinition[]",
                 "optional": true,
                 "default": "",
                 "description": "Named fragment renderers used by nested fragment slots.",
@@ -506,13 +594,14 @@ export const apiSections = [
           "description": "Normalized route."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L128"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L170"
       },
       {
         "name": "createRoutes",
         "signature": "createRoutes(routes) → { all: Route[], match(pathname: string): Route | null }",
-        "line": 141,
+        "line": 187,
         "description": "Create a route manifest that can match normalized paths. Exact static routes win first, then parameterized routes are matched in declaration order.",
+        "private": false,
         "params": [
           {
             "name": "routes",
@@ -529,13 +618,14 @@ export const apiSections = [
           "description": "Route manifest."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L141"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L187"
       },
       {
         "name": "fragmentMeta",
         "signature": "fragmentMeta(meta) → string",
-        "line": 167,
+        "line": 213,
         "description": "Render fragment metadata for the browser fragment router.",
+        "private": false,
         "params": [
           {
             "name": "meta",
@@ -586,36 +676,38 @@ export const apiSections = [
           "description": "Script tag containing serialized metadata."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L167"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L213"
       },
       {
         "name": "renderRoute",
-        "signature": "renderRoute(options) → Promise<{ body: string, meta: Required<RouteMeta> }>",
-        "line": 180,
+        "signature": "renderRoute(options) → Promise<{ body: string, meta: Required<RouteMeta>, deferred: unknown[] }>",
+        "line": 414,
         "description": "Render a matched route and normalize metadata defaults.",
+        "private": false,
         "params": [
           {
             "name": "options",
-            "type": "{ match: Route, request: Request, slot?: string | null }",
+            "type": "{ match: Route, request: Request, slot?: string | null, deferredTimeout?: number | null }",
             "optional": false,
             "default": "",
-            "description": "Render options. When `slot` matches `RouteDefinition.fragments`, only that named fragment is rendered.",
+            "description": "Render options. When `slot` matches a registered named fragment, only that fragment renderer is used. Calls to `context.defer()` always collect deferred work for the adapter to stream or inline.",
             "rest": false
           }
         ],
         "properties": [],
         "returns": {
-          "type": "Promise<{ body: string, meta: Required<RouteMeta> }>",
+          "type": "Promise<{ body: string, meta: Required<RouteMeta>, deferred: unknown[] }>",
           "description": "Rendered route."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L180"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L414"
       },
       {
         "name": "renderFragment",
         "signature": "renderFragment(rendered) → string",
-        "line": 203,
+        "line": 482,
         "description": "Render a fragment response body with embedded metadata.",
+        "private": false,
         "params": [
           {
             "name": "rendered",
@@ -632,18 +724,19 @@ export const apiSections = [
           "description": "Fragment HTML."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L203"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L482"
       },
       {
         "name": "notFoundRoute",
         "signature": "notFoundRoute",
-        "line": 211,
+        "line": 575,
         "description": "Default 404 route used by adapters when a route is not matched.",
+        "private": false,
         "params": [],
         "properties": [],
         "returns": null,
         "type": "{Route}",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L211"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L575"
       }
     ]
   },
@@ -658,8 +751,8 @@ export const apiSections = [
         "description": "",
         "properties": [],
         "type": "import(\"../server/router.js\").Route",
-        "line": 81,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L81"
+        "line": 127,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L127"
       },
       {
         "name": "CloudflareHandlerOptions",
@@ -675,7 +768,7 @@ export const apiSections = [
           },
           {
             "name": "shell",
-            "type": "(rendered: { body: string, meta: object }) => string",
+            "type": "(rendered: { body?: string, meta: object, nonce?: string }) => string | { before: string, after: string }",
             "optional": false,
             "default": "",
             "description": "Function that wraps a rendered route body in a full HTML document.",
@@ -714,25 +807,34 @@ export const apiSections = [
             "rest": false
           },
           {
-            "name": "fragmentManifest",
-            "type": "boolean",
+            "name": "deferredTimeout",
+            "type": "number | null",
             "optional": true,
-            "default": "true",
-            "description": "Whether to inject a declarative fragment manifest with Cloudflare `HTMLRewriter` when available.",
+            "default": "15000",
+            "description": "Default timeout in milliseconds for each deferred fragment renderer. Set `null` to disable.",
+            "rest": false
+          },
+          {
+            "name": "contentSecurityPolicy",
+            "type": "string | false | ((options: { nonce: string, request: Request }) => string | false)",
+            "optional": true,
+            "default": "",
+            "description": "Content Security Policy header. Defaults to `frame-ancestors 'self'`. Pass a function to build a nonce-based strict policy.",
             "rest": false
           }
         ],
         "type": "object",
-        "line": 85,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L85"
+        "line": 131,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L131"
       }
     ],
     "symbols": [
       {
         "name": "createCloudflareHandler",
         "signature": "createCloudflareHandler(options) → { fetch(request: Request, env: Record<string, unknown>): Promise<Response> }",
-        "line": 112,
+        "line": 161,
         "description": "Create a Cloudflare Worker module for a Native Fragments app. Static assets are served from the configured assets binding. Normal document requests render the app shell. Requests with `x-fragment: true` return only the route body plus fragment metadata. Requests under `apiPrefix` are delegated to the optional API router before app route matching.",
+        "private": false,
         "params": [
           {
             "name": "options",
@@ -752,7 +854,7 @@ export const apiSections = [
               },
               {
                 "name": "shell",
-                "type": "(rendered: { body: string, meta: object }) => string",
+                "type": "(rendered: { body?: string, meta: object, nonce?: string }) => string | { before: string, after: string }",
                 "optional": false,
                 "default": "",
                 "description": "Function that wraps a rendered route body in a full HTML document.",
@@ -791,11 +893,19 @@ export const apiSections = [
                 "rest": false
               },
               {
-                "name": "fragmentManifest",
-                "type": "boolean",
+                "name": "deferredTimeout",
+                "type": "number | null",
                 "optional": true,
-                "default": "true",
-                "description": "Whether to inject a declarative fragment manifest with Cloudflare `HTMLRewriter` when available.",
+                "default": "15000",
+                "description": "Default timeout in milliseconds for each deferred fragment renderer. Set `null` to disable.",
+                "rest": false
+              },
+              {
+                "name": "contentSecurityPolicy",
+                "type": "string | false | ((options: { nonce: string, request: Request }) => string | false)",
+                "optional": true,
+                "default": "",
+                "description": "Content Security Policy header. Defaults to `frame-ancestors 'self'`. Pass a function to build a nonce-based strict policy.",
                 "rest": false
               }
             ]
@@ -807,7 +917,7 @@ export const apiSections = [
           "description": "Cloudflare Worker module."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L112"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L161"
       }
     ]
   },
@@ -855,16 +965,17 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 287,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/router.js#L287"
+        "line": 266,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/router.js#L266"
       }
     ],
     "symbols": [
       {
         "name": "prefetchFragment",
         "signature": "prefetchFragment(href, options?) → Promise<string | null>",
-        "line": 200,
+        "line": 189,
         "description": "Prefetch a same-origin fragment into the shared fragment cache.",
+        "private": false,
         "params": [
           {
             "name": "href",
@@ -889,13 +1000,14 @@ export const apiSections = [
           "description": "Prefetched fragment HTML, or `null` for skipped cross-origin URLs and document-like URLs such as `/agents.txt`."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/router.js#L200"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/router.js#L189"
       },
       {
         "name": "installFragmentNavigation",
         "signature": "installFragmentNavigation(options?) → ((href: string, pushState?: boolean, nextSlot?: string) => Promise<void>) | undefined",
-        "line": 314,
+        "line": 293,
         "description": "Install same-origin fragment navigation. Clicked links are fetched with `x-fragment: true`, the configured content slot is replaced, document metadata is updated, and history state is pushed. Links with `data-fragment-slot=\"name\"` replace only the matching `[data-fragment-slot=\"name\"]` container and send `x-fragment-slot: name`. External links, document-like URLs such as `/agents.txt`, modified clicks, and links with `data-nativefragments-reload` or `data-fragment-navigation=\"false\"` keep normal browser behavior.",
+        "private": false,
         "params": [
           {
             "name": "options",
@@ -946,7 +1058,7 @@ export const apiSections = [
           "description": "Navigate function, or `undefined` if the slot does not exist."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/router.js#L314"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/router.js#L293"
       }
     ]
   },
@@ -996,6 +1108,7 @@ export const apiSections = [
         "signature": "sheet(cssText) → CSSStyleSheet",
         "line": 7,
         "description": "Create a constructable stylesheet for Shadow DOM components.",
+        "private": false,
         "params": [
           {
             "name": "cssText",
@@ -1019,6 +1132,7 @@ export const apiSections = [
         "signature": "shadow(element, options?) → ShadowRoot",
         "line": 53,
         "description": "Attach or reuse an open shadow root, adopt stylesheets, and set its HTML. If the element already has declarative shadow DOM from server HTML, the first call preserves that DOM by default. Fragment navigation inserts HTML with `template.innerHTML`, so declarative shadow templates are materialized manually before hydration to keep server-rendered components visible.",
+        "private": false,
         "params": [
           {
             "name": "element",
@@ -1136,6 +1250,7 @@ export const apiSections = [
         "signature": "transferResult(payload, transfer?) → { payload: T, transfer: Transferable[], [transferMarker]: true }",
         "line": 33,
         "description": "Wrap a worker response with Transferable objects.",
+        "private": false,
         "params": [
           {
             "name": "payload",
@@ -1167,6 +1282,7 @@ export const apiSections = [
         "signature": "workerClient(worker, options?) → NativeWorkerClient",
         "line": 59,
         "description": "Create a tiny RPC client for a dedicated Web Worker.",
+        "private": false,
         "params": [
           {
             "name": "worker",
@@ -1234,6 +1350,7 @@ export const apiSections = [
         "signature": "createWorkerClient(workerOrUrl, options?) → NativeWorkerClient",
         "line": 121,
         "description": "Create a module worker and wrap it with `workerClient`.",
+        "private": false,
         "params": [
           {
             "name": "workerOrUrl",
@@ -1282,6 +1399,7 @@ export const apiSections = [
         "signature": "exposeWorker(handlers, scope?) → () => void",
         "line": 139,
         "description": "Expose named handlers inside a dedicated Web Worker.",
+        "private": false,
         "params": [
           {
             "name": "handlers",
@@ -1322,6 +1440,7 @@ export const apiSections = [
         "signature": "state(initial, options?) → Signal.State",
         "line": 44,
         "description": "Create a writable signal. Read it with `.get()` and update it with `.set()`.",
+        "private": false,
         "params": [
           {
             "name": "initial",
@@ -1353,6 +1472,7 @@ export const apiSections = [
         "signature": "computed(callback, options?) → Signal.Computed",
         "line": 54,
         "description": "Create a read-only signal derived from other signals. It recomputes lazily when a dependency changes.",
+        "private": false,
         "params": [
           {
             "name": "callback",
@@ -1384,6 +1504,7 @@ export const apiSections = [
         "signature": "isSignal(value) → boolean",
         "line": 62,
         "description": "Test whether a value is a signal (state or computed).",
+        "private": false,
         "params": [
           {
             "name": "value",
@@ -1407,6 +1528,7 @@ export const apiSections = [
         "signature": "read(value) → unknown",
         "line": 73,
         "description": "Resolve a value: call `.get()` on a signal, invoke a function, or return a plain value unchanged. Lets every binding helper accept a signal, a getter, or a static value.",
+        "private": false,
         "params": [
           {
             "name": "value",
@@ -1430,6 +1552,7 @@ export const apiSections = [
         "signature": "effect(callback) → () => void",
         "line": 87,
         "description": "Run a callback immediately and re-run it whenever a signal it read changes (batched on the microtask queue). Return a function from the callback to run cleanup before the next run.",
+        "private": false,
         "params": [
           {
             "name": "callback",
@@ -1453,6 +1576,7 @@ export const apiSections = [
         "signature": "bindText(node, value) → () => void",
         "line": 112,
         "description": "Bind a node's text content to a signal.",
+        "private": false,
         "params": [
           {
             "name": "node",
@@ -1484,6 +1608,7 @@ export const apiSections = [
         "signature": "bindHTML(element, value) → () => void",
         "line": 124,
         "description": "Bind an element's `innerHTML` to a signal. Use trusted HTML only.",
+        "private": false,
         "params": [
           {
             "name": "element",
@@ -1515,6 +1640,7 @@ export const apiSections = [
         "signature": "bindAttr(element, name, value) → () => void",
         "line": 138,
         "description": "Bind an attribute to a signal. `false`, `null`, and `undefined` remove the attribute; `true` renders it empty.",
+        "private": false,
         "params": [
           {
             "name": "element",
@@ -1554,6 +1680,7 @@ export const apiSections = [
         "signature": "bindProperty(element, property, value) → () => void",
         "line": 156,
         "description": "Bind a DOM property to a signal.",
+        "private": false,
         "params": [
           {
             "name": "element",
@@ -1593,6 +1720,7 @@ export const apiSections = [
         "signature": "bindClass(element, name, value) → () => void",
         "line": 169,
         "description": "Toggle a class on an element based on a signal's truthiness.",
+        "private": false,
         "params": [
           {
             "name": "element",
@@ -1632,6 +1760,7 @@ export const apiSections = [
         "signature": "bindStyle(element, name, value) → () => void",
         "line": 183,
         "description": "Bind a style property to a signal. `false`, `null`, and `undefined` remove the property.",
+        "private": false,
         "params": [
           {
             "name": "element",
@@ -1671,6 +1800,7 @@ export const apiSections = [
         "signature": "model(element, signal, eventName?) → () => void",
         "line": 202,
         "description": "Two-way bind an input-like element's `value` to a writable signal: the signal drives the element, and the element updates the signal on `eventName`.",
+        "private": false,
         "params": [
           {
             "name": "element",
@@ -1723,8 +1853,8 @@ export const apiTypes = [
     "description": "",
     "properties": [],
     "type": "Record<string, string | number | boolean | null | undefined>",
-    "line": 103,
-    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L103"
+    "line": 106,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L106"
   },
   {
     "name": "RouteContext",
@@ -1736,6 +1866,14 @@ export const apiTypes = [
         "optional": false,
         "default": "",
         "description": "Original request.",
+        "rest": false
+      },
+      {
+        "name": "signal",
+        "type": "AbortSignal",
+        "optional": false,
+        "default": "",
+        "description": "Request cancellation signal.",
         "rest": false
       },
       {
@@ -1753,6 +1891,14 @@ export const apiTypes = [
         "default": "",
         "description": "Path parameters captured from a route pattern like `/posts/:slug`.",
         "rest": false
+      },
+      {
+        "name": "defer",
+        "type": "(fragment: FragmentDefinition | string, attributes?: import(\"./html.js\").HtmlAttrs) => import(\"./html.js\").RawHtml",
+        "optional": false,
+        "default": "",
+        "description": "Render a stable loading boundary and collect a named fragment for deferred document streaming.",
+        "rest": false
       }
     ],
     "type": "object",
@@ -1764,15 +1910,31 @@ export const apiTypes = [
     "description": "",
     "properties": [],
     "type": "(context: RouteContext) => string | Promise<string>",
-    "line": 20,
-    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L20"
+    "line": 24,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L24"
+  },
+  {
+    "name": "FragmentLoadingRenderer",
+    "description": "",
+    "properties": [],
+    "type": "(context: RouteContext) => string",
+    "line": 28,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L28"
+  },
+  {
+    "name": "FragmentErrorRenderer",
+    "description": "",
+    "properties": [],
+    "type": "(error: unknown, context: RouteContext) => string | Promise<string>",
+    "line": 32,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L32"
   },
   {
     "name": "Route",
     "description": "",
     "properties": [],
     "type": "RouteDefinition & { path: string, params?: Record<string, string> }",
-    "line": 44,
-    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L44"
+    "line": 61,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L61"
   }
 ];
