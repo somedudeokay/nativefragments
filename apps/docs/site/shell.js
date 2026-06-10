@@ -65,9 +65,6 @@ export const shell = ({ body, meta, nonce }) => {
         <section class="sidebar-site">
           <h2>Native Fragments</h2>
           <a href="https://nativefragments.org/">Home</a>
-          <a href="https://nativefragments.org/examples">Examples</a>
-          <a href="https://nativefragments.org/demos">Demos</a>
-          <a href="https://nativefragments.org/manifesto">Manifesto</a>
           <a href="https://github.com/somedudeokay/nativefragments">GitHub</a>
         </section>
       </aside>
