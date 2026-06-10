@@ -61,10 +61,7 @@ const headerStyles = `
   }
 
   .icon-links {
-    border-left: 1px solid var(--line, rgba(20, 20, 20, 0.12));
     gap: 0.2rem;
-    margin-left: 0.35rem;
-    padding-left: 0.75rem;
   }
 
   a {
@@ -141,10 +138,6 @@ const githubIcon = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentCol
 const headerHtml = `<header>
   <a class="brand" href="https://nativefragments.org/">Native Fragments</a>
   <div class="header-links">
-    <nav aria-label="Primary">
-      <a href="https://docs.nativefragments.org" aria-current="page">Docs</a>
-      <a href="https://nativefragments.org/examples">Examples</a>
-    </nav>
     <div class="icon-links" aria-label="Package links">
       <a class="icon-link" href="https://github.com/somedudeokay/nativefragments" aria-label="GitHub" title="GitHub">${githubIcon}</a>
       <a class="icon-link" href="https://www.npmjs.com/package/@nativefragments/core" aria-label="npm" title="npm"><span class="npm-mark">npm</span></a>
