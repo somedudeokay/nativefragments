@@ -78,8 +78,9 @@ export const postRoute = route("/posts/:slug", {
       <h2>Streaming shells</h2>
       <p>
         To stream, the adapter needs to know where the route body sits inside
-        your shell. A shell that returns <code>{ before, after }</code> when
-        called without a <code>body</code> makes the split explicit:
+        your <a href="/concepts/shell">shell</a>. A shell that returns
+        <code>{ before, after }</code> when called without a <code>body</code>
+        makes the split explicit:
       </p>
       ${code(`import { html, raw } from "@nativefragments/core/server";
 
@@ -129,6 +130,7 @@ export const shell = ({ body, meta, nonce }) => {
       <h2>See also</h2>
       <ul>
         <li><a href="/concepts/fragments">Fragments</a> — the navigation model deferred fragments build on.</li>
+        <li><a href="/concepts/shell">Shell</a> — everything else the shell owns.</li>
         <li><a href="/concepts/api-routes">API Routes</a> — strict Content Security Policy with the per-request nonce.</li>
         <li><a href="/reference#RouteContext">Reference: <code>RouteContext.defer</code></a>, <a href="/reference#FragmentDefinition"><code>FragmentDefinition</code></a>, <a href="/reference#CloudflareHandlerOptions"><code>CloudflareHandlerOptions</code></a>.</li>
       </ul>

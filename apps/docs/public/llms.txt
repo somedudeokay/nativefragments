@@ -13,6 +13,7 @@
 ## Concepts
 
 - [Routing](https://docs.nativefragments.org/routing.md)
+- [Shell](https://docs.nativefragments.org/shell.md)
 - [Fragments](https://docs.nativefragments.org/fragments.md)
 - [Streaming](https://docs.nativefragments.org/streaming.md)
 - [Components](https://docs.nativefragments.org/components.md)

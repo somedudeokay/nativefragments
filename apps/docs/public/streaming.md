@@ -45,7 +45,7 @@ Every deferred fragment has a timeout (default 15 seconds, configurable per frag
 
 ## Streaming shells
 
-To stream, the adapter needs to know where the route body sits inside your shell. A shell that returns `{ before, after }` when called without a `body` makes the split explicit:
+To stream, the adapter needs to know where the route body sits inside your [shell](/concepts/shell). A shell that returns `{ before, after }` when called without a `body` makes the split explicit:
 
 ```js
 import { html, raw } from "@nativefragments/core/server";
@@ -78,5 +78,6 @@ Streamed fragments arrive as real, parseable HTML in the same response the crawl
 ## See also
 
 - [Fragments](/concepts/fragments) — the navigation model deferred fragments build on.
+- [Shell](/concepts/shell) — everything else the shell owns.
 - [API Routes](/concepts/api-routes) — strict Content Security Policy with the per-request nonce.
 - [Reference: RouteContext.defer](/reference#RouteContext), [FragmentDefinition](/reference#FragmentDefinition), [CloudflareHandlerOptions](/reference#CloudflareHandlerOptions).

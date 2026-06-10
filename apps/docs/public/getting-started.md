@@ -51,5 +51,6 @@ npm run deploy
 ## See also
 
 - [Routing](/concepts/routing) — structure your URLs.
+- [Shell](/concepts/shell) — the document around every route.
 - [Fragments](/concepts/fragments) — fast partial navigation.
 - [Components](/concepts/components) — build UI with Shadow DOM.

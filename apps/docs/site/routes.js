@@ -8,6 +8,7 @@ import { gettingStartedPage } from "./pages/getting-started.js";
 import { homePage } from "./pages/home.js";
 import { referencePage } from "./pages/reference.js";
 import { routingPage } from "./pages/routing.js";
+import { shellPage } from "./pages/shell.js";
 import { signalsPage } from "./pages/signals.js";
 import { streamingPage } from "./pages/streaming.js";
 import { workersPage } from "./pages/workers.js";
@@ -39,6 +40,15 @@ export const routes = [
     meta: () =>
       meta("/concepts/routing", "Routing", "Native Fragments route concepts."),
     render: routingPage,
+  }),
+  route("/concepts/shell", {
+    meta: () =>
+      meta(
+        "/concepts/shell",
+        "Shell",
+        "The function that wraps every route body in a full HTML document.",
+      ),
+    render: shellPage,
   }),
   route("/concepts/fragments", {
     meta: () =>

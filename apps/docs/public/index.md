@@ -40,7 +40,7 @@ import { shell } from "./site/shell.js";
 export default createCloudflareHandler({ routes, shell });
 ```
 
-Uses [route](/reference#route), [html](/reference#html), [raw](/reference#raw), and [createCloudflareHandler](/reference#createCloudflareHandler). The shell wraps every route body; `#content-slot` is where fragment navigation swaps content later.
+Uses [route](/reference#route), [html](/reference#html), [raw](/reference#raw), and [createCloudflareHandler](/reference#createCloudflareHandler). The [shell](/concepts/shell) wraps every route body; `#content-slot` is where fragment navigation swaps content later.
 
 ## How it fits together
 

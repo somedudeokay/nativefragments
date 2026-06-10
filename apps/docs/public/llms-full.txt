@@ -22,6 +22,7 @@ npm run dev
 - https://docs.nativefragments.org/index.md
 - https://docs.nativefragments.org/getting-started.md
 - https://docs.nativefragments.org/routing.md
+- https://docs.nativefragments.org/shell.md
 - https://docs.nativefragments.org/fragments.md
 - https://docs.nativefragments.org/streaming.md
 - https://docs.nativefragments.org/components.md

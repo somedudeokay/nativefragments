@@ -10,6 +10,7 @@ export const navGroups = [
     title: "Concepts",
     links: [
       { href: "/concepts/routing", label: "Routing" },
+      { href: "/concepts/shell", label: "Shell" },
       { href: "/concepts/fragments", label: "Fragments" },
       { href: "/concepts/streaming", label: "Streaming" },
       { href: "/concepts/components", label: "Components" },

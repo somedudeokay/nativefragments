@@ -50,8 +50,9 @@ export default createCloudflareHandler({ routes, shell });`)}
         <a href="/reference#html"><code>html</code></a>,
         <a href="/reference#raw"><code>raw</code></a>, and
         <a href="/reference#createCloudflareHandler"><code>createCloudflareHandler</code></a>.
-        The shell wraps every route body; <code>#content-slot</code> is where
-        fragment navigation swaps content later.
+        The <a href="/concepts/shell">shell</a> wraps every route body;
+        <code>#content-slot</code> is where fragment navigation swaps content
+        later.
       </p>
 
       <h2>How it fits together</h2>

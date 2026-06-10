@@ -55,6 +55,7 @@ render: () => html\`<h1>My first fragment</h1>\`,`)}
       <h2>See also</h2>
       <ul>
         <li><a href="/concepts/routing">Routing</a> — structure your URLs.</li>
+        <li><a href="/concepts/shell">Shell</a> — the document around every route.</li>
         <li><a href="/concepts/fragments">Fragments</a> — fast partial navigation.</li>
         <li><a href="/concepts/components">Components</a> — build UI with Shadow DOM.</li>
       </ul>
