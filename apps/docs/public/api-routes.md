@@ -61,7 +61,7 @@ export const shell = ({ body, meta, nonce }) => html`<!doctype html>
       document.documentElement.classList.add("js");
     </script>
   </head>
-  <body>${raw(body)}</body>
+  <body>${body}</body>
 </html>`;
 
 export default createCloudflareHandler({

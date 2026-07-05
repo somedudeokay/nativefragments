@@ -1,4 +1,8 @@
 export {
+  apiRoute,
+  createApi,
+} from "./api.js";
+export {
   attrs,
   declarativeShadow,
   escapeHtml,
@@ -8,9 +12,12 @@ export {
 } from "./html.js";
 export {
   createRoutes,
+  errorRoute,
   fragment,
   fragmentMeta,
   notFoundRoute,
+  readSearch,
+  redirect,
   renderFragment,
   renderRoute,
   route,

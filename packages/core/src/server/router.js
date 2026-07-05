@@ -1,10 +1,12 @@
 import { attrs, html, jsonScript, raw } from "./html.js";
+import { createRouteContext, defaultDeferredTimeout } from "./defer.js";
 
 /**
  * @typedef {object} RouteContext
  * @property {Request} request Original request.
  * @property {AbortSignal} signal Request cancellation signal.
  * @property {URL} url Parsed request URL.
+ * @property {URLSearchParams} query Parsed query parameters from `url.searchParams`.
  * @property {Record<string, string>} params Path parameters captured from a
  * route pattern like `/posts/:slug`.
  * @property {(fragment: FragmentDefinition | string, attributes?: import("./html.js").HtmlAttrs) => import("./html.js").RawHtml} defer
@@ -22,15 +24,15 @@ import { attrs, html, jsonScript, raw } from "./html.js";
  */
 
 /**
- * @typedef {(context: RouteContext) => string | Promise<string>} FragmentRenderer
+ * @typedef {(context: RouteContext) => string | import("./html.js").RawHtml | Response | Promise<string | import("./html.js").RawHtml | Response>} FragmentRenderer
  */
 
 /**
- * @typedef {(context: RouteContext) => string} FragmentLoadingRenderer
+ * @typedef {(context: RouteContext) => string | import("./html.js").RawHtml} FragmentLoadingRenderer
  */
 
 /**
- * @typedef {(error: unknown, context: RouteContext) => string | Promise<string>} FragmentErrorRenderer
+ * @typedef {(error: unknown, context: RouteContext) => string | import("./html.js").RawHtml | Promise<string | import("./html.js").RawHtml>} FragmentErrorRenderer
  */
 
 /**
@@ -50,9 +52,15 @@ import { attrs, html, jsonScript, raw } from "./html.js";
 
 /**
  * @typedef {object} RouteDefinition
- * @property {(context: RouteContext) => RouteMeta | Promise<RouteMeta>} [meta]
+ * @property {(context: RouteContext) => RouteMeta | Response | Promise<RouteMeta | Response>} [meta]
  * Function that returns metadata for the route.
- * @property {(context: RouteContext) => string | Promise<string>} render
+ * @property {number} [status=200] Status used for rendered HTML responses.
+ * @property {Record<string, string> | ((context: RouteContext) => Record<string, string> | Promise<Record<string, string>>)} [headers]
+ * Headers merged into rendered HTML responses after adapter defaults.
+ * @property {(context: RouteContext) => Response | Promise<Response>} [action]
+ * POST handler for no-JavaScript mutations. Must return a native Response,
+ * usually a 303 redirect.
+ * @property {(context: RouteContext) => string | import("./html.js").RawHtml | Response | Promise<string | import("./html.js").RawHtml | Response>} render
  * Function that renders route body HTML.
  * @property {Record<string, FragmentRenderer | FragmentDefinition> | FragmentDefinition[]} [fragments]
  * Named fragment renderers used by nested fragment slots.
@@ -66,6 +74,8 @@ const normalizePath = (path) => {
   if (!path || path === "/") return "/";
   return path.replace(/\/+$/, "") || "/";
 };
+
+const isResponse = (value) => value instanceof Response;
 
 const isFragmentDefinition = (value) =>
   Boolean(value && typeof value === "object" && value.name && value.render);
@@ -102,11 +112,29 @@ const decodeSegment = (segment) => {
 const pathSegments = (path) =>
   normalizePath(path).split("/").filter(Boolean).map(decodeSegment);
 
-const paramName = (segment) => (segment.startsWith(":") ? segment.slice(1) : null);
+const paramInfo = (segment) => {
+  if (!segment.startsWith(":")) return null;
+  const rawName = segment.slice(1);
+  const rest = rawName.endsWith("*");
+  const name = rest ? rawName.slice(0, -1) : rawName;
+  return name ? { name, rest } : null;
+};
+
+const validateRoutePattern = (path) => {
+  const segments = pathSegments(path);
+  for (const [index, segment] of segments.entries()) {
+    const info = paramInfo(segment);
+    if (info?.rest && index !== segments.length - 1) {
+      throw new TypeError(
+        `Catch-all route segment "${segment}" must be the final segment in "${path}".`,
+      );
+    }
+  }
+};
 
 const compileRoutePattern = (item) => {
   const segments = pathSegments(item.path);
-  const hasParams = segments.some((segment) => paramName(segment));
+  const hasParams = segments.some((segment) => paramInfo(segment));
   if (!hasParams) return null;
 
   return { item, segments };
@@ -114,14 +142,22 @@ const compileRoutePattern = (item) => {
 
 const matchRoutePattern = (compiled, pathname) => {
   const requestSegments = pathSegments(pathname);
-  if (compiled.segments.length !== requestSegments.length) return null;
+  const restIndex = compiled.segments.findIndex((segment) => paramInfo(segment)?.rest);
+  if (restIndex === -1 && compiled.segments.length !== requestSegments.length) {
+    return null;
+  }
+  if (restIndex !== -1 && requestSegments.length < restIndex) return null;
 
   const params = {};
 
   for (const [index, segment] of compiled.segments.entries()) {
-    const name = paramName(segment);
-    if (name) {
-      params[name] = requestSegments[index] ?? "";
+    const info = paramInfo(segment);
+    if (info?.rest) {
+      params[info.name] = requestSegments.slice(index).join("/");
+      break;
+    }
+    if (info) {
+      params[info.name] = requestSegments[index] ?? "";
       continue;
     }
     if (segment !== requestSegments[index]) return null;
@@ -168,6 +204,7 @@ export const fragment = (name, definition) => {
  * @returns {Route} Normalized route.
  */
 export const route = (path, definition) => {
+  validateRoutePattern(path);
   const { fragments, ...routeDefinition } = definition;
 
   return {
@@ -178,6 +215,40 @@ export const route = (path, definition) => {
 };
 
 /**
+ * Create a redirect response.
+ *
+ * @param {string | URL} location Redirect destination.
+ * @param {number} [status=302] Redirect status.
+ * @returns {Response} Native redirect response.
+ */
+export const redirect = (location, status = 302) =>
+  new Response(null, {
+    status,
+    headers: {
+      Location: String(location),
+    },
+  });
+
+/**
+ * Read string query parameters with defaults.
+ *
+ * Each returned key is `searchParams.get(key)` when it is a non-empty string,
+ * otherwise the default value.
+ *
+ * @template {Record<string, string>} T
+ * @param {URLSearchParams} searchParams Query parameters.
+ * @param {T} defaults Default values.
+ * @returns {T} Query values merged with defaults.
+ */
+export const readSearch = (searchParams, defaults) =>
+  Object.fromEntries(
+    Object.entries(defaults).map(([key, fallback]) => {
+      const value = searchParams.get(key);
+      return [key, value === "" || value == null ? fallback : value];
+    }),
+  );
+
+/**
  * Create a route manifest that can match normalized paths. Exact static routes
  * win first, then parameterized routes are matched in declaration order.
  *
@@ -185,11 +256,26 @@ export const route = (path, definition) => {
  * @returns {{ all: Route[], match(pathname: string): Route | null }} Route manifest.
  */
 export const createRoutes = (routes) => {
-  const byPath = new Map(routes.map((item) => [normalizePath(item.path), item]));
-  const patterns = routes.map(compileRoutePattern).filter(Boolean);
+  const byPath = new Map();
+  const uniqueRoutes = [];
+
+  for (const item of routes) {
+    const path = normalizePath(item.path);
+    validateRoutePattern(path);
+    if (byPath.has(path)) {
+      console.warn(
+        `Native Fragments: duplicate route path "${path}" ignored; keeping first "${byPath.get(path).path}".`,
+      );
+      continue;
+    }
+    byPath.set(path, item);
+    uniqueRoutes.push(item);
+  }
+
+  const patterns = uniqueRoutes.map(compileRoutePattern).filter(Boolean);
 
   return {
-    all: routes,
+    all: uniqueRoutes,
     match(pathname) {
       const exact = byPath.get(normalizePath(pathname));
       if (exact) return exact;
@@ -208,199 +294,12 @@ export const createRoutes = (routes) => {
  * Render fragment metadata for the browser fragment router.
  *
  * @param {RouteMeta} meta Metadata to embed in the fragment response.
- * @returns {string} Script tag containing serialized metadata.
+ * @returns {import("./html.js").RawHtml} Script tag containing serialized metadata.
  */
 export const fragmentMeta = (meta) =>
   html`<script type="application/json" data-fragment-meta>${raw(
     jsonScript(meta),
   )}</script>`;
-
-const validTagName = (value) =>
-  typeof value === "string" && /^[a-z][a-z0-9-]*$/i.test(value);
-
-const unsafeDeferredTags = new Set([
-  "base",
-  "body",
-  "head",
-  "html",
-  "iframe",
-  "link",
-  "meta",
-  "script",
-  "style",
-  "template",
-  "textarea",
-  "title",
-]);
-
-const deferredTagName = (value) => {
-  const tag = String(value ?? "").toLowerCase();
-  return validTagName(tag) && !unsafeDeferredTags.has(tag) ? tag : "section";
-};
-
-const deferredId = (name, index) => {
-  const slug = String(name)
-    .toLowerCase()
-    .replace(/[^a-z0-9_-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-  return `nf-${slug || "fragment"}-${index}`;
-};
-
-const defaultDeferredLoading = () => html`<div data-fragment-loading role="status">
-  Loading...
-</div>`;
-
-const defaultDeferredError = () => html`<div data-fragment-error role="status">
-  This section could not be rendered.
-</div>`;
-
-const resolveDeferredFragment = (match, fragmentOrName) => {
-  if (typeof fragmentOrName === "string") {
-    return match.fragments?.[fragmentOrName] ?? null;
-  }
-
-  return isFragmentDefinition(fragmentOrName) ? fragmentOrName : null;
-};
-
-const renderLoading = (definition, context) => {
-  const loading = definition.loading?.(context) ?? defaultDeferredLoading(context);
-
-  if (loading && typeof loading.then === "function") {
-    throw new Error(
-      `Deferred fragment "${definition.name}" loading() must be synchronous. Do async work in render().`,
-    );
-  }
-
-  return loading;
-};
-
-const renderError = async (definition, error, context) => {
-  try {
-    return await (definition.error?.(error, context) ?? defaultDeferredError(error, context));
-  } catch {
-    return defaultDeferredError(error, context);
-  }
-};
-
-const defaultDeferredTimeout = 15_000;
-
-const deferredTimeout = (definition, fallback) => {
-  const timeout = definition.timeout ?? fallback;
-  return Number.isFinite(timeout) && timeout > 0 ? timeout : null;
-};
-
-const runWithSignal = ({ context, definition, timeout }) => {
-  const controller = new AbortController();
-  const parentSignal = context.signal;
-  let timeoutId = null;
-  let removeParentAbort = null;
-  const races = [];
-
-  if (parentSignal) {
-    races.push(
-      new Promise((_, reject) => {
-        const abort = () => {
-          const reason = parentSignal.reason ?? new Error("Request aborted");
-          controller.abort(reason);
-          reject(reason);
-        };
-
-        if (parentSignal.aborted) {
-          abort();
-          return;
-        }
-
-        parentSignal.addEventListener("abort", abort, { once: true });
-        removeParentAbort = () =>
-          parentSignal.removeEventListener("abort", abort);
-      }),
-    );
-  }
-
-  if (timeout) {
-    races.push(
-      new Promise((_, reject) => {
-        timeoutId = setTimeout(() => {
-          const error = new Error(
-            `Deferred fragment "${definition.name}" timed out after ${timeout}ms`,
-          );
-          controller.abort(error);
-          reject(error);
-        }, timeout);
-      }),
-    );
-  }
-
-  const render = Promise.resolve().then(() =>
-    definition.render({
-      ...context,
-      signal: controller.signal,
-    }),
-  );
-
-  return Promise.race([render, ...races]).finally(() => {
-    if (timeoutId) clearTimeout(timeoutId);
-    removeParentAbort?.();
-  });
-};
-
-const createDeferredTask = ({ id, definition, context, attributes, loading, timeout }) => ({
-  id,
-  name: definition.name,
-  attributes,
-  context,
-  definition,
-  loading,
-  placeholder: "",
-  promise: null,
-  run() {
-    this.promise ??= runWithSignal({
-      context,
-      definition,
-      timeout,
-    })
-      .then(
-        (body) => ({ ok: true, body }),
-        (error) => ({ ok: false, error }),
-      );
-    return this.promise;
-  },
-});
-
-const renderDeferredSlot = ({ id, name, content, attributes = {}, state = "loading" }) => {
-  const { as, ...htmlAttributes } = attributes;
-  const tag = deferredTagName(as);
-  const isLoading = state === "loading";
-
-  return html`<${raw(tag)}${attrs({
-    ...htmlAttributes,
-    ...(isLoading ? { "aria-busy": "true" } : {}),
-    "data-fragment-slot": name,
-    "data-fragment-state": state,
-    "data-nativefragments-deferred": id,
-  })}>${raw(content)}</${raw(tag)}>`;
-};
-
-const renderResolvedDeferredSlot = async (task) => {
-  const result = await task.run();
-  const state = result.ok ? "ready" : "error";
-  const body = result.ok
-    ? result.body
-    : await renderError(task.definition, result.error, task.context);
-
-  return {
-    body,
-    state,
-    slot: renderDeferredSlot({
-      id: task.id,
-      name: task.name,
-      content: body,
-      attributes: task.attributes,
-      state,
-    }),
-  };
-};
 
 /**
  * Render a matched route and normalize metadata defaults.
@@ -409,7 +308,7 @@ const renderResolvedDeferredSlot = async (task) => {
  * Render options. When `slot` matches a registered named fragment, only that
  * fragment renderer is used. Calls to `context.defer()` always collect
  * deferred work for the adapter to stream or inline.
- * @returns {Promise<{ body: string, meta: Required<RouteMeta>, deferred: unknown[] }>} Rendered route.
+ * @returns {Promise<{ body: string, meta: Required<Pick<RouteMeta, "title" | "description" | "canonical">> & RouteMeta, deferred: unknown[], status: number, headers: Record<string, string> } | { response: Response }>} Rendered route.
  */
 export const renderRoute = async ({
   match,
@@ -418,154 +317,89 @@ export const renderRoute = async ({
   deferredTimeout: fallbackDeferredTimeout = defaultDeferredTimeout,
 }) => {
   const deferred = [];
-  const context = {
-    params: match.params ?? {},
+  const context = createRouteContext({
+    deferred,
+    fallbackDeferredTimeout,
+    match,
     request,
-    signal: request.signal,
-    url: new URL(request.url),
-    defer(fragmentOrName, attributes = {}) {
-      const definition = resolveDeferredFragment(match, fragmentOrName);
-      if (!definition) {
-        throw new Error(`Unknown deferred fragment: ${String(fragmentOrName)}`);
-      }
-
-      const id = deferredId(definition.name, deferred.length + 1);
-      const loading = renderLoading(definition, context);
-      const task = createDeferredTask({
-        attributes,
-        context,
-        definition,
-        id,
-        loading,
-        timeout: deferredTimeout(definition, fallbackDeferredTimeout),
-      });
-
-      task.placeholder = renderDeferredSlot({
-        id,
-        name: definition.name,
-        content: loading,
-        attributes,
-        state: "loading",
-      });
-      deferred.push(task);
-      // Start the renderer immediately so data fetches overlap with the rest
-      // of the route render and shell serialization. run() never rejects (it
-      // resolves to an { ok, body | error } envelope).
-      task.run();
-
-      return raw(task.placeholder);
-    },
-  };
-  const meta = await match.meta?.(context);
+  });
+  let meta;
+  try {
+    meta = await match.meta?.(context);
+    if (isResponse(meta)) return { response: meta };
+  } catch (error) {
+    if (isResponse(error)) return { response: error };
+    throw error;
+  }
   const fragmentDefinition = slot ? match.fragments?.[slot] : null;
   const render = fragmentDefinition ? fragmentDefinition.render : match.render;
-  const body = await render(context);
+  let body;
+  try {
+    body = await render(context);
+    if (isResponse(body)) return { response: body };
+  } catch (error) {
+    if (isResponse(error)) return { response: error };
+    throw error;
+  }
+
+  const routeHeaders =
+    typeof match.headers === "function"
+      ? await match.headers(context)
+      : match.headers;
 
   return {
-    body,
+    body: String(body),
     deferred,
+    headers: routeHeaders ?? {},
     meta: {
       title: "",
       description: "",
       canonical: context.url.pathname,
       ...(meta ?? {}),
     },
+    status: match.status ?? 200,
   };
+};
+
+/**
+ * Run a route action for POST-redirect-GET mutations.
+ *
+ * @private
+ * @param {{ match: Route, request: Request }} options Action options.
+ * @returns {Promise<Response>} Action response.
+ */
+export const runRouteAction = async ({ match, request }) => {
+  if (!match.action) {
+    throw new Error(`Route "${match.path}" does not define an action.`);
+  }
+
+  const context = createRouteContext({
+    deferred: [],
+    fallbackDeferredTimeout: null,
+    match,
+    request,
+  });
+  let response;
+  try {
+    response = await match.action(context);
+  } catch (error) {
+    if (isResponse(error)) return error;
+    throw error;
+  }
+  if (!isResponse(response)) {
+    throw new TypeError(`Route action for "${match.path}" must return a Response.`);
+  }
+  return response;
 };
 
 /**
  * Render a fragment response body with embedded metadata.
  *
  * @param {{ body: string, meta: RouteMeta }} rendered Rendered route body and metadata.
- * @returns {string} Fragment HTML.
+ * @returns {import("./html.js").RawHtml} Fragment HTML.
  */
 export const renderFragment = ({ body, meta }) =>
-  html`${raw(body)}${raw(fragmentMeta(meta))}`;
-
-/**
- * @private
- */
-export const inlineDeferredFragments = async (rendered) => {
-  if (!rendered.deferred?.length) return rendered;
-  const replacements = await Promise.all(
-    rendered.deferred.map(async (task) => [
-      task,
-      (await renderResolvedDeferredSlot(task)).slot,
-    ]),
-  );
-  let body = rendered.body;
-
-  for (const [task, resolved] of replacements) {
-    if (!body.includes(task.placeholder)) {
-      console.warn(
-        `Native Fragments: the loading boundary for deferred fragment "${task.name}" was not found in the rendered body, so its resolved content was dropped. Interpolate the value returned by context.defer() into the render output unmodified.`,
-      );
-      continue;
-    }
-    body = body.split(task.placeholder).join(resolved);
-  }
-
-  return {
-    ...rendered,
-    body,
-    deferred: [],
-  };
-};
-
-/**
- * @private
- */
-export const renderDeferredFragment = async (task) => {
-  const resolved = await renderResolvedDeferredSlot(task);
-
-  return html`<div hidden data-nativefragments-deferred-content="${task.id}" data-fragment-state="${resolved.state}">${raw(
-    resolved.body,
-  )}</div>`;
-};
-
-/**
- * Single source of the deferred reveal logic. It streams inline (with the CSP
- * nonce) on every deferred document response, before any content chunk, so the
- * browser router does not need its own copy.
- *
- * @private
- */
-export const deferredFragmentBootstrap = ({ nonce } = {}) => html`<script${attrs({
-  nonce,
-  "data-nativefragments-deferred-bootstrap": true,
-})}>
-(() => {
-  if (window.__nativeFragmentsDeferredFragments) return;
-  window.__nativeFragmentsDeferredFragments = true;
-
-  const escapeValue = (value) => String(value).replace(/["\\\\]/g, "\\\\$&");
-  const reveal = (node) => {
-    if (!(node instanceof Element)) return;
-    const id = node.getAttribute("data-nativefragments-deferred-content");
-    if (!id) return;
-    const target = document.querySelector('[data-nativefragments-deferred="' + escapeValue(id) + '"]');
-    if (!target) return;
-    const fragment = document.createDocumentFragment();
-    while (node.firstChild) fragment.appendChild(node.firstChild);
-    target.replaceChildren(fragment);
-    target.setAttribute("data-fragment-state", node.getAttribute("data-fragment-state") || "ready");
-    target.removeAttribute("aria-busy");
-    node.remove();
-  };
-
-  const process = (root) => {
-    reveal(root);
-    root.querySelectorAll?.("[data-nativefragments-deferred-content]").forEach(reveal);
-  };
-
-  document.querySelectorAll("[data-nativefragments-deferred-content]").forEach(reveal);
-  new MutationObserver((records) => {
-    for (const record of records) {
-      record.addedNodes.forEach(process);
-    }
-  }).observe(document.documentElement, { childList: true, subtree: true });
-})();
-</script>`;
+  html`${raw(body)}${fragmentMeta(meta)}`;
 
 /**
  * Default 404 route used by adapters when a route is not matched.
@@ -573,6 +407,7 @@ export const deferredFragmentBootstrap = ({ nonce } = {}) => html`<script${attrs
  * @type {Route}
  */
 export const notFoundRoute = route("404", {
+  status: 404,
   meta: ({ url }) => ({
     title: "404",
     description: "Page not found.",
@@ -582,5 +417,24 @@ export const notFoundRoute = route("404", {
     <p class="eyebrow">404</p>
     <h1>Nothing rendered here.</h1>
     <p>This route is not in the manifest.</p>
+  </main>`,
+});
+
+/**
+ * Default 500 route used by adapters when a route render fails.
+ *
+ * @type {Route}
+ */
+export const errorRoute = route("500", {
+  status: 500,
+  meta: ({ url }) => ({
+    title: "Something went wrong",
+    description: "The page could not be rendered.",
+    canonical: url.pathname,
+  }),
+  render: () => html`<main class="error">
+    <p class="eyebrow">500</p>
+    <h1>Something went wrong</h1>
+    <p>The page could not be rendered. Please try again.</p>
   </main>`,
 });

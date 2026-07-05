@@ -1,6 +1,6 @@
 ---
 name: nativefragments
-description: Build and edit Native Fragments apps with zero dependencies, zero build, Cloudflare Workers, fragment navigation, and Shadow DOM components.
+description: Build and edit Native Fragments apps with zero dependencies, zero build, Cloudflare Workers, fragment navigation, API routes, forms, and Shadow DOM components.
 ---
 
 # Native Fragments Skill
@@ -9,82 +9,193 @@ Use this skill when creating or editing a Native Fragments app.
 
 ## Goals
 
-- Keep apps zero dependency unless the product earns an exception.
-- Keep apps zero build by default: no Vite, no JSX transform, no virtual DOM.
-- Use Cloudflare Workers for server rendering and static assets.
-- Render HTML on the server, then use fragment navigation for fast transitions.
-- Use declarative fragment prefetching for high-probability navigation.
-- Use nested fragment slots for route regions that should navigate without
-  replacing the full page body.
-- Use Web Workers for expensive client-side work like search, filtering,
-  parsing, and background preparation.
-- Put component styling inside Shadow DOM.
-- Server-render initially visible custom elements with declarative Shadow DOM,
-  then hydrate them with `shadow()` on the client.
-- Treat an empty above-the-fold custom element that is filled only after module
-  load as a FOUC and layout-shift bug.
-- Make files obvious for agents: one route, one renderer, one component file.
+- Keep apps zero dependency and zero build unless the product explicitly earns
+  an exception.
+- Use native Fetch, Request, Response, URL, URLSearchParams, FormData, Custom
+  Elements, Shadow DOM, and History APIs.
+- Render real HTML on the server; enhance same-origin navigation with fragments.
+- Keep files obvious for agents: one route, one renderer, one API resource, one
+  component module.
+- Server-render initially visible custom elements with `declarativeShadow()`
+  and hydrate with `shadow()` on the client.
 
 ## Default Structure
 
 - `worker.js`: Cloudflare Worker entrypoint.
-- `site/routes.js`: explicit route manifest.
-- `site/shell.js`: full document shell.
+- `site/routes.js`: explicit page route manifest.
+- `site/api.js`: exports `createApi([...])`.
+- `site/api/*.js`: optional resource route arrays for larger APIs.
+- `site/model.js`: pure URL/query/form parsing and domain helpers.
 - `site/pages/*.js`: route renderers.
+- `site/shell.js`: full document shell.
 - `public/nativefragments/*.js`: browser-loadable framework helpers.
 - `public/app/*.js`: app browser modules and custom elements.
+
+## HTML Safety
+
+`html` returns a trusted wrapper. Nested templates and arrays compose directly:
+
+```js
+const row = (item) => html`<li>${item.label}</li>`;
+html`<ul>${items.map(row)}</ul>`;
+```
+
+Never wrap a variable in `raw()` unless the value is framework-authored static
+markup. If you find yourself wrapping `html` output in `raw()`, the code is
+wrong.
+
+Correct `raw()` uses are external trusted strings: inline SVG constants,
+`jsonScript()` text, CSS text inside `<style>`, and syntax-highlighted HTML.
 
 ## Route Pattern
 
 ```js
-route("/", {
-  meta: () => ({
-    title: "Home",
-    description: "Page description",
-    canonical: "https://example.com/"
+import { html, route } from "@nativefragments/core/server";
+
+route("/docs/:rest*", {
+  meta: ({ params }) => ({
+    title: params.rest || "Docs",
+    description: "Documentation",
+    canonical: "https://example.com/docs"
   }),
-render: () => html`<h1>Hello</h1>`
+  render: ({ params, query }) => html`<h1>${params.rest || query.get("q")}</h1>`
 });
 ```
 
+Exact static routes match first. Parameterized routes match in declaration
+order. A catch-all `:rest*` segment must be final.
+
+Use route `status` and `headers` for rendered HTML responses:
+
+```js
+route("/gone", {
+  status: 410,
+  headers: () => ({ "Cache-Control": "public, max-age=60" }),
+  render: () => html`<h1>Gone</h1>`
+});
+```
+
+Use `redirect(location, status)` or return/throw a native `Response` when a
+route owns the entire response.
+
 ## Nested Fragment Pattern
 
-Use `fragment()` when a route contains a sub-region with its own links. This
-keeps the route registration, target attributes, and link attributes tied to
-one name.
+Use `fragment()` when a route contains a sub-region with its own links.
 
 ```js
 import { fragment, html, route } from "@nativefragments/core/server";
 
-const profile = fragment("settings-panel", profilePanel);
+const panel = fragment("settings-panel", settingsPanel);
 
-route("/settings/profile", {
-  meta: () => ({
-    title: "Profile",
-    description: "Profile settings",
-    canonical: "https://example.com/settings/profile"
-  }),
-  render: () => html`<main>
+route("/settings/:panel", {
+  render: (context) => html`<main>
     <nav>
-      <a href="/settings/profile"${profile.prefetchAttrs("intent")}>
-        Profile
-      </a>
+      <a href="/settings/profile"${panel.prefetchAttrs("intent")}>Profile</a>
     </nav>
-    <section${profile.attrs()}>
-      ${profilePanel()}
-    </section>
+    <section${panel.attrs()}>${settingsPanel(context)}</section>
   </main>`,
-  fragments: [profile]
+  fragments: [panel]
 });
 ```
 
-The link slot name must match the target container and the route `fragments`
-key. The full `render` output remains the canonical server-rendered fallback.
+The link slot name, target slot name, and route fragment name must match. The
+full `render` output remains the no-JavaScript fallback.
+
+## API Routes
+
+Use `apiRoute()` and `createApi()` instead of hand-rolled pathname chains.
+
+```js
+import { apiRoute, createApi } from "@nativefragments/core/server";
+
+export const api = createApi([
+  apiRoute("GET", "/api/todos", ({ query }) => listTodos(query.get("filter"))),
+  apiRoute("POST", "/api/todos", async ({ request }) =>
+    Response.json(await createTodo(await request.json()), { status: 201 }),
+  ),
+  apiRoute("DELETE", "/api/todos/:id", ({ params }) => removeTodo(params.id)),
+]);
+```
+
+For complex APIs, each `site/api/<resource>.js` exports an array of
+`apiRoute()` entries:
+
+```js
+// site/api/todos.js
+export const todoRoutes = [
+  apiRoute("GET", "/api/todos", listTodosHandler),
+  apiRoute("POST", "/api/todos", createTodoHandler),
+];
+
+// site/api.js
+export const api = createApi([...todoRoutes]);
+```
+
+Handler context is `{ request, env, context, url, params, query, signal }`.
+Return a `Response` for full control; return any other value for `Response.json`.
+
+## Query Params
+
+Parse query state in pure model helpers, not inline in renderers.
+
+```js
+import { readSearch } from "@nativefragments/core/server";
+
+export const filtersFromSearch = (query) =>
+  readSearch(query, { filter: "all", sort: "newest" });
+```
+
+Renderers call the model helper:
+
+```js
+route("/todos", {
+  render: ({ query }) => todoPage(filtersFromSearch(query))
+});
+```
+
+## Mutations
+
+Use route `action()` for no-JavaScript POST-redirect-GET forms.
+
+```js
+import { html, redirect, route } from "@nativefragments/core/server";
+
+route("/todos", {
+  action: async ({ request }) => {
+    const form = await request.formData();
+    await createTodo(form.get("title"));
+    return redirect("/todos", 303);
+  },
+  render: () => html`<form method="post"><input name="title" /></form>`
+});
+```
+
+POST forms are never fragment-intercepted. They submit to the server, run
+`action()`, and return through a redirect.
+
+After any request that mutates server state, call `clearFragmentCache()` before
+navigating.
+
+```js
+import { clearFragmentCache } from "/nativefragments/router.js";
+
+await fetch("/api/todos", { method: "POST", body: JSON.stringify(todo) });
+clearFragmentCache();
+```
+
+Use `data-fragment-form` only for GET forms whose URL state should fragment
+navigate:
+
+```html
+<form action="/search" method="get" data-fragment-form>
+  <input name="q" />
+</form>
+```
 
 ## Prefetch Pattern
 
-The browser router prefetches same-origin fragment links on hover and focus by
-default. Override individual links with `data-fragment-prefetch`:
+The router prefetches same-origin fragment links on hover/focus by default.
+Links can override the mode:
 
 ```html
 <a href="/reports" data-fragment-prefetch="visible">Reports</a>
@@ -92,21 +203,29 @@ default. Override individual links with `data-fragment-prefetch`:
 <a href="/logout" data-fragment-prefetch="none">Log out</a>
 ```
 
-Use `visible` for links likely to be clicked after scrolling, `load` for
-near-certain next routes, and `none` for actions that should not be requested
-early.
+Use `data-nativefragments-reload` or `data-fragment-navigation="false"` for
+links that must use normal browser navigation.
 
-`data-fragment-prefetch="none"` only disables early fetches. For a link that
-must use normal browser navigation, such as `/agents.txt`, a file download, or a
-server-only action, add `data-nativefragments-reload` or
-`data-fragment-navigation="false"`.
+## Component Pattern
+
+For visible custom elements, share shadow CSS and HTML between server and
+client modules.
+
+```js
+import { declarativeShadow, html } from "@nativefragments/core/server";
+
+export const appCard = (content) => html`<app-card>${declarativeShadow({
+  styles: [cardStyles],
+  html: html`<article>${content}</article>`
+})}</app-card>`;
+```
+
+The browser component hydrates with `shadow()`. Do not send an empty
+above-the-fold custom element and fill it after module load.
 
 ## Worker Pattern
 
-Use `/nativefragments/worker.js` for worker RPC instead of inventing a custom
-`postMessage` protocol in each app.
-
-Worker module:
+Use `/nativefragments/worker.js` for dedicated worker RPC.
 
 ```js
 import { exposeWorker } from "/nativefragments/worker.js";
@@ -117,8 +236,6 @@ exposeWorker({
 });
 ```
 
-Main thread:
-
 ```js
 import { createWorkerClient } from "/nativefragments/worker.js";
 
@@ -126,89 +243,10 @@ const worker = createWorkerClient("/app/filter-worker.js");
 const rows = await worker.call("filter", { rows: allRows, query });
 ```
 
-Keep worker payloads structured-clone friendly. Use `transferResult()` for
-large `ArrayBuffer` payloads that should move without copying.
-
-## Component Pattern
-
-For any component visible during initial render, include a declarative shadow
-template in the server HTML. This prevents the browser from painting unstyled
-light DOM before the component module upgrades and prevents the component from
-appearing as an empty box until JavaScript loads.
-
-Prefer a shared template module for non-trivial components:
-
-- Export the component's shadow CSS as a string.
-- Export the component's shadow HTML as a string or `html` value.
-- Import that module from both the server renderer and the browser custom
-  element.
-- Keep the server-rendered declarative shadow output identical to the hydrated
-  client output unless there is a deliberate no-JavaScript fallback.
-- Treat server/client visual mismatches as hydration bugs. The declarative
-  shadow DOM should use the same spacing, responsive rules, typography, icons,
-  CSS variables, and stable element dimensions as the hydrated component.
-- Avoid placeholder markup or reserved-height boxes for initially visible
-  custom elements. Prefer real server-rendered shadow markup. Use placeholders
-  only when the product intentionally has no meaningful server-rendered state.
-- Keep server-rendered shadow DOM visible through the first component upgrade,
-  then remove or replace it only after the hydrated component has rendered. A
-  blank intermediate frame is a FOUC bug.
-
-Server renderer:
-
-```js
-import { declarativeShadow, html } from "@nativefragments/core/server";
-
-const cardStyles = `
-  :host { display: block; }
-  article { border: 1px solid currentColor; }
-`;
-
-export const appCard = (content) => html`<app-card>${declarativeShadow({
-  styles: [cardStyles],
-  html: html`<article>${content}</article>`
-})}</app-card>`;
-```
-
-Browser component:
-
-```js
-import { shadow, sheet } from "/nativefragments/component.js";
-
-const cardStyles = `
-  :host { display: block; }
-  article { border: 1px solid currentColor; }
-`;
-
-const styles = sheet(cardStyles);
-
-class AppCard extends HTMLElement {
-  connectedCallback() {
-    shadow(this, {
-      styles: [styles],
-      html: `<article><slot></slot></article>`
-    });
-  }
-}
-
-customElements.define("app-card", AppCard);
-```
-
-The `shadow()` helper preserves an existing declarative shadow root on first
-upgrade, then updates normally on later renders. Use `{ hydrate: false }` only
-when a component must intentionally discard server-rendered shadow DOM.
-
-For layout-sensitive components, add a browser regression test that captures
-key bounding boxes from the server-rendered declarative shadow DOM, waits for
-hydration, and verifies the hydrated component keeps those boxes stable. This
-is especially important for above-the-fold navigation, game boards, dashboards,
-and other elements where a small shift is visible on refresh.
+Call `dispose()` when the owner tears down the client. Workers created by
+`createWorkerClient(url)` are terminated on dispose.
 
 ## Testing Guidance
 
-Do not add a test framework to the package. App repos can add focused checks:
-
-- HTTP smoke checks with `curl`.
-- Component tests with Web Test Runner and Open WC.
-- Browser checks only when behavior depends on navigation, layout, or real DOM
-  APIs.
+Core uses `node --test` and `node --check`. App repos can add focused HTTP,
+component, and browser checks for navigation, layout, and real DOM behavior.

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createCloudflareHandler } from "../src/cloudflare/index.js";
-import { fragment, html, raw, renderRoute, route } from "../src/server/index.js";
+import { fragment, html, renderRoute, route } from "../src/server/index.js";
 
 const readStreamText = async (reader) => {
   const decoder = new TextDecoder();
@@ -33,7 +33,7 @@ const shell = ({ body, meta }) => html`<!doctype html>
     <title>${meta.title}</title>
   </head>
   <body>
-    <main id="content-slot">${raw(body)}</main>
+    <main id="content-slot">${body}</main>
   </body>
 </html>`;
 
@@ -305,18 +305,20 @@ test("a shell without a body insertion point warns and buffers deferred content"
   const curatorNote = fragment("curator-note", {
     render: async () => html`<article>Buffered fallback content</article>`,
   });
-  // Interpolating `body` without raw() escapes it, so the streaming split
-  // cannot find an insertion point.
-  const escapingShell = ({ body, meta }) => html`<!doctype html>
+  const shellWithoutStableBodyMarker = ({ body, meta }) => {
+    const safeBody =
+      body && String(body).includes("nativefragments-body-") ? "" : body;
+    return html`<!doctype html>
 <html lang="en">
   <head>
     <title>${meta.title}</title>
   </head>
-  <body>${body ?? ""}</body>
+  <body>${safeBody ?? ""}</body>
 </html>`;
+  };
 
   const app = createCloudflareHandler({
-    shell: escapingShell,
+    shell: shellWithoutStableBodyMarker,
     routes: [
       route("/", {
         render: (context) => html`${context.defer(curatorNote)}`,

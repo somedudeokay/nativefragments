@@ -146,7 +146,7 @@ const headerHtml = `<header>
 </header>`;
 
 export const siteHeader = () =>
-  raw(html`<nf-site-header>${declarativeShadow({
+  html`<nf-site-header>${declarativeShadow({
     styles: [headerStyles],
     html: headerHtml,
-  })}</nf-site-header>`);
+  })}</nf-site-header>`;

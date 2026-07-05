@@ -8,7 +8,7 @@ Module: `@nativefragments/core/server`
 
 ### RawHtml
 
-`{ [RAW]: true, value: string }`
+`{ [RAW]: true, value: string, toString(): string }`
 
 
 
@@ -66,10 +66,10 @@ Escape a value for safe insertion into HTML text or attribute context.
 ### html
 
 ```js
-html(strings, ...values) → string
+html(strings, ...values) → RawHtml
 ```
 
-Server-side HTML template tag with escaped interpolation by default. Arrays are flattened, `null`, `undefined`, and `false` become empty strings, and values returned by [`raw`](#raw) are inserted as trusted HTML.
+Server-side HTML template tag with escaped interpolation by default. Arrays are flattened, `null`, `undefined`, and `false` become empty strings, and trusted values returned by [`html`](#html), [`raw`](#raw), [`attrs`](#attrs), or [`declarativeShadow`](#declarativeShadow) are inserted as HTML without being re-escaped.
 
 **Parameters**
 
@@ -78,7 +78,7 @@ Server-side HTML template tag with escaped interpolation by default. Arrays are 
 | `strings` | `TemplateStringsArray` | required | Template literal string parts. |
 | `values` | `...unknown` | required | Interpolated values. |
 
-**Returns** — `string`. Rendered HTML.
+**Returns** — `RawHtml`. Rendered HTML wrapper.
 
 ### declarativeShadow
 
@@ -118,7 +118,7 @@ Serialize JSON for safe embedding inside an inline script tag. `<` characters ar
 attrs(attributes?) → RawHtml
 ```
 
-Build escaped HTML attributes from an object. `false`, `null`, and `undefined` values are omitted. `true` values render as boolean attributes.
+Build escaped HTML attributes from an object. `false`, `null`, and `undefined` values are omitted. `true` values render as boolean attributes. Attribute names must be valid HTML-like names.
 
 **Parameters**
 
@@ -145,6 +145,7 @@ Module: `@nativefragments/core/server`
 | `request` | `Request` | required | Original request. |
 | `signal` | `AbortSignal` | required | Request cancellation signal. |
 | `url` | `URL` | required | Parsed request URL. |
+| `query` | `URLSearchParams` | required | Parsed query parameters from `url.searchParams`. |
 | `params` | `Record<string, string>` | required | Path parameters captured from a route pattern like `/posts/:slug`. |
 | `defer` | `(fragment: FragmentDefinition | string, attributes?: import("./html.js").HtmlAttrs) => import("./html.js").RawHtml` | required | Render a stable loading boundary and collect a named fragment for deferred document streaming. |
 
@@ -165,19 +166,19 @@ Module: `@nativefragments/core/server`
 
 ### FragmentRenderer
 
-`(context: RouteContext) => string | Promise<string>`
+`(context: RouteContext) => string | import("./html.js").RawHtml | Response | Promise<string | import("./html.js").RawHtml | Response>`
 
 
 
 ### FragmentLoadingRenderer
 
-`(context: RouteContext) => string`
+`(context: RouteContext) => string | import("./html.js").RawHtml`
 
 
 
 ### FragmentErrorRenderer
 
-`(error: unknown, context: RouteContext) => string | Promise<string>`
+`(error: unknown, context: RouteContext) => string | import("./html.js").RawHtml | Promise<string | import("./html.js").RawHtml>`
 
 
 
@@ -209,8 +210,11 @@ Module: `@nativefragments/core/server`
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `meta` | `(context: RouteContext) => RouteMeta | Promise<RouteMeta>` | — | Function that returns metadata for the route. |
-| `render` | `(context: RouteContext) => string | Promise<string>` | required | Function that renders route body HTML. |
+| `meta` | `(context: RouteContext) => RouteMeta | Response | Promise<RouteMeta | Response>` | — | Function that returns metadata for the route. |
+| `status` | `number` | `200` | Status used for rendered HTML responses. |
+| `headers` | `Record<string, string> | ((context: RouteContext) => Record<string, string> | Promise<Record<string, string>>)` | — | Headers merged into rendered HTML responses after adapter defaults. |
+| `action` | `(context: RouteContext) => Response | Promise<Response>` | — | POST handler for no-JavaScript mutations. Must return a native Response, usually a 303 redirect. |
+| `render` | `(context: RouteContext) => string | import("./html.js").RawHtml | Response | Promise<string | import("./html.js").RawHtml | Response>` | required | Function that renders route body HTML. |
 | `fragments` | `Record<string, FragmentRenderer | FragmentDefinition> | FragmentDefinition[]` | — | Named fragment renderers used by nested fragment slots. |
 
 ### Route
@@ -253,6 +257,40 @@ Create a normalized route definition.
 
 **Returns** — `Route`. Normalized route.
 
+### redirect
+
+```js
+redirect(location, status?) → Response
+```
+
+Create a redirect response.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `location` | `string | URL` | required | Redirect destination. |
+| `status` | `number` | `302` | Redirect status. |
+
+**Returns** — `Response`. Native redirect response.
+
+### readSearch
+
+```js
+readSearch(searchParams, defaults) → T
+```
+
+Read string query parameters with defaults. Each returned key is `searchParams.get(key)` when it is a non-empty string, otherwise the default value.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `searchParams` | `URLSearchParams` | required | Query parameters. |
+| `defaults` | `T` | required | Default values. |
+
+**Returns** — `T`. Query values merged with defaults.
+
 ### createRoutes
 
 ```js
@@ -272,7 +310,7 @@ Create a route manifest that can match normalized paths. Exact static routes win
 ### fragmentMeta
 
 ```js
-fragmentMeta(meta) → string
+fragmentMeta(meta) → import("./html.js").RawHtml
 ```
 
 Render fragment metadata for the browser fragment router.
@@ -283,12 +321,12 @@ Render fragment metadata for the browser fragment router.
 | --- | --- | --- | --- |
 | `meta` | `RouteMeta` | required | Metadata to embed in the fragment response. |
 
-**Returns** — `string`. Script tag containing serialized metadata.
+**Returns** — `import("./html.js").RawHtml`. Script tag containing serialized metadata.
 
 ### renderRoute
 
 ```js
-renderRoute(options) → Promise<{ body: string, meta: Required<RouteMeta>, deferred: unknown[] }>
+renderRoute(options) → Promise<{ body: string, meta: Required<Pick<RouteMeta, "title" | "description" | "canonical">> & RouteMeta, deferred: unknown[], status: number, headers: Record<string, string> } | { response: Response }>
 ```
 
 Render a matched route and normalize metadata defaults.
@@ -299,12 +337,12 @@ Render a matched route and normalize metadata defaults.
 | --- | --- | --- | --- |
 | `options` | `{ match: Route, request: Request, slot?: string | null, deferredTimeout?: number | null }` | required | Render options. When `slot` matches a registered named fragment, only that fragment renderer is used. Calls to `context.defer()` always collect deferred work for the adapter to stream or inline. |
 
-**Returns** — `Promise<{ body: string, meta: Required<RouteMeta>, deferred: unknown[] }>`. Rendered route.
+**Returns** — `Promise<{ body: string, meta: Required<Pick<RouteMeta, "title" | "description" | "canonical">> & RouteMeta, deferred: unknown[], status: number, headers: Record<string, string> } | { response: Response }>`. Rendered route.
 
 ### renderFragment
 
 ```js
-renderFragment(rendered) → string
+renderFragment(rendered) → import("./html.js").RawHtml
 ```
 
 Render a fragment response body with embedded metadata.
@@ -315,7 +353,7 @@ Render a fragment response body with embedded metadata.
 | --- | --- | --- | --- |
 | `rendered` | `{ body: string, meta: RouteMeta }` | required | Rendered route body and metadata. |
 
-**Returns** — `string`. Fragment HTML.
+**Returns** — `import("./html.js").RawHtml`. Fragment HTML.
 
 ### notFoundRoute
 
@@ -326,6 +364,93 @@ notFoundRoute
 Default 404 route used by adapters when a route is not matched.
 
 Type: `{Route}`
+
+### errorRoute
+
+```js
+errorRoute
+```
+
+Default 500 route used by adapters when a route render fails.
+
+Type: `{Route}`
+
+## Server API
+
+Module: `@nativefragments/core/server`
+
+### ApiContext
+
+`object`
+
+
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `request` | `Request` | required | Original request. |
+| `env` | `Record<string, unknown>` | required | Runtime environment bindings. |
+| `context` | `unknown` | required | Runtime execution context. |
+| `url` | `URL` | required | Parsed request URL. |
+| `query` | `URLSearchParams` | required | Parsed query parameters from `url.searchParams`. |
+| `params` | `Record<string, string>` | required | Path parameters captured from the API route. |
+| `signal` | `AbortSignal` | required | Request cancellation signal. |
+
+### ApiHandler
+
+`(context: ApiContext) => unknown | Response | Promise<unknown | Response>`
+
+
+
+### ApiRoute
+
+`object`
+
+
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `method` | `string` | required | Upper-case HTTP method. |
+| `path` | `string` | required | Normalized API route path. |
+| `handler` | `ApiHandler` | required | API route handler. |
+
+### apiRoute
+
+```js
+apiRoute(method, path, handler) → ApiRoute
+```
+
+Create a normalized API route. Paths use the same `:param` and trailing `:rest*` segment syntax as page routes.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `method` | `string` | required | Upper-case HTTP method. |
+| `path` | `string` | required | API path pattern. |
+| `handler` | `ApiHandler` | required | API handler. |
+
+**Returns** — `ApiRoute`. Normalized API route.
+
+### createApi
+
+```js
+createApi(routes, options?) → { fetch(request: Request, env?: Record<string, unknown>, context?: unknown): Promise<Response> }
+```
+
+Create a Fetch-compatible API router.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `routes` | `ApiRoute[]` | required | API route definitions. |
+| `options` | `{ onError?: (event: { error: unknown, request: Request, route?: ApiRoute }) => void }` | `{}` | API options. |
+
+**Returns** — `{ fetch(request: Request, env?: Record<string, unknown>, context?: unknown): Promise<Response> }`. Fetch-compatible API router.
 
 ## Cloudflare Adapter
 
@@ -348,10 +473,12 @@ Module: `@nativefragments/core/cloudflare`
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `routes` | `Route[]` | required | App route definitions. |
-| `shell` | `(rendered: { body?: string, meta: object, nonce?: string }) => string | { before: string, after: string }` | required | Function that wraps a rendered route body in a full HTML document. |
-| `api` | `{ fetch(request: Request, env: Record<string, unknown>, context?: unknown): Promise<Response> | Response }` | — | Optional Web Standards API router. Hono apps work here because they expose a compatible `fetch` method. |
+| `shell` | `(rendered: { body?: import("../server/html.js").RawHtml, meta: object, nonce?: string }) => string | import("../server/html.js").RawHtml | { before: string | import("../server/html.js").RawHtml, after: string | import("../server/html.js").RawHtml }` | required | Function that wraps a rendered route body in a full HTML document. |
+| `api` | `{ fetch(request: Request, env: Record<string, unknown>, context?: unknown): Promise<Response> | Response } | import("../server/api.js").ApiRoute[]` | — | Optional Web Standards API router or array of `apiRoute()` definitions. Hono apps work here because they expose a compatible `fetch` method. |
 | `apiPrefix` | `string` | `"/api"` | URL prefix handled by `api`. |
 | `notFound` | `Route` | — | Optional 404 route. |
+| `error` | `Route` | — | Optional 500 route. |
+| `onError` | `({ error, request, phase }: { error: unknown, request: Request, phase: "route" | "error-route" | "api" }) => void` | — | Error hook for caught route, error-route, and API failures. |
 | `assetsBinding` | `string` | `"ASSETS"` | Cloudflare assets binding name. |
 | `deferredTimeout` | `number | null` | `15000` | Default timeout in milliseconds for each deferred fragment renderer. Set `null` to disable. |
 | `contentSecurityPolicy` | `string | false | ((options: { nonce: string, request: Request }) => string | false)` | — | Content Security Policy header. Defaults to `frame-ancestors 'self'`. Pass a function to build a nonce-based strict policy. |
@@ -389,7 +516,24 @@ Module: `/nativefragments/router.js`
 | `slot` | `string` | `"#content-slot"` | Selector for the element replaced by fragment responses. |
 | `ttl` | `number` | `30000` | Fragment cache time in milliseconds. |
 | `prefetch` | `boolean | "none" | "intent" | "visible" | "load"` | `"intent"` | Default fragment prefetch behavior. Links can override this with `data-fragment-prefetch="intent|visible|load|none"`. |
+| `viewTransitions` | `boolean` | `true` | Whether to use `document.startViewTransition()` for DOM swaps when supported. |
 | `afterNavigate` | `(event: { meta: object | null, url: URL, slot: string }) => void` | — | Callback fired after a successful client-side navigation. |
+
+### clearFragmentCache
+
+```js
+clearFragmentCache(href?) → void
+```
+
+Clear cached fragment responses. With no argument, the entire cache and in-flight request map are cleared. With `href`, every cache entry for the resolved pathname and search is removed across all fragment slots.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `href` | `string | URL` | — | Optional URL to clear. |
+
+**Returns** — `void`.
 
 ### prefetchFragment
 
@@ -411,10 +555,10 @@ Prefetch a same-origin fragment into the shared fragment cache.
 ### installFragmentNavigation
 
 ```js
-installFragmentNavigation(options?) → ((href: string, pushState?: boolean, nextSlot?: string) => Promise<void>) | undefined
+installFragmentNavigation(options?) → ((href: string | URL, pushState?: boolean, nextSlot?: string) => Promise<void>) | undefined
 ```
 
-Install same-origin fragment navigation. Clicked links are fetched with `x-fragment: true`, the configured content slot is replaced, document metadata is updated, and history state is pushed. Links with `data-fragment-slot="name"` replace only the matching `[data-fragment-slot="name"]` container and send `x-fragment-slot: name`. External links, document-like URLs such as `/agents.txt`, modified clicks, and links with `data-nativefragments-reload` or `data-fragment-navigation="false"` keep normal browser behavior.
+Install same-origin fragment navigation. Clicked links are fetched with `x-fragment: true`, the configured content slot is replaced, document metadata is updated, and history state is pushed. Links with `data-fragment-slot="name"` replace only the matching `[data-fragment-slot="name"]` container and send `x-fragment-slot: name`. GET forms with `data-fragment-form` are intercepted the same way. POST forms are left to the browser so the server can run route actions and redirect. External links, document-like URLs such as `/agents.txt`, modified clicks, and links with `data-nativefragments-reload` or `data-fragment-navigation="false"` keep normal browser behavior.
 
 **Parameters**
 
@@ -422,7 +566,7 @@ Install same-origin fragment navigation. Clicked links are fetched with `x-fragm
 | --- | --- | --- | --- |
 | `options` | `FragmentNavigationOptions` | `{}` | Navigation options. |
 
-**Returns** — `((href: string, pushState?: boolean, nextSlot?: string) => Promise<void>) | undefined`. Navigate function, or `undefined` if the slot does not exist.
+**Returns** — `((href: string | URL, pushState?: boolean, nextSlot?: string) => Promise<void>) | undefined`. Navigate function, or `undefined` if the slot does not exist.
 
 ## Shadow DOM Components
 
@@ -502,8 +646,22 @@ Module: `/nativefragments/worker.js`
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `call` | `(type: string, payload?: unknown, transfer?: Transferable[]) => Promise<unknown>` | required | Call a named worker handler. |
-| `dispose` | `() => void` | required | Reject pending calls and remove listeners. |
+| `dispose` | `() => void` | required | Reject pending calls, remove listeners, and terminate workers constructed by `createWorkerClient`. |
 | `worker` | `Worker` | required | The wrapped Worker instance. |
+
+### NativeWorkerScope
+
+`object`
+
+
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `postMessage` | `(message: unknown, transfer?: Transferable[]) => void` | required | Post a message to the paired thread. |
+| `addEventListener` | `(type: "message", listener: (event: MessageEvent) => void) => void` | required | Register a message listener. |
+| `removeEventListener` | `(type: "message", listener: (event: MessageEvent) => void) => void` | required | Remove a message listener. |
 
 ### transferResult
 
@@ -520,7 +678,7 @@ Wrap a worker response with Transferable objects.
 | `payload` | `T` | required | Response payload. |
 | `transfer` | `Transferable[]` | `[]` | Transferable objects to move. |
 
-**Returns** — `{ payload: T, transfer: Transferable[], [transferMarker]: true }`. 
+**Returns** — `{ payload: T, transfer: Transferable[], [transferMarker]: true }`.
 
 ### workerClient
 
@@ -535,7 +693,7 @@ Create a tiny RPC client for a dedicated Web Worker.
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `worker` | `Worker` | required | Worker instance. |
-| `options` | `WorkerClientOptions` | `{}` | Client options. |
+| `options` | `WorkerClientOptions & { owned?: boolean }` | `{}` | Client options. |
 
 **Returns** — `NativeWorkerClient`. Worker client.
 
@@ -569,7 +727,7 @@ Expose named handlers inside a dedicated Web Worker.
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `handlers` | `Record<string, (payload: unknown, context: { event: MessageEvent, type: string }) => unknown | Promise<unknown>>` | required | Worker handlers keyed by message type. |
-| `scope` | `DedicatedWorkerGlobalScope` | `globalThis` | Worker global scope. |
+| `scope` | `NativeWorkerScope` | `globalThis` | Worker global scope. |
 
 **Returns** — `() => void`. Cleanup function.
 

@@ -192,7 +192,7 @@ const headerHtml = (activePath) => `<header>
 </header>`;
 
 export const siteHeader = ({ activePath = "/" } = {}) =>
-  raw(html`<nf-site-header>${declarativeShadow({
+  html`<nf-site-header>${declarativeShadow({
     styles: [headerStyles],
     html: headerHtml(activePath),
-  })}</nf-site-header>`);
+  })}</nf-site-header>`;

@@ -1,6 +1,9 @@
 import {
+  createApi,
   createRoutes,
+  errorRoute as defaultErrorRoute,
   notFoundRoute,
+  raw,
   renderFragment,
   renderRoute,
 } from "../server/index.js";
@@ -8,6 +11,9 @@ import {
   deferredFragmentBootstrap,
   inlineDeferredFragments,
   renderDeferredFragment,
+} from "../server/defer.js";
+import {
+  runRouteAction,
 } from "../server/router.js";
 
 const assetLike = (url) =>
@@ -21,6 +27,8 @@ const requestWantsFragment = (request) =>
 
 const requestedFragmentSlot = (request) =>
   request.headers.get("x-fragment-slot");
+
+const fragmentUrlHeader = "X-NativeFragments-URL";
 
 const encoder = new TextEncoder();
 const defaultContentSecurityPolicy = "frame-ancestors 'self'";
@@ -49,8 +57,17 @@ const securityHeaders = ({ contentSecurityPolicy, nonce, request }) => {
 
 const htmlHeaders = ({ contentSecurityPolicy, nonce, request }) => ({
   "Content-Type": "text/html; charset=utf-8",
+  Vary: "x-fragment, x-fragment-slot",
   ...securityHeaders({ contentSecurityPolicy, nonce, request }),
 });
+
+const mergeHeaders = (defaults, overrides = {}) => {
+  const headers = new Headers(defaults);
+  for (const [name, value] of Object.entries(overrides)) {
+    headers.set(name, String(value));
+  }
+  return headers;
+};
 
 const shellMarker = () =>
   `<!--nativefragments-body-${Math.random().toString(36).slice(2)}-->`;
@@ -58,22 +75,43 @@ const shellMarker = () =>
 const isStreamingShell = (value) =>
   value &&
   typeof value === "object" &&
-  typeof value.before === "string" &&
-  typeof value.after === "string";
+  "before" in value &&
+  "after" in value;
+
+const isRedirectResponse = (response) =>
+  response.status >= 300 &&
+  response.status < 400 &&
+  response.headers.has("location");
+
+const withFragmentUrl = (response, url) => {
+  if (response.headers.has(fragmentUrlHeader)) return response;
+  const headers = new Headers(response.headers);
+  headers.set(fragmentUrlHeader, url.href);
+  return new Response(response.body, {
+    headers,
+    status: response.status,
+    statusText: response.statusText,
+  });
+};
 
 const renderShellDocument = (shell, rendered, nonce) => {
-  const document = shell({ ...rendered, nonce });
+  const document = shell({ ...rendered, body: raw(rendered.body), nonce });
   return isStreamingShell(document)
-    ? `${document.before}${rendered.body}${document.after}`
-    : document;
+    ? `${String(document.before)}${rendered.body}${String(document.after)}`
+    : String(document);
 };
 
 const splitShell = ({ shell, meta, nonce }) => {
   const streamingShell = shell({ meta, nonce });
-  if (isStreamingShell(streamingShell)) return streamingShell;
+  if (isStreamingShell(streamingShell)) {
+    return {
+      before: String(streamingShell.before),
+      after: String(streamingShell.after),
+    };
+  }
 
   const marker = shellMarker();
-  const document = shell({ body: marker, meta, nonce });
+  const document = String(shell({ body: raw(marker), meta, nonce }));
   const markerIndex = document.indexOf(marker);
 
   if (markerIndex === -1) return null;
@@ -91,7 +129,7 @@ const streamDocument = async ({ headers, nonce, shell, rendered, status }) => {
       "Native Fragments: the shell does not expose a body insertion point, so deferred fragments were buffered instead of streamed. Return { before, after } from the shell, or interpolate `body` into the document unmodified, to enable streaming.",
     );
     const completed = await inlineDeferredFragments(rendered);
-    return new Response(renderShellDocument(shell, completed, nonce), {
+    return new Response(String(renderShellDocument(shell, completed, nonce)), {
       headers,
       status,
     });
@@ -99,7 +137,7 @@ const streamDocument = async ({ headers, nonce, shell, rendered, status }) => {
 
   const { readable, writable } = new TransformStream();
   const writer = writable.getWriter();
-  const write = (chunk) => writer.write(encoder.encode(chunk));
+  const write = (chunk) => writer.write(encoder.encode(String(chunk)));
 
   Promise.resolve()
     .then(async () => {
@@ -131,13 +169,16 @@ const streamDocument = async ({ headers, nonce, shell, rendered, status }) => {
 /**
  * @typedef {object} CloudflareHandlerOptions
  * @property {Route[]} routes App route definitions.
- * @property {(rendered: { body?: string, meta: object, nonce?: string }) => string | { before: string, after: string }} shell
+ * @property {(rendered: { body?: import("../server/html.js").RawHtml, meta: object, nonce?: string }) => string | import("../server/html.js").RawHtml | { before: string | import("../server/html.js").RawHtml, after: string | import("../server/html.js").RawHtml }} shell
  * Function that wraps a rendered route body in a full HTML document.
- * @property {{ fetch(request: Request, env: Record<string, unknown>, context?: unknown): Promise<Response> | Response }} [api]
- * Optional Web Standards API router. Hono apps work here because they expose a
- * compatible `fetch` method.
+ * @property {{ fetch(request: Request, env: Record<string, unknown>, context?: unknown): Promise<Response> | Response } | import("../server/api.js").ApiRoute[]} [api]
+ * Optional Web Standards API router or array of `apiRoute()` definitions. Hono
+ * apps work here because they expose a compatible `fetch` method.
  * @property {string} [apiPrefix="/api"] URL prefix handled by `api`.
  * @property {Route} [notFound] Optional 404 route.
+ * @property {Route} [error] Optional 500 route.
+ * @property {({ error, request, phase }: { error: unknown, request: Request, phase: "route" | "error-route" | "api" }) => void} [onError]
+ * Error hook for caught route, error-route, and API failures.
  * @property {string} [assetsBinding="ASSETS"] Cloudflare assets binding name.
  * @property {number | null} [deferredTimeout=15000] Default timeout in
  * milliseconds for each deferred fragment renderer. Set `null` to disable.
@@ -164,11 +205,119 @@ export const createCloudflareHandler = ({
   api,
   apiPrefix = "/api",
   notFound = notFoundRoute,
+  error = defaultErrorRoute,
+  onError = (event) => console.error("Native Fragments:", event.error),
   assetsBinding = "ASSETS",
   deferredTimeout = 15_000,
   contentSecurityPolicy = defaultContentSecurityPolicy,
 }) => {
   const manifest = createRoutes(routes);
+  const apiRouter = Array.isArray(api)
+    ? createApi(api, {
+        onError: ({ error: apiError, request: apiRequest }) =>
+          onError({ error: apiError, request: apiRequest, phase: "api" }),
+      })
+    : api;
+
+  const methodNotAllowed = (match) =>
+    new Response("Method not allowed", {
+      status: 405,
+      headers: {
+        Allow: `GET, HEAD${match.action ? ", POST" : ""}`,
+      },
+    });
+
+  const renderHtml = async ({
+    headers,
+    match,
+    nonce,
+    request,
+    redirectDepth = 0,
+    statusOverride,
+  }) => {
+    const wantsFragment = requestWantsFragment(request);
+    const slot = wantsFragment ? requestedFragmentSlot(request) : null;
+    const rendered = await renderRoute({
+      deferredTimeout,
+      match,
+      request,
+      slot,
+    });
+
+    if ("response" in rendered) {
+      if (
+        wantsFragment &&
+        redirectDepth < 8 &&
+        isRedirectResponse(rendered.response)
+      ) {
+        const redirectUrl = new URL(
+          rendered.response.headers.get("location"),
+          request.url,
+        );
+        if (redirectUrl.origin === new URL(request.url).origin) {
+          const redirectMatch = manifest.match(redirectUrl.pathname);
+          if (redirectMatch) {
+            const redirectRequest = new Request(redirectUrl, {
+              headers: request.headers,
+              method: "GET",
+              signal: request.signal,
+            });
+            const response = await renderHtml({
+              headers,
+              match: redirectMatch,
+              nonce,
+              redirectDepth: redirectDepth + 1,
+              request: redirectRequest,
+            });
+            return withFragmentUrl(response, redirectUrl);
+          }
+        }
+      }
+      return rendered.response;
+    }
+
+    const responseHeaders = mergeHeaders(headers, rendered.headers);
+    const completed = wantsFragment ? await inlineDeferredFragments(rendered) : rendered;
+    const streamsDocument = !wantsFragment && completed.deferred?.length;
+    const status = statusOverride ?? rendered.status;
+
+    return streamsDocument
+      ? streamDocument({
+          headers: responseHeaders,
+          nonce,
+          shell,
+          rendered: completed,
+          status,
+        })
+      : new Response(
+          String(
+            wantsFragment
+              ? renderFragment(completed)
+              : renderShellDocument(shell, completed, nonce),
+          ),
+          { headers: responseHeaders, status },
+        );
+  };
+
+  const renderErrorResponse = async ({ headers, nonce, request }) => {
+    try {
+      return await renderHtml({
+        headers,
+        match: error,
+        nonce,
+        request,
+        statusOverride: 500,
+      });
+    } catch (fallbackError) {
+      onError({ error: fallbackError, request, phase: "error-route" });
+      return new Response("Internal error", {
+        status: 500,
+        headers: {
+          "content-type": "text/plain; charset=utf-8",
+        },
+      });
+    }
+  };
 
   return {
     async fetch(request, env, context) {
@@ -177,8 +326,13 @@ export const createCloudflareHandler = ({
       const nonce = createNonce();
       const headers = htmlHeaders({ contentSecurityPolicy, nonce, request });
 
-      if (api && (url.pathname === apiPrefix || url.pathname.startsWith(`${apiPrefix}/`))) {
-        return api.fetch(request, env, context);
+      if (apiRouter && (url.pathname === apiPrefix || url.pathname.startsWith(`${apiPrefix}/`))) {
+        try {
+          return await apiRouter.fetch(request, env, context);
+        } catch (apiError) {
+          onError({ error: apiError, request, phase: "api" });
+          return Response.json({ error: "Internal error" }, { status: 500 });
+        }
       }
 
       if (assetLike(url) && assets) {
@@ -186,27 +340,32 @@ export const createCloudflareHandler = ({
         if (asset.status !== 404) return asset;
       }
 
-      const match = manifest.match(url.pathname) ?? notFound;
-      const status = match === notFound ? 404 : 200;
-      const wantsFragment = requestWantsFragment(request);
-      const slot = wantsFragment ? requestedFragmentSlot(request) : null;
-      const rendered = await renderRoute({
-        deferredTimeout,
-        match,
-        request,
-        slot,
-      });
+      const routeMatch = manifest.match(url.pathname);
+      const match = routeMatch ?? notFound;
+      const method = request.method.toUpperCase();
 
-      const completed = wantsFragment ? await inlineDeferredFragments(rendered) : rendered;
-      const streamsDocument = !wantsFragment && completed.deferred?.length;
-      const response = streamsDocument
-        ? await streamDocument({ headers, nonce, shell, rendered: completed, status })
-        : new Response(
-            wantsFragment ? renderFragment(completed) : renderShellDocument(shell, completed, nonce),
-            { headers, status },
-          );
+      try {
+        if (routeMatch) {
+          if (method === "POST") {
+            if (!match.action) return methodNotAllowed(match);
+            return await runRouteAction({ match, request });
+          }
+          if (method !== "GET" && method !== "HEAD") {
+            return methodNotAllowed(match);
+          }
+        }
 
-      return response;
+        return await renderHtml({
+          headers,
+          match,
+          nonce,
+          request,
+          statusOverride: routeMatch ? undefined : 404,
+        });
+      } catch (routeError) {
+        onError({ error: routeError, request, phase: "route" });
+        return renderErrorResponse({ headers, nonce, request });
+      }
     },
   };
 };

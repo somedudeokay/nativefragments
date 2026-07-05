@@ -13,6 +13,7 @@ const markdownOutputPath = path.join(root, "public/reference.md");
 const sources = [
   { root: coreRoot, file: "src/server/html.js", repoPath: "packages/core/src/server/html.js", module: "@nativefragments/core/server", title: "Server HTML" },
   { root: coreRoot, file: "src/server/router.js", repoPath: "packages/core/src/server/router.js", module: "@nativefragments/core/server", title: "Server Routing" },
+  { root: coreRoot, file: "src/server/api.js", repoPath: "packages/core/src/server/api.js", module: "@nativefragments/core/server", title: "Server API" },
   { root: coreRoot, file: "src/cloudflare/index.js", repoPath: "packages/core/src/cloudflare/index.js", module: "@nativefragments/core/cloudflare", title: "Cloudflare Adapter" },
   { root: coreRoot, file: "public/nativefragments/router.js", repoPath: "packages/core/public/nativefragments/router.js", module: "/nativefragments/router.js", title: "Browser Router" },
   { root: coreRoot, file: "public/nativefragments/component.js", repoPath: "packages/core/public/nativefragments/component.js", module: "/nativefragments/component.js", title: "Shadow DOM Components" },
@@ -238,6 +239,14 @@ const mdParamTable = (params) =>
         .join("\n")}\n`
     : "";
 
+const mdReturns = (returns) => {
+  if (!returns?.type && !returns?.description) return "";
+  const parts = [];
+  if (returns.type) parts.push(`\`${returns.type}\`.`);
+  if (returns.description) parts.push(mdLinks(returns.description));
+  return `\n**Returns** — ${parts.join(" ")}\n`;
+};
+
 const renderMarkdown = (sections) => `# Native Fragments API Reference
 
 > Generated from JSDoc comments in @nativefragments/core. For the full index, fetch https://docs.nativefragments.org/llms.txt.
@@ -267,16 +276,14 @@ ${symbol.signature}
 \`\`\`
 
 ${mdLinks(symbol.description)}
-${symbol.type ? `\nType: \`${symbol.type}\`\n` : ""}${mdParamTable(symbol.params)}${
-      symbol.returns?.type || symbol.returns?.description
-        ? `\n**Returns** — ${symbol.returns.type ? `\`${symbol.returns.type}\`. ` : ""}${mdLinks(symbol.returns.description)}\n`
-        : ""
-    }`,
+  ${symbol.type ? `\nType: \`${symbol.type}\`\n` : ""}${mdParamTable(symbol.params)}${mdReturns(symbol.returns)}`,
   )
   .join("\n")}`,
   )
   .join("\n")}
 `;
+
+const normalizeMarkdown = (markdown) => markdown.replace(/[ \t]+$/gm, "");
 
 const REPO = "https://github.com/somedudeokay/nativefragments";
 
@@ -387,7 +394,7 @@ const main = async () => {
     outputPath,
     `export const apiSections = ${JSON.stringify(sections, null, 2)};\n\nexport const apiTypes = ${JSON.stringify(apiTypes, null, 2)};\n`,
   );
-  await writeFile(markdownOutputPath, renderMarkdown(sections));
+  await writeFile(markdownOutputPath, normalizeMarkdown(renderMarkdown(sections)));
   console.log(`api reference: ${sections.length} modules, ${apiTypes.length} appendix types`);
 };
 

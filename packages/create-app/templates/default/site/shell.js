@@ -38,6 +38,6 @@ export const shell = ({ body, meta, nonce }) => html`<!doctype html>
       activePath: activePath(meta.canonical),
       clickCount: clickCount(meta),
     })}
-    <main id="content-slot">${raw(body)}</main>
+    <main id="content-slot">${body}</main>
   </body>
 </html>`;

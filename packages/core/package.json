@@ -4,52 +4,52 @@
   "description": "Zero dependency, zero build framework core for agents building AI-friendly web applications.",
   "type": "module",
   "main": "./src/index.js",
-  "types": "./types/index.d.ts",
+  "types": "./types/src/index.d.ts",
   "exports": {
     ".": {
-      "types": "./types/index.d.ts",
+      "types": "./types/src/index.d.ts",
       "default": "./src/index.js"
     },
     "./cloudflare": {
-      "types": "./types/cloudflare.d.ts",
+      "types": "./types/src/cloudflare/index.d.ts",
       "default": "./src/cloudflare/index.js"
     },
     "./server": {
-      "types": "./types/server.d.ts",
+      "types": "./types/src/server/index.d.ts",
       "default": "./src/server/index.js"
     },
     "./client/router.js": {
-      "types": "./types/client-router.d.ts",
+      "types": "./types/public/nativefragments/router.d.ts",
       "default": "./public/nativefragments/router.js"
     },
     "./client/component.js": {
-      "types": "./types/client-component.d.ts",
+      "types": "./types/public/nativefragments/component.d.ts",
       "default": "./public/nativefragments/component.js"
     },
     "./client/worker.js": {
-      "types": "./types/client-worker.d.ts",
+      "types": "./types/public/nativefragments/worker.d.ts",
       "default": "./public/nativefragments/worker.js"
     }
   },
   "typesVersions": {
     "*": {
       "cloudflare": [
-        "./types/cloudflare.d.ts"
+        "./types/src/cloudflare/index.d.ts"
       ],
       "server": [
-        "./types/server.d.ts"
+        "./types/src/server/index.d.ts"
       ],
       "client/router.js": [
-        "./types/client-router.d.ts"
+        "./types/public/nativefragments/router.d.ts"
       ],
       "client/component.js": [
-        "./types/client-component.d.ts"
+        "./types/public/nativefragments/component.d.ts"
       ],
       "client/worker.js": [
-        "./types/client-worker.d.ts"
+        "./types/public/nativefragments/worker.d.ts"
       ],
       "*": [
-        "./types/index.d.ts"
+        "./types/src/index.d.ts"
       ]
     }
   },
@@ -77,9 +77,10 @@
   "scripts": {
     "check": "find src public/nativefragments -name '*.js' -print0 | xargs -0 -n1 node --check",
     "test": "node --test",
+    "types": "tsc -p tsconfig.types.json",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "npm run check && changeset publish"
+    "release": "npm run check && npm run types && changeset publish"
   },
   "keywords": [
     "web-components",
@@ -92,6 +93,7 @@
   "license": "MIT",
   "devDependencies": {
     "@changesets/changelog-github": "^0.7.0",
-    "@changesets/cli": "^2.31.0"
+    "@changesets/cli": "^2.31.0",
+    "typescript": "^6.0.3"
   }
 }

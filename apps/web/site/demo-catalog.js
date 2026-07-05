@@ -111,15 +111,11 @@ const specHtml = () => html`<div class="demo-spec">
       <span class="demo-spec__dot" aria-hidden="true"></span>Lighthouse
     </p>
     <div class="demo-spec__stats">
-      ${raw(
-        lighthouse
-          .map(
-            (s) => html`<div class="spec spec--score">
+      ${lighthouse.map(
+        (s) => html`<div class="spec spec--score">
               <span class="spec__num">${s.value}</span>
               <span class="spec__cap">${s.label}</span>
             </div>`,
-          )
-          .join(""),
       )}
     </div>
   </section>
@@ -135,10 +131,8 @@ const specHtml = () => html`<div class="demo-spec">
 </div>`;
 
 export const demoRows = () =>
-  raw(
-    demos
-      .map(
-        (demo, index) => html`<article class="demo-row">
+  demos.map(
+    (demo, index) => html`<article class="demo-row">
           <a class="demo-shot-link" href="${demo.url}" data-nativefragments-reload>
             <img
               alt="${demo.title} screenshot"
@@ -154,9 +148,9 @@ export const demoRows = () =>
             <h2><a href="${demo.url}" data-nativefragments-reload>${demo.title}</a></h2>
             <p>${demo.summary}</p>
             <p class="demo-meta">
-              ${raw(tags.map((tag) => html`<span>${tag}</span>`).join(""))}
+              ${tags.map((tag) => html`<span>${tag}</span>`)}
             </p>
-            ${raw(specHtml())}
+            ${specHtml()}
             <div class="demo-actions">
               <a
                 class="demo-action demo-action--demo"
@@ -176,6 +170,4 @@ export const demoRows = () =>
             </div>
           </div>
         </article>`,
-      )
-      .join(""),
   );

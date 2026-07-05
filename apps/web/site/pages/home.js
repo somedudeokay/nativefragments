@@ -136,16 +136,12 @@ const streamRows = [
 
 const streamTimeline = () => html`<div class="stream-timeline" aria-hidden="true">
   <p class="stream-timeline-head">one connection · fastest first</p>
-  ${raw(
-    streamRows
-      .map(
-        (row) => html`<div class="stream-row" data-state="${row.state}">
+  ${streamRows.map(
+    (row) => html`<div class="stream-row" data-state="${row.state}">
           <span class="stream-label">${row.label}</span>
           <span class="stream-bar"><span style="width: ${row.width}"></span></span>
           <span class="stream-time">${row.time}</span>
         </div>`,
-      )
-      .join(""),
   )}
 </div>`;
 
@@ -174,15 +170,11 @@ export const homePage = () => html`<section class="hero">
 </section>
 
 <section class="stats-strip" aria-label="Measured numbers">
-  ${raw(
-    stats
-      .map(
-        (stat) => html`<div class="stat">
+  ${stats.map(
+    (stat) => html`<div class="stat">
           <strong>${stat.value}</strong>
           <span>${stat.caption}</span>
         </div>`,
-      )
-      .join(""),
   )}
 </section>
 
@@ -208,7 +200,7 @@ export const homePage = () => html`<section class="hero">
 </section>
 
 <section class="pillars" aria-label="Why Native Fragments">
-  ${raw(pillars.map(pillarCard).join(""))}
+  ${pillars.map(pillarCard)}
 </section>
 
 <section class="stream-slab">
@@ -226,7 +218,7 @@ export const homePage = () => html`<section class="hero">
       fragment has a timeout, and the content arrives as crawlable HTML in the
       same response — not a client-side fetch.
     </p>
-    ${raw(streamTimeline())}
+    ${streamTimeline()}
     <div class="stream-actions">
       <a class="stream-link" href="https://met-gallery.nativefragments.org" data-nativefragments-reload>Watch it stream live <span aria-hidden="true">→</span></a>
       <a class="stream-link stream-link--quiet" href="https://docs.nativefragments.org/concepts/streaming">Streaming docs</a>

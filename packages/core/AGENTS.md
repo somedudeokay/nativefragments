@@ -32,7 +32,11 @@ building fast, maintainable, AI-friendly web applications.
 
 ## Structure
 
-- `src/server`: HTML helpers, route helpers, metadata, and rendering.
+- `src/server/router.js`: route definitions, matching, actions, redirects,
+  query helpers, and render normalization.
+- `src/server/defer.js`: deferred fragment streaming, timeouts, and reveal
+  bootstrap.
+- `src/server/api.js`: `apiRoute()` and `createApi()` helpers.
 - `src/cloudflare`: Cloudflare Worker adapter.
 - `public/nativefragments`: browser-loadable framework modules.
 - `docs`: package API reference documentation.
@@ -40,3 +44,12 @@ building fast, maintainable, AI-friendly web applications.
 
 No Vite, no framework compiler, no test runner dependency. The public docsite
 lives in the separate `nativefragments.org` repo.
+
+## API Conventions
+
+- `html` returns a trusted wrapper; nested `html` and arrays compose directly.
+- Use `raw()` only for external trusted strings such as SVG, CSS, highlighted
+  code, and `jsonScript()` text.
+- Use `apiRoute()`/`createApi()` for API handlers.
+- Use route `action()` plus `redirect(..., 303)` for POST-redirect-GET forms.
+- Keep query parsing in pure helpers built around `readSearch()`.

@@ -16,7 +16,8 @@ npm run deploy
 The starter includes:
 
 - Cloudflare Worker rendering through `@nativefragments/core`.
-- Hono mounted under `/api/*`.
+- Built-in `apiRoute()`/`createApi()` mounted under `/api/*`.
+- Route query state read with `readSearch(query, defaults)`.
 - Fragment navigation with route-level and nested slot demos.
 - A persistent shell header that is not replaced during navigation.
 - Server-rendered Shadow DOM components with no refresh FOUC.

@@ -59,7 +59,7 @@ export const shell = ({ body, meta, nonce }) => {
     after: html`</main></body></html>`,
   };
   if (body === undefined) return parts;
-  return html`${raw(parts.before)}${raw(body)}${raw(parts.after)}`;
+  return html`${parts.before}${body}${parts.after}`;
 };
 ```
 

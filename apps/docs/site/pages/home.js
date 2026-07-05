@@ -36,7 +36,7 @@ import { html, raw } from "@nativefragments/core/server";
 export const shell = ({ body, meta }) => html\`<!doctype html>
 <html lang="en">
   <head><title>\${meta.title}</title></head>
-  <body><main id="content-slot">\${raw(body)}</main></body>
+  <body><main id="content-slot">\${body}</main></body>
 </html>\`;
 
 // worker.js

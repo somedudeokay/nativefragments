@@ -35,7 +35,7 @@ export const docPage = ({ eyebrow, title, intro, body }) => {
 };
 
 export const callout = (title, text) =>
-  raw(html`<aside class="callout">
+  html`<aside class="callout">
     <strong>${title}</strong>
     <p>${text}</p>
-  </aside>`);
+  </aside>`;

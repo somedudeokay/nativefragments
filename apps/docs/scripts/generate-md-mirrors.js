@@ -109,7 +109,7 @@ let count = 0;
 for (const route of routes) {
   const name = mirrors[route.path];
   if (!name) continue;
-  const rendered = await route.render(context(route.path));
+  const rendered = String(await route.render(context(route.path)));
   await mkdir(publicDir, { recursive: true });
   await writeFile(path.join(publicDir, `${name}.md`), toMarkdown(rendered));
   count += 1;

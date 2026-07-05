@@ -165,8 +165,6 @@ const highlight = (source, language) => {
 };
 
 export const codeBlock = (source, language = "js", file = null) =>
-  raw(
-    html`<pre class="code-block" data-language="${language}"${
-      file ? raw(html` data-file="${file}"`) : ""
-    }><code>${raw(highlight(source.trim(), language))}</code></pre>`,
-  );
+  html`<pre class="code-block" data-language="${language}"${
+    file ? html` data-file="${file}"` : ""
+  }><code>${raw(highlight(source.trim(), language))}</code></pre>`;

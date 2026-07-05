@@ -27,12 +27,12 @@ export const shell = ({ body, meta, nonce }) => html`<!doctype html>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="dark light" />
-    ${raw(headLinks({ meta, nonce }))}
+    ${headLinks({ meta, nonce })}
   </head>
   <body>
     <a class="skip-link" href="#content-slot">Skip to content</a>
     ${siteHeader({ activePath: activePath(meta.canonical) })}
-    <main id="content-slot">${raw(body)}</main>
-    ${raw(siteFooter())}
+    <main id="content-slot">${body}</main>
+    ${siteFooter()}
   </body>
 </html>`;

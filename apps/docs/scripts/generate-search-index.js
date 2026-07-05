@@ -54,7 +54,7 @@ for (const route of routes) {
 
   const meta = (await route.meta?.(context(route.path))) ?? {};
   // Drop the "On this page" navigation so its labels don't pollute the index.
-  const rendered = (await route.render(context(route.path))).replace(
+  const rendered = String(await route.render(context(route.path))).replace(
     /<nav class="toc"[^>]*>[\s\S]*?<\/nav>/g,
     "",
   );

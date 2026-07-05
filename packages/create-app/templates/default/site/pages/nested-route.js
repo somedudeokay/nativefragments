@@ -1,4 +1,4 @@
-import { fragment, html, raw } from "@nativefragments/core/server";
+import { fragment, html } from "@nativefragments/core/server";
 import { featureList } from "../features.js";
 
 const nestedPanelName = "nested-panel";
@@ -58,12 +58,12 @@ export const nestedRegion = (context) => {
       href: "/nested-route/activity",
       label: "Activity",
     }),
-  ].join("");
+  ];
 
   return html`<div class="nested-tabs" aria-label="Nested panels">
-      ${raw(links)}
+      ${links}
     </div>
-    ${raw(panelContent(activePanel))}`;
+    ${panelContent(activePanel)}`;
 };
 
 export const nestedRoutePage = (context) => html`<section class="demo-hero nested-route">
@@ -81,6 +81,6 @@ export const nestedRoutePage = (context) => html`<section class="demo-hero neste
       "aria-label": "Nested fragment panel",
     })}
   >
-    ${raw(nestedRegion(context))}
+    ${nestedRegion(context)}
   </section>
 </section>`;

@@ -10,9 +10,10 @@
   ],
   "scripts": {
     "check": "npm run check --workspaces --if-present",
+    "sync-public": "node scripts/sync-public.mjs",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "changeset publish",
+    "release": "npm run sync-public && changeset publish",
     "dev:web": "npm run dev -w apps/web",
     "deploy:web": "npm run deploy -w apps/web",
     "dev:docs": "npm run dev -w apps/docs",

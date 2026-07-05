@@ -27,7 +27,7 @@ export const shell = ({ body, meta }) => html`<!doctype html>
   </head>
   <body>
     <header>…site chrome…</header>
-    <main id="content-slot">${raw(body)}</main>
+    <main id="content-slot">${body}</main>
   </body>
 </html>`;
 ```
@@ -54,7 +54,7 @@ export const shell = ({ body, meta, nonce }) => {
     after: html`</main></body></html>`,
   };
   if (body === undefined) return parts;
-  return html`${raw(parts.before)}${raw(body)}${raw(parts.after)}`;
+  return html`${parts.before}${body}${parts.after}`;
 };
 ```
 
@@ -73,7 +73,7 @@ export const shell = ({ body, meta, nonce }) => html`<!doctype html>
       document.documentElement.classList.add("js");
     </script>
   </head>
-  <body><main id="content-slot">${raw(body)}</main></body>
+  <body><main id="content-slot">${body}</main></body>
 </html>`;
 ```
 

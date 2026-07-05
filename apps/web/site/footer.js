@@ -35,7 +35,7 @@ const footerLink = ({ href, label, reload }) =>
 const footerGroup = ({ title, links }) => html`<nav class="footer-group" aria-label="${title}">
   <p class="footer-title">${title}</p>
   <ul>
-    ${raw(links.map(footerLink).join(""))}
+    ${links.map(footerLink)}
   </ul>
 </nav>`;
 
@@ -48,7 +48,7 @@ export const siteFooter = () => html`<footer class="site-footer">
         the edge. This site is built with it.
       </p>
     </div>
-    ${raw(groups.map(footerGroup).join(""))}
+    ${groups.map(footerGroup)}
   </div>
   <div class="footer-meta">
     <p>MIT licensed.</p>

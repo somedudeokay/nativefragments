@@ -1,4 +1,4 @@
-import { declarativeShadow, html } from "@nativefragments/core/server";
+import { declarativeShadow, html, readSearch } from "@nativefragments/core/server";
 import { featureList } from "../features.js";
 import { readClickCountCookie } from "../state.js";
 
@@ -96,8 +96,9 @@ const counterPanelHtml = (count) => html`<section class="panel">
   </div>
 </section>`;
 
-export const counterPage = ({ request }) => {
+export const counterPage = ({ query, request }) => {
   const count = readClickCountCookie(request);
+  const { mode } = readSearch(query, { mode: "default" });
 
   return html`<section class="demo-hero counter-route">
     <div class="hero-copy">
@@ -105,7 +106,7 @@ export const counterPage = ({ request }) => {
       ${featureList()}
       <p class="lede">
         One shared state, no client framework. The page rerenders in pieces
-        while the counter stays in sync.
+        while the counter stays in sync. Query mode: ${mode}.
       </p>
     </div>
     <app-counter-panel>

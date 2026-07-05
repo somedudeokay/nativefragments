@@ -9,7 +9,7 @@ export const apiSections = [
         "name": "RawHtml",
         "description": "",
         "properties": [],
-        "type": "{ [RAW]: true, value: string }",
+        "type": "{ [RAW]: true, value: string, toString(): string }",
         "line": 3,
         "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L3"
       },
@@ -35,23 +35,23 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 67,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L67"
+        "line": 76,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L76"
       },
       {
         "name": "HtmlAttrs",
         "description": "",
         "properties": [],
         "type": "Record<string, string | number | boolean | null | undefined>",
-        "line": 106,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L106"
+        "line": 115,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L115"
       }
     ],
     "symbols": [
       {
         "name": "raw",
         "signature": "raw(value?) → RawHtml",
-        "line": 19,
+        "line": 28,
         "description": "Mark a value as trusted HTML. Use this only for framework-generated markup or content that has already been validated. Ordinary interpolated values in {@link html} are escaped by default.",
         "private": false,
         "params": [
@@ -70,12 +70,12 @@ export const apiSections = [
           "description": "Trusted HTML wrapper."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L19"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L28"
       },
       {
         "name": "escapeHtml",
         "signature": "escapeHtml(value) → string",
-        "line": 33,
+        "line": 39,
         "description": "Escape a value for safe insertion into HTML text or attribute context.",
         "private": false,
         "params": [
@@ -94,13 +94,13 @@ export const apiSections = [
           "description": "Escaped HTML string."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L33"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L39"
       },
       {
         "name": "html",
-        "signature": "html(strings, ...values) → string",
-        "line": 58,
-        "description": "Server-side HTML template tag with escaped interpolation by default. Arrays are flattened, `null`, `undefined`, and `false` become empty strings, and values returned by {@link raw} are inserted as trusted HTML.",
+        "signature": "html(strings, ...values) → RawHtml",
+        "line": 65,
+        "description": "Server-side HTML template tag with escaped interpolation by default. Arrays are flattened, `null`, `undefined`, and `false` become empty strings, and trusted values returned by {@link html}, {@link raw}, {@link attrs}, or {@link declarativeShadow} are inserted as HTML without being re-escaped.",
         "private": false,
         "params": [
           {
@@ -122,16 +122,16 @@ export const apiSections = [
         ],
         "properties": [],
         "returns": {
-          "type": "string",
-          "description": "Rendered HTML."
+          "type": "RawHtml",
+          "description": "Rendered HTML wrapper."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L58"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L65"
       },
       {
         "name": "declarativeShadow",
         "signature": "declarativeShadow(options?) → RawHtml",
-        "line": 87,
+        "line": 96,
         "description": "Render a declarative Shadow DOM template for server-rendered components. Put this as the first child of a custom element to avoid a flash of unstyled light DOM before the component module loads. Pair it with the browser {@link shadow} helper, which preserves an existing declarative shadow root on first upgrade and materializes declarative shadow templates inserted during fragment navigation.",
         "private": false,
         "params": [
@@ -168,12 +168,12 @@ export const apiSections = [
           "description": "Trusted declarative shadow template."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L87"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L96"
       },
       {
         "name": "jsonScript",
         "signature": "jsonScript(value) → string",
-        "line": 103,
+        "line": 112,
         "description": "Serialize JSON for safe embedding inside an inline script tag. `<` characters are escaped so embedded JSON cannot accidentally terminate the script element.",
         "private": false,
         "params": [
@@ -192,13 +192,13 @@ export const apiSections = [
           "description": "JSON string safe for script text."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L103"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L112"
       },
       {
         "name": "attrs",
         "signature": "attrs(attributes?) → RawHtml",
-        "line": 119,
-        "description": "Build escaped HTML attributes from an object. `false`, `null`, and `undefined` values are omitted. `true` values render as boolean attributes.",
+        "line": 130,
+        "description": "Build escaped HTML attributes from an object. `false`, `null`, and `undefined` values are omitted. `true` values render as boolean attributes. Attribute names must be valid HTML-like names.",
         "private": false,
         "params": [
           {
@@ -216,7 +216,7 @@ export const apiSections = [
           "description": "Trusted HTML attribute string."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L119"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L130"
       }
     ]
   },
@@ -255,6 +255,14 @@ export const apiSections = [
             "rest": false
           },
           {
+            "name": "query",
+            "type": "URLSearchParams",
+            "optional": false,
+            "default": "",
+            "description": "Parsed query parameters from `url.searchParams`.",
+            "rest": false
+          },
+          {
             "name": "params",
             "type": "Record<string, string>",
             "optional": false,
@@ -272,8 +280,8 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 3,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L3"
+        "line": 4,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L4"
       },
       {
         "name": "RouteMeta",
@@ -313,32 +321,32 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 15,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L15"
+        "line": 17,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L17"
       },
       {
         "name": "FragmentRenderer",
         "description": "",
         "properties": [],
-        "type": "(context: RouteContext) => string | Promise<string>",
-        "line": 24,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L24"
+        "type": "(context: RouteContext) => string | import(\"./html.js\").RawHtml | Response | Promise<string | import(\"./html.js\").RawHtml | Response>",
+        "line": 26,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L26"
       },
       {
         "name": "FragmentLoadingRenderer",
         "description": "",
         "properties": [],
-        "type": "(context: RouteContext) => string",
-        "line": 28,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L28"
+        "type": "(context: RouteContext) => string | import(\"./html.js\").RawHtml",
+        "line": 30,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L30"
       },
       {
         "name": "FragmentErrorRenderer",
         "description": "",
         "properties": [],
-        "type": "(error: unknown, context: RouteContext) => string | Promise<string>",
-        "line": 32,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L32"
+        "type": "(error: unknown, context: RouteContext) => string | import(\"./html.js\").RawHtml | Promise<string | import(\"./html.js\").RawHtml>",
+        "line": 34,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L34"
       },
       {
         "name": "FragmentDefinition",
@@ -402,8 +410,8 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 36,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L36"
+        "line": 38,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L38"
       },
       {
         "name": "RouteDefinition",
@@ -411,15 +419,39 @@ export const apiSections = [
         "properties": [
           {
             "name": "meta",
-            "type": "(context: RouteContext) => RouteMeta | Promise<RouteMeta>",
+            "type": "(context: RouteContext) => RouteMeta | Response | Promise<RouteMeta | Response>",
             "optional": true,
             "default": "",
             "description": "Function that returns metadata for the route.",
             "rest": false
           },
           {
+            "name": "status",
+            "type": "number",
+            "optional": true,
+            "default": "200",
+            "description": "Status used for rendered HTML responses.",
+            "rest": false
+          },
+          {
+            "name": "headers",
+            "type": "Record<string, string> | ((context: RouteContext) => Record<string, string> | Promise<Record<string, string>>)",
+            "optional": true,
+            "default": "",
+            "description": "Headers merged into rendered HTML responses after adapter defaults.",
+            "rest": false
+          },
+          {
+            "name": "action",
+            "type": "(context: RouteContext) => Response | Promise<Response>",
+            "optional": true,
+            "default": "",
+            "description": "POST handler for no-JavaScript mutations. Must return a native Response, usually a 303 redirect.",
+            "rest": false
+          },
+          {
             "name": "render",
-            "type": "(context: RouteContext) => string | Promise<string>",
+            "type": "(context: RouteContext) => string | import(\"./html.js\").RawHtml | Response | Promise<string | import(\"./html.js\").RawHtml | Response>",
             "optional": false,
             "default": "",
             "description": "Function that renders route body HTML.",
@@ -435,23 +467,23 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 51,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L51"
+        "line": 53,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L53"
       },
       {
         "name": "Route",
         "description": "",
         "properties": [],
         "type": "RouteDefinition & { path: string, params?: Record<string, string> }",
-        "line": 61,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L61"
+        "line": 69,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L69"
       }
     ],
     "symbols": [
       {
         "name": "fragment",
         "signature": "fragment(name, definition) → FragmentDefinition",
-        "line": 145,
+        "line": 181,
         "description": "Create a named fragment definition. Use this when a route has a nested region with its own navigation. The returned object can be registered in `route(..., { fragments: [item] })` and its attributes can be reused on links and target containers.",
         "private": false,
         "params": [
@@ -478,7 +510,7 @@ export const apiSections = [
           "description": "Fragment definition."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L145",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L181",
         "returnFields": [
           {
             "name": "name",
@@ -541,7 +573,7 @@ export const apiSections = [
       {
         "name": "route",
         "signature": "route(path, definition) → Route",
-        "line": 170,
+        "line": 206,
         "description": "Create a normalized route definition.",
         "private": false,
         "params": [
@@ -563,15 +595,39 @@ export const apiSections = [
             "fields": [
               {
                 "name": "meta",
-                "type": "(context: RouteContext) => RouteMeta | Promise<RouteMeta>",
+                "type": "(context: RouteContext) => RouteMeta | Response | Promise<RouteMeta | Response>",
                 "optional": true,
                 "default": "",
                 "description": "Function that returns metadata for the route.",
                 "rest": false
               },
               {
+                "name": "status",
+                "type": "number",
+                "optional": true,
+                "default": "200",
+                "description": "Status used for rendered HTML responses.",
+                "rest": false
+              },
+              {
+                "name": "headers",
+                "type": "Record<string, string> | ((context: RouteContext) => Record<string, string> | Promise<Record<string, string>>)",
+                "optional": true,
+                "default": "",
+                "description": "Headers merged into rendered HTML responses after adapter defaults.",
+                "rest": false
+              },
+              {
+                "name": "action",
+                "type": "(context: RouteContext) => Response | Promise<Response>",
+                "optional": true,
+                "default": "",
+                "description": "POST handler for no-JavaScript mutations. Must return a native Response, usually a 303 redirect.",
+                "rest": false
+              },
+              {
                 "name": "render",
-                "type": "(context: RouteContext) => string | Promise<string>",
+                "type": "(context: RouteContext) => string | import(\"./html.js\").RawHtml | Response | Promise<string | import(\"./html.js\").RawHtml | Response>",
                 "optional": false,
                 "default": "",
                 "description": "Function that renders route body HTML.",
@@ -594,12 +650,76 @@ export const apiSections = [
           "description": "Normalized route."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L170"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L206"
+      },
+      {
+        "name": "redirect",
+        "signature": "redirect(location, status?) → Response",
+        "line": 224,
+        "description": "Create a redirect response.",
+        "private": false,
+        "params": [
+          {
+            "name": "location",
+            "type": "string | URL",
+            "optional": false,
+            "default": "",
+            "description": "Redirect destination.",
+            "rest": false
+          },
+          {
+            "name": "status",
+            "type": "number",
+            "optional": true,
+            "default": "302",
+            "description": "Redirect status.",
+            "rest": false
+          }
+        ],
+        "properties": [],
+        "returns": {
+          "type": "Response",
+          "description": "Native redirect response."
+        },
+        "type": "",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L224"
+      },
+      {
+        "name": "readSearch",
+        "signature": "readSearch(searchParams, defaults) → T",
+        "line": 243,
+        "description": "Read string query parameters with defaults. Each returned key is `searchParams.get(key)` when it is a non-empty string, otherwise the default value.",
+        "private": false,
+        "params": [
+          {
+            "name": "searchParams",
+            "type": "URLSearchParams",
+            "optional": false,
+            "default": "",
+            "description": "Query parameters.",
+            "rest": false
+          },
+          {
+            "name": "defaults",
+            "type": "T",
+            "optional": false,
+            "default": "",
+            "description": "Default values.",
+            "rest": false
+          }
+        ],
+        "properties": [],
+        "returns": {
+          "type": "T",
+          "description": "Query values merged with defaults."
+        },
+        "type": "",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L243"
       },
       {
         "name": "createRoutes",
         "signature": "createRoutes(routes) → { all: Route[], match(pathname: string): Route | null }",
-        "line": 187,
+        "line": 258,
         "description": "Create a route manifest that can match normalized paths. Exact static routes win first, then parameterized routes are matched in declaration order.",
         "private": false,
         "params": [
@@ -618,12 +738,12 @@ export const apiSections = [
           "description": "Route manifest."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L187"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L258"
       },
       {
         "name": "fragmentMeta",
-        "signature": "fragmentMeta(meta) → string",
-        "line": 213,
+        "signature": "fragmentMeta(meta) → import(\"./html.js\").RawHtml",
+        "line": 299,
         "description": "Render fragment metadata for the browser fragment router.",
         "private": false,
         "params": [
@@ -672,16 +792,16 @@ export const apiSections = [
         ],
         "properties": [],
         "returns": {
-          "type": "string",
+          "type": "import(\"./html.js\").RawHtml",
           "description": "Script tag containing serialized metadata."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L213"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L299"
       },
       {
         "name": "renderRoute",
-        "signature": "renderRoute(options) → Promise<{ body: string, meta: Required<RouteMeta>, deferred: unknown[] }>",
-        "line": 414,
+        "signature": "renderRoute(options) → Promise<{ body: string, meta: Required<Pick<RouteMeta, \"title\" | \"description\" | \"canonical\">> & RouteMeta, deferred: unknown[], status: number, headers: Record<string, string> } | { response: Response }>",
+        "line": 313,
         "description": "Render a matched route and normalize metadata defaults.",
         "private": false,
         "params": [
@@ -696,16 +816,16 @@ export const apiSections = [
         ],
         "properties": [],
         "returns": {
-          "type": "Promise<{ body: string, meta: Required<RouteMeta>, deferred: unknown[] }>",
+          "type": "Promise<{ body: string, meta: Required<Pick<RouteMeta, \"title\" | \"description\" | \"canonical\">> & RouteMeta, deferred: unknown[], status: number, headers: Record<string, string> } | { response: Response }>",
           "description": "Rendered route."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L414"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L313"
       },
       {
         "name": "renderFragment",
-        "signature": "renderFragment(rendered) → string",
-        "line": 482,
+        "signature": "renderFragment(rendered) → import(\"./html.js\").RawHtml",
+        "line": 401,
         "description": "Render a fragment response body with embedded metadata.",
         "private": false,
         "params": [
@@ -720,23 +840,249 @@ export const apiSections = [
         ],
         "properties": [],
         "returns": {
-          "type": "string",
+          "type": "import(\"./html.js\").RawHtml",
           "description": "Fragment HTML."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L482"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L401"
       },
       {
         "name": "notFoundRoute",
         "signature": "notFoundRoute",
-        "line": 575,
+        "line": 409,
         "description": "Default 404 route used by adapters when a route is not matched.",
         "private": false,
         "params": [],
         "properties": [],
         "returns": null,
         "type": "{Route}",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L575"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L409"
+      },
+      {
+        "name": "errorRoute",
+        "signature": "errorRoute",
+        "line": 428,
+        "description": "Default 500 route used by adapters when a route render fails.",
+        "private": false,
+        "params": [],
+        "properties": [],
+        "returns": null,
+        "type": "{Route}",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L428"
+      }
+    ]
+  },
+  {
+    "module": "@nativefragments/core/server",
+    "title": "Server API",
+    "file": "packages/core/src/server/api.js",
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/api.js",
+    "types": [
+      {
+        "name": "ApiContext",
+        "description": "",
+        "properties": [
+          {
+            "name": "request",
+            "type": "Request",
+            "optional": false,
+            "default": "",
+            "description": "Original request.",
+            "rest": false
+          },
+          {
+            "name": "env",
+            "type": "Record<string, unknown>",
+            "optional": false,
+            "default": "",
+            "description": "Runtime environment bindings.",
+            "rest": false
+          },
+          {
+            "name": "context",
+            "type": "unknown",
+            "optional": false,
+            "default": "",
+            "description": "Runtime execution context.",
+            "rest": false
+          },
+          {
+            "name": "url",
+            "type": "URL",
+            "optional": false,
+            "default": "",
+            "description": "Parsed request URL.",
+            "rest": false
+          },
+          {
+            "name": "query",
+            "type": "URLSearchParams",
+            "optional": false,
+            "default": "",
+            "description": "Parsed query parameters from `url.searchParams`.",
+            "rest": false
+          },
+          {
+            "name": "params",
+            "type": "Record<string, string>",
+            "optional": false,
+            "default": "",
+            "description": "Path parameters captured from the API route.",
+            "rest": false
+          },
+          {
+            "name": "signal",
+            "type": "AbortSignal",
+            "optional": false,
+            "default": "",
+            "description": "Request cancellation signal.",
+            "rest": false
+          }
+        ],
+        "type": "object",
+        "line": 13,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/api.js#L13"
+      },
+      {
+        "name": "ApiHandler",
+        "description": "",
+        "properties": [],
+        "type": "(context: ApiContext) => unknown | Response | Promise<unknown | Response>",
+        "line": 24,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/api.js#L24"
+      },
+      {
+        "name": "ApiRoute",
+        "description": "",
+        "properties": [
+          {
+            "name": "method",
+            "type": "string",
+            "optional": false,
+            "default": "",
+            "description": "Upper-case HTTP method.",
+            "rest": false
+          },
+          {
+            "name": "path",
+            "type": "string",
+            "optional": false,
+            "default": "",
+            "description": "Normalized API route path.",
+            "rest": false
+          },
+          {
+            "name": "handler",
+            "type": "ApiHandler",
+            "optional": false,
+            "default": "",
+            "description": "API route handler.",
+            "rest": false
+          }
+        ],
+        "type": "object",
+        "line": 28,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/api.js#L28"
+      }
+    ],
+    "symbols": [
+      {
+        "name": "apiRoute",
+        "signature": "apiRoute(method, path, handler) → ApiRoute",
+        "line": 46,
+        "description": "Create a normalized API route. Paths use the same `:param` and trailing `:rest*` segment syntax as page routes.",
+        "private": false,
+        "params": [
+          {
+            "name": "method",
+            "type": "string",
+            "optional": false,
+            "default": "",
+            "description": "Upper-case HTTP method.",
+            "rest": false
+          },
+          {
+            "name": "path",
+            "type": "string",
+            "optional": false,
+            "default": "",
+            "description": "API path pattern.",
+            "rest": false
+          },
+          {
+            "name": "handler",
+            "type": "ApiHandler",
+            "optional": false,
+            "default": "",
+            "description": "API handler.",
+            "rest": false
+          }
+        ],
+        "properties": [],
+        "returns": {
+          "type": "ApiRoute",
+          "description": "Normalized API route."
+        },
+        "type": "",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/api.js#L46"
+      },
+      {
+        "name": "createApi",
+        "signature": "createApi(routes, options?) → { fetch(request: Request, env?: Record<string, unknown>, context?: unknown): Promise<Response> }",
+        "line": 95,
+        "description": "Create a Fetch-compatible API router.",
+        "private": false,
+        "params": [
+          {
+            "name": "routes",
+            "type": "ApiRoute[]",
+            "optional": false,
+            "default": "",
+            "description": "API route definitions.",
+            "rest": false,
+            "fields": [
+              {
+                "name": "method",
+                "type": "string",
+                "optional": false,
+                "default": "",
+                "description": "Upper-case HTTP method.",
+                "rest": false
+              },
+              {
+                "name": "path",
+                "type": "string",
+                "optional": false,
+                "default": "",
+                "description": "Normalized API route path.",
+                "rest": false
+              },
+              {
+                "name": "handler",
+                "type": "ApiHandler",
+                "optional": false,
+                "default": "",
+                "description": "API route handler.",
+                "rest": false
+              }
+            ]
+          },
+          {
+            "name": "options",
+            "type": "{ onError?: (event: { error: unknown, request: Request, route?: ApiRoute }) => void }",
+            "optional": true,
+            "default": "{}",
+            "description": "API options.",
+            "rest": false
+          }
+        ],
+        "properties": [],
+        "returns": {
+          "type": "{ fetch(request: Request, env?: Record<string, unknown>, context?: unknown): Promise<Response> }",
+          "description": "Fetch-compatible API router."
+        },
+        "type": "",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/api.js#L95"
       }
     ]
   },
@@ -751,8 +1097,8 @@ export const apiSections = [
         "description": "",
         "properties": [],
         "type": "import(\"../server/router.js\").Route",
-        "line": 127,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L127"
+        "line": 165,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L165"
       },
       {
         "name": "CloudflareHandlerOptions",
@@ -768,7 +1114,7 @@ export const apiSections = [
           },
           {
             "name": "shell",
-            "type": "(rendered: { body?: string, meta: object, nonce?: string }) => string | { before: string, after: string }",
+            "type": "(rendered: { body?: import(\"../server/html.js\").RawHtml, meta: object, nonce?: string }) => string | import(\"../server/html.js\").RawHtml | { before: string | import(\"../server/html.js\").RawHtml, after: string | import(\"../server/html.js\").RawHtml }",
             "optional": false,
             "default": "",
             "description": "Function that wraps a rendered route body in a full HTML document.",
@@ -776,10 +1122,10 @@ export const apiSections = [
           },
           {
             "name": "api",
-            "type": "{ fetch(request: Request, env: Record<string, unknown>, context?: unknown): Promise<Response> | Response }",
+            "type": "{ fetch(request: Request, env: Record<string, unknown>, context?: unknown): Promise<Response> | Response } | import(\"../server/api.js\").ApiRoute[]",
             "optional": true,
             "default": "",
-            "description": "Optional Web Standards API router. Hono apps work here because they expose a compatible `fetch` method.",
+            "description": "Optional Web Standards API router or array of `apiRoute()` definitions. Hono apps work here because they expose a compatible `fetch` method.",
             "rest": false
           },
           {
@@ -796,6 +1142,22 @@ export const apiSections = [
             "optional": true,
             "default": "",
             "description": "Optional 404 route.",
+            "rest": false
+          },
+          {
+            "name": "error",
+            "type": "Route",
+            "optional": true,
+            "default": "",
+            "description": "Optional 500 route.",
+            "rest": false
+          },
+          {
+            "name": "onError",
+            "type": "({ error, request, phase }: { error: unknown, request: Request, phase: \"route\" | \"error-route\" | \"api\" }) => void",
+            "optional": true,
+            "default": "",
+            "description": "Error hook for caught route, error-route, and API failures.",
             "rest": false
           },
           {
@@ -824,15 +1186,15 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 131,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L131"
+        "line": 169,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L169"
       }
     ],
     "symbols": [
       {
         "name": "createCloudflareHandler",
         "signature": "createCloudflareHandler(options) → { fetch(request: Request, env: Record<string, unknown>): Promise<Response> }",
-        "line": 161,
+        "line": 202,
         "description": "Create a Cloudflare Worker module for a Native Fragments app. Static assets are served from the configured assets binding. Normal document requests render the app shell. Requests with `x-fragment: true` return only the route body plus fragment metadata. Requests under `apiPrefix` are delegated to the optional API router before app route matching.",
         "private": false,
         "params": [
@@ -854,7 +1216,7 @@ export const apiSections = [
               },
               {
                 "name": "shell",
-                "type": "(rendered: { body?: string, meta: object, nonce?: string }) => string | { before: string, after: string }",
+                "type": "(rendered: { body?: import(\"../server/html.js\").RawHtml, meta: object, nonce?: string }) => string | import(\"../server/html.js\").RawHtml | { before: string | import(\"../server/html.js\").RawHtml, after: string | import(\"../server/html.js\").RawHtml }",
                 "optional": false,
                 "default": "",
                 "description": "Function that wraps a rendered route body in a full HTML document.",
@@ -862,10 +1224,10 @@ export const apiSections = [
               },
               {
                 "name": "api",
-                "type": "{ fetch(request: Request, env: Record<string, unknown>, context?: unknown): Promise<Response> | Response }",
+                "type": "{ fetch(request: Request, env: Record<string, unknown>, context?: unknown): Promise<Response> | Response } | import(\"../server/api.js\").ApiRoute[]",
                 "optional": true,
                 "default": "",
-                "description": "Optional Web Standards API router. Hono apps work here because they expose a compatible `fetch` method.",
+                "description": "Optional Web Standards API router or array of `apiRoute()` definitions. Hono apps work here because they expose a compatible `fetch` method.",
                 "rest": false
               },
               {
@@ -882,6 +1244,22 @@ export const apiSections = [
                 "optional": true,
                 "default": "",
                 "description": "Optional 404 route.",
+                "rest": false
+              },
+              {
+                "name": "error",
+                "type": "Route",
+                "optional": true,
+                "default": "",
+                "description": "Optional 500 route.",
+                "rest": false
+              },
+              {
+                "name": "onError",
+                "type": "({ error, request, phase }: { error: unknown, request: Request, phase: \"route\" | \"error-route\" | \"api\" }) => void",
+                "optional": true,
+                "default": "",
+                "description": "Error hook for caught route, error-route, and API failures.",
                 "rest": false
               },
               {
@@ -917,7 +1295,7 @@ export const apiSections = [
           "description": "Cloudflare Worker module."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L161"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L202"
       }
     ]
   },
@@ -956,6 +1334,14 @@ export const apiSections = [
             "rest": false
           },
           {
+            "name": "viewTransitions",
+            "type": "boolean",
+            "optional": true,
+            "default": "true",
+            "description": "Whether to use `document.startViewTransition()` for DOM swaps when supported.",
+            "rest": false
+          },
+          {
             "name": "afterNavigate",
             "type": "(event: { meta: object | null, url: URL, slot: string }) => void",
             "optional": true,
@@ -965,15 +1351,39 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 266,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/router.js#L266"
+        "line": 391,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/router.js#L391"
       }
     ],
     "symbols": [
       {
+        "name": "clearFragmentCache",
+        "signature": "clearFragmentCache(href?) → void",
+        "line": 86,
+        "description": "Clear cached fragment responses. With no argument, the entire cache and in-flight request map are cleared. With `href`, every cache entry for the resolved pathname and search is removed across all fragment slots.",
+        "private": false,
+        "params": [
+          {
+            "name": "href",
+            "type": "string | URL",
+            "optional": true,
+            "default": "",
+            "description": "Optional URL to clear.",
+            "rest": false
+          }
+        ],
+        "properties": [],
+        "returns": {
+          "type": "void",
+          "description": ""
+        },
+        "type": "",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/router.js#L86"
+      },
+      {
         "name": "prefetchFragment",
         "signature": "prefetchFragment(href, options?) → Promise<string | null>",
-        "line": 189,
+        "line": 316,
         "description": "Prefetch a same-origin fragment into the shared fragment cache.",
         "private": false,
         "params": [
@@ -1000,13 +1410,13 @@ export const apiSections = [
           "description": "Prefetched fragment HTML, or `null` for skipped cross-origin URLs and document-like URLs such as `/agents.txt`."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/router.js#L189"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/router.js#L316"
       },
       {
         "name": "installFragmentNavigation",
-        "signature": "installFragmentNavigation(options?) → ((href: string, pushState?: boolean, nextSlot?: string) => Promise<void>) | undefined",
-        "line": 293,
-        "description": "Install same-origin fragment navigation. Clicked links are fetched with `x-fragment: true`, the configured content slot is replaced, document metadata is updated, and history state is pushed. Links with `data-fragment-slot=\"name\"` replace only the matching `[data-fragment-slot=\"name\"]` container and send `x-fragment-slot: name`. External links, document-like URLs such as `/agents.txt`, modified clicks, and links with `data-nativefragments-reload` or `data-fragment-navigation=\"false\"` keep normal browser behavior.",
+        "signature": "installFragmentNavigation(options?) → ((href: string | URL, pushState?: boolean, nextSlot?: string) => Promise<void>) | undefined",
+        "line": 422,
+        "description": "Install same-origin fragment navigation. Clicked links are fetched with `x-fragment: true`, the configured content slot is replaced, document metadata is updated, and history state is pushed. Links with `data-fragment-slot=\"name\"` replace only the matching `[data-fragment-slot=\"name\"]` container and send `x-fragment-slot: name`. GET forms with `data-fragment-form` are intercepted the same way. POST forms are left to the browser so the server can run route actions and redirect. External links, document-like URLs such as `/agents.txt`, modified clicks, and links with `data-nativefragments-reload` or `data-fragment-navigation=\"false\"` keep normal browser behavior.",
         "private": false,
         "params": [
           {
@@ -1042,6 +1452,14 @@ export const apiSections = [
                 "rest": false
               },
               {
+                "name": "viewTransitions",
+                "type": "boolean",
+                "optional": true,
+                "default": "true",
+                "description": "Whether to use `document.startViewTransition()` for DOM swaps when supported.",
+                "rest": false
+              },
+              {
                 "name": "afterNavigate",
                 "type": "(event: { meta: object | null, url: URL, slot: string }) => void",
                 "optional": true,
@@ -1054,11 +1472,11 @@ export const apiSections = [
         ],
         "properties": [],
         "returns": {
-          "type": "((href: string, pushState?: boolean, nextSlot?: string) => Promise<void>) | undefined",
+          "type": "((href: string | URL, pushState?: boolean, nextSlot?: string) => Promise<void>) | undefined",
           "description": "Navigate function, or `undefined` if the slot does not exist."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/router.js#L293"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/router.js#L422"
       }
     ]
   },
@@ -1207,8 +1625,8 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 39,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/worker.js#L39"
+        "line": 41,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/worker.js#L41"
       },
       {
         "name": "NativeWorkerClient",
@@ -1227,7 +1645,7 @@ export const apiSections = [
             "type": "() => void",
             "optional": false,
             "default": "",
-            "description": "Reject pending calls and remove listeners.",
+            "description": "Reject pending calls, remove listeners, and terminate workers constructed by `createWorkerClient`.",
             "rest": false
           },
           {
@@ -1240,15 +1658,48 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 44,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/worker.js#L44"
+        "line": 46,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/worker.js#L46"
+      },
+      {
+        "name": "NativeWorkerScope",
+        "description": "",
+        "properties": [
+          {
+            "name": "postMessage",
+            "type": "(message: unknown, transfer?: Transferable[]) => void",
+            "optional": false,
+            "default": "",
+            "description": "Post a message to the paired thread.",
+            "rest": false
+          },
+          {
+            "name": "addEventListener",
+            "type": "(type: \"message\", listener: (event: MessageEvent) => void) => void",
+            "optional": false,
+            "default": "",
+            "description": "Register a message listener.",
+            "rest": false
+          },
+          {
+            "name": "removeEventListener",
+            "type": "(type: \"message\", listener: (event: MessageEvent) => void) => void",
+            "optional": false,
+            "default": "",
+            "description": "Remove a message listener.",
+            "rest": false
+          }
+        ],
+        "type": "object",
+        "line": 55,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/worker.js#L55"
       }
     ],
     "symbols": [
       {
         "name": "transferResult",
         "signature": "transferResult(payload, transfer?) → { payload: T, transfer: Transferable[], [transferMarker]: true }",
-        "line": 33,
+        "line": 35,
         "description": "Wrap a worker response with Transferable objects.",
         "private": false,
         "params": [
@@ -1275,12 +1726,12 @@ export const apiSections = [
           "description": ""
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/worker.js#L33"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/worker.js#L35"
       },
       {
         "name": "workerClient",
         "signature": "workerClient(worker, options?) → NativeWorkerClient",
-        "line": 59,
+        "line": 72,
         "description": "Create a tiny RPC client for a dedicated Web Worker.",
         "private": false,
         "params": [
@@ -1294,7 +1745,7 @@ export const apiSections = [
           },
           {
             "name": "options",
-            "type": "WorkerClientOptions",
+            "type": "WorkerClientOptions & { owned?: boolean }",
             "optional": true,
             "default": "{}",
             "description": "Client options.",
@@ -1307,6 +1758,13 @@ export const apiSections = [
                 "default": "30000",
                 "description": "Request timeout in milliseconds.",
                 "rest": false
+              },
+              {
+                "name": "owned",
+                "type": "boolean",
+                "optional": true,
+                "default": "",
+                "description": ""
               }
             ]
           }
@@ -1317,7 +1775,7 @@ export const apiSections = [
           "description": "Worker client."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/worker.js#L59",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/worker.js#L72",
         "returnFields": [
           {
             "name": "call",
@@ -1332,7 +1790,7 @@ export const apiSections = [
             "type": "() => void",
             "optional": false,
             "default": "",
-            "description": "Reject pending calls and remove listeners.",
+            "description": "Reject pending calls, remove listeners, and terminate workers constructed by `createWorkerClient`.",
             "rest": false
           },
           {
@@ -1348,7 +1806,7 @@ export const apiSections = [
       {
         "name": "createWorkerClient",
         "signature": "createWorkerClient(workerOrUrl, options?) → NativeWorkerClient",
-        "line": 121,
+        "line": 135,
         "description": "Create a module worker and wrap it with `workerClient`.",
         "private": false,
         "params": [
@@ -1392,12 +1850,12 @@ export const apiSections = [
           "description": "Worker client."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/worker.js#L121"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/worker.js#L135"
       },
       {
         "name": "exposeWorker",
         "signature": "exposeWorker(handlers, scope?) → () => void",
-        "line": 139,
+        "line": 152,
         "description": "Expose named handlers inside a dedicated Web Worker.",
         "private": false,
         "params": [
@@ -1411,11 +1869,37 @@ export const apiSections = [
           },
           {
             "name": "scope",
-            "type": "DedicatedWorkerGlobalScope",
+            "type": "NativeWorkerScope",
             "optional": true,
             "default": "globalThis",
             "description": "Worker global scope.",
-            "rest": false
+            "rest": false,
+            "fields": [
+              {
+                "name": "postMessage",
+                "type": "(message: unknown, transfer?: Transferable[]) => void",
+                "optional": false,
+                "default": "",
+                "description": "Post a message to the paired thread.",
+                "rest": false
+              },
+              {
+                "name": "addEventListener",
+                "type": "(type: \"message\", listener: (event: MessageEvent) => void) => void",
+                "optional": false,
+                "default": "",
+                "description": "Register a message listener.",
+                "rest": false
+              },
+              {
+                "name": "removeEventListener",
+                "type": "(type: \"message\", listener: (event: MessageEvent) => void) => void",
+                "optional": false,
+                "default": "",
+                "description": "Remove a message listener.",
+                "rest": false
+              }
+            ]
           }
         ],
         "properties": [],
@@ -1424,7 +1908,7 @@ export const apiSections = [
           "description": "Cleanup function."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/worker.js#L139"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/public/nativefragments/worker.js#L152"
       }
     ]
   },
@@ -1844,7 +2328,7 @@ export const apiTypes = [
     "name": "RawHtml",
     "description": "",
     "properties": [],
-    "type": "{ [RAW]: true, value: string }",
+    "type": "{ [RAW]: true, value: string, toString(): string }",
     "line": 3,
     "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L3"
   },
@@ -1853,8 +2337,8 @@ export const apiTypes = [
     "description": "",
     "properties": [],
     "type": "Record<string, string | number | boolean | null | undefined>",
-    "line": 106,
-    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L106"
+    "line": 115,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/html.js#L115"
   },
   {
     "name": "RouteContext",
@@ -1885,6 +2369,14 @@ export const apiTypes = [
         "rest": false
       },
       {
+        "name": "query",
+        "type": "URLSearchParams",
+        "optional": false,
+        "default": "",
+        "description": "Parsed query parameters from `url.searchParams`.",
+        "rest": false
+      },
+      {
         "name": "params",
         "type": "Record<string, string>",
         "optional": false,
@@ -1902,39 +2394,112 @@ export const apiTypes = [
       }
     ],
     "type": "object",
-    "line": 3,
-    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L3"
+    "line": 4,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L4"
   },
   {
     "name": "FragmentRenderer",
     "description": "",
     "properties": [],
-    "type": "(context: RouteContext) => string | Promise<string>",
-    "line": 24,
-    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L24"
+    "type": "(context: RouteContext) => string | import(\"./html.js\").RawHtml | Response | Promise<string | import(\"./html.js\").RawHtml | Response>",
+    "line": 26,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L26"
   },
   {
     "name": "FragmentLoadingRenderer",
     "description": "",
     "properties": [],
-    "type": "(context: RouteContext) => string",
-    "line": 28,
-    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L28"
+    "type": "(context: RouteContext) => string | import(\"./html.js\").RawHtml",
+    "line": 30,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L30"
   },
   {
     "name": "FragmentErrorRenderer",
     "description": "",
     "properties": [],
-    "type": "(error: unknown, context: RouteContext) => string | Promise<string>",
-    "line": 32,
-    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L32"
+    "type": "(error: unknown, context: RouteContext) => string | import(\"./html.js\").RawHtml | Promise<string | import(\"./html.js\").RawHtml>",
+    "line": 34,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L34"
   },
   {
     "name": "Route",
     "description": "",
     "properties": [],
     "type": "RouteDefinition & { path: string, params?: Record<string, string> }",
-    "line": 61,
-    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L61"
+    "line": 69,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/router.js#L69"
+  },
+  {
+    "name": "ApiContext",
+    "description": "",
+    "properties": [
+      {
+        "name": "request",
+        "type": "Request",
+        "optional": false,
+        "default": "",
+        "description": "Original request.",
+        "rest": false
+      },
+      {
+        "name": "env",
+        "type": "Record<string, unknown>",
+        "optional": false,
+        "default": "",
+        "description": "Runtime environment bindings.",
+        "rest": false
+      },
+      {
+        "name": "context",
+        "type": "unknown",
+        "optional": false,
+        "default": "",
+        "description": "Runtime execution context.",
+        "rest": false
+      },
+      {
+        "name": "url",
+        "type": "URL",
+        "optional": false,
+        "default": "",
+        "description": "Parsed request URL.",
+        "rest": false
+      },
+      {
+        "name": "query",
+        "type": "URLSearchParams",
+        "optional": false,
+        "default": "",
+        "description": "Parsed query parameters from `url.searchParams`.",
+        "rest": false
+      },
+      {
+        "name": "params",
+        "type": "Record<string, string>",
+        "optional": false,
+        "default": "",
+        "description": "Path parameters captured from the API route.",
+        "rest": false
+      },
+      {
+        "name": "signal",
+        "type": "AbortSignal",
+        "optional": false,
+        "default": "",
+        "description": "Request cancellation signal.",
+        "rest": false
+      }
+    ],
+    "type": "object",
+    "line": 13,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/api.js#L13"
+  },
+  {
+    "name": "ApiHandler",
+    "description": "",
+    "properties": [],
+    "type": "(context: ApiContext) => unknown | Response | Promise<unknown | Response>",
+    "line": 24,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/server/api.js#L24"
   }
 ];

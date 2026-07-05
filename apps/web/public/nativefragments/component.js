@@ -20,21 +20,43 @@ export const sheet = (cssText) => {
 
 const hydrated = new WeakSet();
 
+const findDeclarativeShadowTemplate = (element) => {
+  for (const child of element.children) {
+    if (child.localName === "template" && child.hasAttribute("shadowrootmode")) {
+      return child;
+    }
+  }
+  return null;
+};
+
+const materializeDeclarativeShadow = (element, root) => {
+  const template = findDeclarativeShadowTemplate(element);
+  if (!template) return false;
+
+  root.replaceChildren(template.content.cloneNode(true));
+  template.remove();
+  return true;
+};
+
 /**
  * Attach or reuse an open shadow root, adopt stylesheets, and set its HTML.
  *
- * If the element already has a declarative shadow root from server HTML, the
- * first call preserves that DOM by default. Later calls update the HTML as
- * usual, which keeps stateful components simple while avoiding refresh FOUC.
+ * If the element already has declarative shadow DOM from server HTML, the
+ * first call preserves that DOM by default. Fragment navigation inserts HTML
+ * with `template.innerHTML`, so declarative shadow templates are materialized
+ * manually before hydration to keep server-rendered components visible.
  *
  * @param {HTMLElement} element Custom element receiving the shadow root.
  * @param {ShadowOptions} [options={}] Shadow render options.
  * @returns {ShadowRoot} The element's shadow root.
  */
 export const shadow = (element, { styles = [], html = "", hydrate = true } = {}) => {
+  const hadShadowRoot = Boolean(element.shadowRoot);
   const root = element.shadowRoot ?? element.attachShadow({ mode: "open" });
+  const materialized = hydrate && !hadShadowRoot && materializeDeclarativeShadow(element, root);
+
   root.adoptedStyleSheets = styles;
-  const shouldHydrate = hydrate && root.childNodes.length > 0 && !hydrated.has(root);
+  const shouldHydrate = hydrate && (materialized || (root.childNodes.length > 0 && !hydrated.has(root)));
   hydrated.add(root);
   if (!shouldHydrate) root.innerHTML = html;
   return root;

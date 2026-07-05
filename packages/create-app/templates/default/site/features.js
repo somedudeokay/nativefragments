@@ -1,4 +1,4 @@
-import { html, raw } from "@nativefragments/core/server";
+import { html } from "@nativefragments/core/server";
 
 const features = [
   { name: "Pure HTML", note: "Readable, no build step" },
@@ -11,18 +11,14 @@ const features = [
 ];
 
 export const featureList = () =>
-  raw(html`<ul
+  html`<ul
   class="feature-grid"
   aria-label="Native Fragments starter features"
 >
-  ${raw(
-    features
-      .map(
-        (feature) => html`<li>
+  ${features.map(
+    (feature) => html`<li>
         <span class="feature-name">${feature.name}</span>
         <span class="feature-note">${feature.note}</span>
       </li>`,
-      )
-      .join(""),
   )}
-</ul>`);
+</ul>`;

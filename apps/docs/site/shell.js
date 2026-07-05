@@ -3,22 +3,17 @@ import { criticalStyles } from "./critical-styles.js";
 import { siteHeader } from "./header.js";
 import { navGroups } from "./nav.js";
 
-const renderNav = (pathname) => html`${raw(
-  navGroups
-    .map(
-      (group) => `<section>
+const renderNav = (pathname) => html`${navGroups.map(
+  (group) => html`<section>
         <h2>${group.title}</h2>
-        ${group.links
-          .map(
-            (link) =>
-              `<a href="${link.href}" ${
-                link.href === pathname ? 'aria-current="page"' : ""
-              }>${link.label}</a>`,
-          )
-          .join("")}
+        ${group.links.map(
+          (link) => html`<a
+            href="${link.href}"
+            ${link.href === pathname ? html`aria-current="page"` : ""}
+            >${link.label}</a
+          >`,
+        )}
       </section>`,
-    )
-    .join(""),
 )}`;
 
 export const shell = ({ body, meta, nonce }) => {
@@ -61,14 +56,14 @@ export const shell = ({ body, meta, nonce }) => {
           <span class="search-trigger-label">Search the docs…</span>
           <kbd class="search-trigger-key">⌘K</kbd>
         </button>
-        ${raw(renderNav(pathname))}
+        ${renderNav(pathname)}
         <section class="sidebar-site">
           <h2>Native Fragments</h2>
           <a href="https://nativefragments.org/">Home</a>
           <a href="https://github.com/somedudeokay/nativefragments">GitHub</a>
         </section>
       </aside>
-      <main id="content-slot">${raw(body)}</main>
+      <main id="content-slot">${body}</main>
     </div>
     <div class="menu-scrim" data-menu-close></div>
     <nav class="mobile-bar" aria-label="Mobile">

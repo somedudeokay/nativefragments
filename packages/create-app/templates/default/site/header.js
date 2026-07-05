@@ -1,4 +1,4 @@
-import { declarativeShadow, html, raw } from "@nativefragments/core/server";
+import { declarativeShadow, html } from "@nativefragments/core/server";
 
 export const headerStyles = `
   :host {
@@ -261,8 +261,7 @@ const headerHtml = ({ activePath = "/", seconds = 0, clickCount = 0 } = {}) => {
     .map(
       (digit, index) =>
         html`<span class="digit" data-digit="${index}">${digit}</span>`,
-    )
-    .join("");
+    );
 
   return html`<header>
     <div class="render-meter">
@@ -272,7 +271,7 @@ const headerHtml = ({ activePath = "/", seconds = 0, clickCount = 0 } = {}) => {
         aria-label="${padded} seconds since rerender"
         title="seconds since rerender"
       >
-        ${raw(digits)}
+        ${digits}
       </span>
       <span class="render-copy">
         <strong>header stays mounted during partial rerenders</strong>
@@ -285,11 +284,11 @@ const headerHtml = ({ activePath = "/", seconds = 0, clickCount = 0 } = {}) => {
     </div>
     <nav aria-label="Demo routes" data-active-tab="${active}">
       <span class="tab-indicator" aria-hidden="true"></span>
-      <a href="/" data-tab="/" ${active === "/" ? raw('aria-current="page"') : ""}>Counter</a>
+      <a href="/" data-tab="/" ${active === "/" ? html`aria-current="page"` : ""}>Counter</a>
       <a
         href="/nested-route"
         data-tab="/nested-route"
-        ${active === "/nested-route" ? raw('aria-current="page"') : ""}
+        ${active === "/nested-route" ? html`aria-current="page"` : ""}
         >Nested route</a
       >
     </nav>
@@ -297,9 +296,9 @@ const headerHtml = ({ activePath = "/", seconds = 0, clickCount = 0 } = {}) => {
 };
 
 export const appHeader = ({ activePath = "/", clickCount = 0 } = {}) =>
-  raw(html`<nf-demo-header data-initial-click-count="${clickCount}">
+  html`<nf-demo-header data-initial-click-count="${clickCount}">
     ${declarativeShadow({
       styles: [headerStyles],
       html: headerHtml({ activePath, seconds: 0, clickCount }),
     })}
-  </nf-demo-header>`);
+  </nf-demo-header>`;

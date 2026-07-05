@@ -27,8 +27,10 @@ npm i @nativefragments/core
 
 ## What Core Provides
 
-- Escaped server-side HTML templates.
-- Explicit route helpers with path params.
+- Escaped server-side HTML templates that compose safely when nested.
+- Explicit route helpers with path params, `:rest*` catch-alls, query access,
+  route status/headers, redirects, and POST actions.
+- First-class API route helpers.
 - Full-page and fragment render helpers.
 - Cloudflare Worker adapter.
 - Browser fragment navigation with first-class prefetching.
@@ -41,7 +43,16 @@ npm i @nativefragments/core
 ## Package Exports
 
 ```js
-import { declarativeShadow, fragment, html, route } from "@nativefragments/core/server";
+import {
+  apiRoute,
+  createApi,
+  declarativeShadow,
+  fragment,
+  html,
+  readSearch,
+  redirect,
+  route
+} from "@nativefragments/core/server";
 import { createCloudflareHandler } from "@nativefragments/core/cloudflare";
 ```
 
@@ -53,6 +64,10 @@ import { installFragmentNavigation } from "/nativefragments/router.js";
 import { shadow, sheet } from "/nativefragments/component.js";
 import { createWorkerClient } from "/nativefragments/worker.js";
 ```
+
+`html` returns a trusted wrapper. Nested `html` values and arrays of `html`
+values compose directly. Use `raw()` only for external trusted strings such as
+inline SVG, CSS, highlighted code, or `jsonScript()` output.
 
 ## Nested Fragments
 
@@ -95,6 +110,56 @@ route("/settings/:panel", {
 });
 ```
 
+Routes also support a trailing catch-all segment:
+
+```js
+route("/docs/:rest*", {
+  render: ({ params }) => html`<h1>${params.rest || "Docs"}</h1>`
+});
+```
+
+Read query state from `context.query`, preferably through a model helper:
+
+```js
+const filtersFromSearch = (query) =>
+  readSearch(query, { filter: "all", sort: "newest" });
+```
+
+Use `action()` for POST-redirect-GET forms:
+
+```js
+route("/todos", {
+  action: async ({ request }) => {
+    const form = await request.formData();
+    await saveTodo(form.get("title"));
+    return redirect("/todos", 303);
+  },
+  render: () => html`<form method="post"><input name="title" /></form>`
+});
+```
+
+## API Routes
+
+`createApi()` returns the same `{ fetch }` shape the Cloudflare adapter accepts.
+Handlers get native request objects plus route params and query params.
+
+```js
+import { apiRoute, createApi } from "@nativefragments/core/server";
+
+export const api = createApi([
+  apiRoute("GET", "/api/todos", ({ query }) => listTodos(query.get("filter"))),
+  apiRoute("POST", "/api/todos", async ({ request }) =>
+    Response.json(await createTodo(await request.json()), { status: 201 }),
+  ),
+]);
+```
+
+Pass the API router to the adapter:
+
+```js
+export default createCloudflareHandler({ api, routes, shell });
+```
+
 ## Fragment Prefetch
 
 The browser router prefetches same-origin fragments on hover and focus by
@@ -109,6 +174,15 @@ default. Links can override the behavior:
 Prefetching is based on real anchors in the document. Agents and browsers can
 inspect the same links; there is no separate framework manifest to understand.
 
+After a request mutates server state, clear cached fragments before navigating:
+
+```js
+import { clearFragmentCache } from "/nativefragments/router.js";
+
+await fetch("/api/todos", { method: "POST", body: JSON.stringify(todo) });
+clearFragmentCache();
+```
+
 ## Content Security Policy
 
 The Cloudflare adapter creates a per-request `nonce` and passes it to the app
@@ -116,7 +190,7 @@ shell. Use it on inline scripts/styles when you enable a strict CSP:
 
 ```js
 import { createCloudflareHandler } from "@nativefragments/core/cloudflare";
-import { attrs, html, raw } from "@nativefragments/core/server";
+import { attrs, html } from "@nativefragments/core/server";
 import { routes } from "./routes.js";
 
 export const shell = ({ body, meta, nonce }) => html`<!doctype html>
@@ -126,7 +200,7 @@ export const shell = ({ body, meta, nonce }) => html`<!doctype html>
       document.documentElement.classList.add("js");
     </script>
   </head>
-  <body>${raw(body)}</body>
+  <body>${body}</body>
 </html>`;
 
 export default createCloudflareHandler({
