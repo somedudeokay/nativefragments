@@ -52,6 +52,17 @@ export const settingsRoute = route("/settings/profile", {
   fragments: [settingsPanel],
 });`;
 
+const actionExample = `import { redirect, route } from "@nativefragments/core/server";
+
+route("/todos", {
+  render: (context) => todoList(context.query.get("filter")),
+  // POST runs here, then redirects — no client JavaScript required.
+  action: async ({ request }) => {
+    await addTodo(await request.formData());
+    return redirect("/todos", 303);
+  },
+});`;
+
 const componentExample = `import { shadow, sheet } from "/nativefragments/component.js";
 
 const styles = sheet(\`
@@ -71,12 +82,17 @@ class ThemeSwitch extends HTMLElement {
 
 customElements.define("theme-switch", ThemeSwitch);`;
 
-const apiExample = `import { createCloudflareHandler } from "@nativefragments/core/cloudflare";
-import { Hono } from "hono";
+const apiExample = `import { apiRoute, createApi } from "@nativefragments/core/server";
 
-const api = new Hono();
+export const api = createApi([
+  apiRoute("GET", "/api/todos", ({ query }) => listTodos(query.get("filter"))),
+  apiRoute("POST", "/api/todos", async ({ request }) =>
+    Response.json(await createTodo(await request.json()), { status: 201 }),
+  ),
+]);
 
-api.get("/api/health", (context) => context.json({ ok: true }));
+// worker.js
+import { createCloudflareHandler } from "@nativefragments/core/cloudflare";
 
 export default createCloudflareHandler({ api, routes, shell });`;
 
@@ -238,8 +254,8 @@ export const homePage = () => html`<section class="hero">
     <p>
       A route is a path, metadata, and a render function. Normal requests return
       the full document. Fragment requests return only the page body and the
-      metadata the browser needs to update the head. No loaders, no actions, no
-      compiler conventions to memorize.
+      metadata the browser needs to update the head. No loaders, no client
+      bundle, no compiler conventions to memorize.
     </p>
     ${codeBlock(routeExample, "js", "site/routes.js")}
   </div>
@@ -262,6 +278,23 @@ export const homePage = () => html`<section class="hero">
 
 <section class="landing-section">
   <div>
+    <p class="eyebrow">No-JS mutations</p>
+    <h2>Write data with a plain form and a redirect.</h2>
+  </div>
+  <div class="section-copy">
+    <p>
+      A route <code>action</code> handles the POST and returns a
+      <code>redirect</code> — the classic POST-redirect-GET pattern, built in.
+      Forms submit, data changes, and the browser lands on fresh HTML with no
+      client code, no <code>onsubmit</code>, no fetch wiring. POST stays a full
+      document round trip by design — mutations never ride the fragment cache.
+    </p>
+    ${codeBlock(actionExample, "js", "site/routes.js")}
+  </div>
+</section>
+
+<section class="landing-section landing-section--flip">
+  <div>
     <p class="eyebrow">Native islands</p>
     <h2>Interactive pieces are Custom Elements.</h2>
   </div>
@@ -276,18 +309,21 @@ export const homePage = () => html`<section class="hero">
   </div>
 </section>
 
-<section class="landing-section landing-section--flip install-section">
+<section class="landing-section install-section">
   <div>
     <p class="eyebrow">Edge native</p>
     <h2>One Worker renders pages, fragments, and the API.</h2>
   </div>
   <div class="section-copy">
     <p>
-      Deploy as a Cloudflare Worker close to users. Mount Hono — or anything
-      with a Web Standards <code>fetch</code> — under <code>/api/*</code> while
-      the same Worker streams the pages. The free tier carries a real app.
+      Define JSON endpoints with <code>apiRoute</code> and
+      <code>createApi</code> — same <code>:param</code> and catch-all matching as
+      pages, no second framework to pull in. Bring your own Hono or any Web
+      Standards <code>fetch</code> handler if you prefer; either mounts under
+      <code>/api/*</code> in the same Worker that streams the pages. The free
+      tier carries a real app.
     </p>
-    ${codeBlock(apiExample, "js", "worker.js")}
+    ${codeBlock(apiExample, "js", "site/api.js")}
   </div>
 </section>
 

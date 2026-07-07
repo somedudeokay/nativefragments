@@ -78,6 +78,13 @@ export const demos = [
       "Keyboard interaction, scoped Shadow DOM styling, and platform-native command search.",
     url: "https://command-palette.nativefragments.org",
   },
+  {
+    slug: "met-gallery",
+    title: "Met Gallery",
+    summary:
+      "Deferred HTML streaming: live museum data arrives as fragments on one response.",
+    url: "https://met-gallery.nativefragments.org",
+  },
 ];
 
 const tags = ["Cloudflare Worker", "Native Fragments", "Zero build"];

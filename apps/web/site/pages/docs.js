@@ -54,7 +54,7 @@ export const docsPage = () => html`<section class="page-hero compact">
 <section class="link-strip" aria-label="Project links">
   <a href="https://github.com/somedudeokay/nativefragments">GitHub repository</a>
   <a href="https://www.npmjs.com/package/@nativefragments/core">npm package</a>
-  <a href="/demos">Demos <span>coming soon</span></a>
+  <a href="/examples">Examples</a>
 </section>
 
 <section class="docs-grid">
