@@ -1,5 +1,15 @@
 # @nativefragments/core
 
+## 0.6.0
+
+### Minor Changes
+
+- 8c8b8a1: Add adapter error routes, method handling, Vary headers, native Response passthrough, route status/headers, and redirects.
+- 8c8b8a1: Add `apiRoute`, `createApi`, route `query`, `readSearch`, catch-all segments, and route `action` support.
+- 8c8b8a1: Fix browser fragment navigation for hashes, scroll restoration, content-type fallback, cache clearing, GET forms, redirects, focus, and view transitions.
+- 8c8b8a1: Make `html` return trusted composable markup, remove nested-template `raw()` requirements, and harden attribute rendering.
+- 8c8b8a1: Split deferred streaming internals, warn on duplicate routes, generate declarations from JSDoc, and update documentation and templates.
+
 ## 0.5.0
 
 ### Minor Changes

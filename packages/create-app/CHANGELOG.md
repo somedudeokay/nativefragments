@@ -1,5 +1,11 @@
 # @nativefragments/create-app
 
+## 0.5.0
+
+### Minor Changes
+
+- Scaffold the 0.6 API surface: `site/api.js` with `apiRoute`/`createApi`, composable `html` shells without `raw(body)`, query params on route contexts, and the updated fragment router.
+
 ## 0.4.1
 
 ### Patch Changes
