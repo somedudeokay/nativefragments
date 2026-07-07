@@ -28,6 +28,7 @@ npm run dev`, "shell")}
       <h2>Project structure</h2>
       ${code(`worker.js                  # Cloudflare entrypoint — createCloudflareHandler
 site/routes.js             # the route manifest
+site/api.js                # JSON endpoints (apiRoute + createApi)
 site/shell.js              # the full HTML document
 site/pages/home.js         # one renderer per route
 public/app/client.js       # installs fragment navigation
@@ -35,6 +36,9 @@ public/app/components/     # Custom Elements
 public/nativefragments/    # browser helpers (router, component, worker)`, "shell")}
       <p>
         One route, one renderer, one component file — the layout stays obvious.
+        The scaffold wires <code>site/api.js</code> into the handler so an
+        <a href="/concepts/api-routes"><code>/api</code></a> endpoint works out
+        of the box.
       </p>
 
       <h2>Make your first change</h2>
@@ -57,6 +61,7 @@ render: () => html\`<h1>My first fragment</h1>\`,`)}
         <li><a href="/concepts/routing">Routing</a> — structure your URLs.</li>
         <li><a href="/concepts/shell">Shell</a> — the document around every route.</li>
         <li><a href="/concepts/fragments">Fragments</a> — fast partial navigation.</li>
+        <li><a href="/concepts/api-routes">API Routes</a> — the <code>site/api.js</code> the scaffold ships.</li>
         <li><a href="/concepts/components">Components</a> — build UI with Shadow DOM.</li>
       </ul>
     `,

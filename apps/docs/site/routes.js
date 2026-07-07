@@ -82,7 +82,7 @@ export const routes = [
       meta(
         "/concepts/api-routes",
         "API Routes",
-        "Mount Hono or any Web Standards router under Native Fragments.",
+        "Define JSON endpoints with apiRoute and createApi, or mount any Web Standards router.",
       ),
     render: apiRoutesPage,
   }),

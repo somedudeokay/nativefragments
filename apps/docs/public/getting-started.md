@@ -22,6 +22,7 @@ npm run dev
 ```shell
 worker.js                  # Cloudflare entrypoint — createCloudflareHandler
 site/routes.js             # the route manifest
+site/api.js                # JSON endpoints (apiRoute + createApi)
 site/shell.js              # the full HTML document
 site/pages/home.js         # one renderer per route
 public/app/client.js       # installs fragment navigation
@@ -29,7 +30,7 @@ public/app/components/     # Custom Elements
 public/nativefragments/    # browser helpers (router, component, worker)
 ```
 
-One route, one renderer, one component file — the layout stays obvious.
+One route, one renderer, one component file — the layout stays obvious. The scaffold wires `site/api.js` into the handler so an [/api](/concepts/api-routes) endpoint works out of the box.
 
 ## Make your first change
 
@@ -53,4 +54,5 @@ npm run deploy
 - [Routing](/concepts/routing) — structure your URLs.
 - [Shell](/concepts/shell) — the document around every route.
 - [Fragments](/concepts/fragments) — fast partial navigation.
+- [API Routes](/concepts/api-routes) — the `site/api.js` the scaffold ships.
 - [Components](/concepts/components) — build UI with Shadow DOM.

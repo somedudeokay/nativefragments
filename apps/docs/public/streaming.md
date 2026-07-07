@@ -48,7 +48,7 @@ Every deferred fragment has a timeout (default 15 seconds, configurable per frag
 To stream, the adapter needs to know where the route body sits inside your [shell](/concepts/shell). A shell that returns `{ before, after }` when called without a `body` makes the split explicit:
 
 ```js
-import { html, raw } from "@nativefragments/core/server";
+import { html } from "@nativefragments/core/server";
 
 export const shell = ({ body, meta, nonce }) => {
   const parts = {

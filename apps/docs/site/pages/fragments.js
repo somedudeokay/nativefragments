@@ -67,6 +67,65 @@ installFragmentNavigation({
       <p>
         For imperative control, call
         <a href="/reference#prefetchFragment"><code>prefetchFragment</code></a>.
+        <code>visible</code> and <code>load</code> prefetch re-bind after each
+        navigation, so links that swap into the slot start prefetching too.
+      </p>
+
+      <h2>GET forms</h2>
+      <p>
+        A search or filter <code>&lt;form method="get"&gt;</code> opts into
+        fragment navigation with <code>data-fragment-form</code>. The router
+        serializes the fields into the query string, fragment-navigates to the
+        result, and includes the submitter's <code>name</code>/<code>value</code>
+        when a specific button submits.
+      </p>
+      ${code(`<form action="/search" method="get" data-fragment-form>
+  <input name="q" />
+  <button>Search</button>
+</form>`, "js")}
+      ${callout(
+        "Note",
+        "POST forms are never fragment-intercepted. They post to a route action() and return through a redirect — see Routing.",
+      )}
+
+      <h2>Clearing the cache</h2>
+      <p>
+        After a mutation, drop stale fragment HTML with
+        <a href="/reference#clearFragmentCache"><code>clearFragmentCache</code></a>.
+        With no argument it clears every cached and in-flight fragment; with an
+        <code>href</code> it clears every slot for that pathname and search.
+      </p>
+      ${code(`import { clearFragmentCache } from "/nativefragments/router.js";
+
+await fetch("/api/todos", { method: "POST", body });
+clearFragmentCache(); // next navigation refetches`)}
+
+      <h2>Scroll, focus, and transitions</h2>
+      <p>
+        Fragment navigation preserves the platform feel: back/forward restores
+        the saved scroll position (including hash-only history entries),
+        in-page hash links keep native behavior, and a cross-page hash scrolls
+        to the anchor after the swap. Focus moves to the swapped container for
+        keyboard and screen-reader users. When the browser supports it, the swap
+        runs inside <code>document.startViewTransition()</code> — toggle it with
+        the <code>viewTransitions</code> option (default <code>true</code>).
+      </p>
+      ${code(`installFragmentNavigation({
+  prefetch: "intent",
+  viewTransitions: true, // the default
+});`)}
+      ${callout(
+        "Good to know",
+        "Fragment responses are validated by Content-Type: a non-text/html response falls back to a full document navigation instead of swapping garbage into the slot. Server redirects are followed, and the final URL lands in the address bar.",
+      )}
+
+      <h2>Window globals</h2>
+      <p>
+        Module imports are preferred, but the router also exposes globals for
+        inline handlers and console debugging:
+        <code>window.nativeFragmentsNavigate(href, pushState?, slot?)</code>,
+        <code>window.nativeFragmentsPrefetch(href, slot?)</code>, and
+        <code>window.nativeFragmentsClearFragmentCache(href?)</code>.
       </p>
 
       <h2>Prefetch discovery</h2>
@@ -95,7 +154,7 @@ installFragmentNavigation({
         <li><a href="/concepts/routing">Routing</a> — define the routes fragments navigate between.</li>
         <li><a href="/concepts/streaming">Streaming</a> — defer slow fragments and stream them out of order.</li>
         <li><a href="/concepts/components">Components</a> — keep components alive across swaps.</li>
-        <li><a href="/reference#installFragmentNavigation">Reference: <code>installFragmentNavigation</code></a>, <a href="/reference#fragment"><code>fragment</code></a>, <a href="/reference#prefetchFragment"><code>prefetchFragment</code></a>.</li>
+        <li><a href="/reference#installFragmentNavigation">Reference: <code>installFragmentNavigation</code></a>, <a href="/reference#prefetchFragment"><code>prefetchFragment</code></a>, <a href="/reference#clearFragmentCache"><code>clearFragmentCache</code></a>.</li>
       </ul>
     `,
   });

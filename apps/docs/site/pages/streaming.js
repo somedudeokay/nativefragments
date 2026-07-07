@@ -82,7 +82,7 @@ export const postRoute = route("/posts/:slug", {
         <code>{ before, after }</code> when called without a <code>body</code>
         makes the split explicit:
       </p>
-      ${code(`import { html, raw } from "@nativefragments/core/server";
+      ${code(`import { html } from "@nativefragments/core/server";
 
 export const shell = ({ body, meta, nonce }) => {
   const parts = {

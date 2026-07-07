@@ -53,7 +53,48 @@ Prefetching warms the fragment cache so the swap is instant. Set a default in `i
 <a href="/logout" data-fragment-prefetch="none">Log out</a>      <!-- never -->
 ```
 
-For imperative control, call [prefetchFragment](/reference#prefetchFragment).
+For imperative control, call [prefetchFragment](/reference#prefetchFragment). `visible` and `load` prefetch re-bind after each navigation, so links that swap into the slot start prefetching too.
+
+## GET forms
+
+A search or filter `<form method="get">` opts into fragment navigation with `data-fragment-form`. The router serializes the fields into the query string, fragment-navigates to the result, and includes the submitter's `name`/`value` when a specific button submits.
+
+```js
+<form action="/search" method="get" data-fragment-form>
+  <input name="q" />
+  <button>Search</button>
+</form>
+```
+
+> **Note:** POST forms are never fragment-intercepted. They post to a route action() and return through a redirect — see Routing.
+
+## Clearing the cache
+
+After a mutation, drop stale fragment HTML with [clearFragmentCache](/reference#clearFragmentCache). With no argument it clears every cached and in-flight fragment; with an `href` it clears every slot for that pathname and search.
+
+```js
+import { clearFragmentCache } from "/nativefragments/router.js";
+
+await fetch("/api/todos", { method: "POST", body });
+clearFragmentCache(); // next navigation refetches
+```
+
+## Scroll, focus, and transitions
+
+Fragment navigation preserves the platform feel: back/forward restores the saved scroll position (including hash-only history entries), in-page hash links keep native behavior, and a cross-page hash scrolls to the anchor after the swap. Focus moves to the swapped container for keyboard and screen-reader users. When the browser supports it, the swap runs inside `document.startViewTransition()` — toggle it with the `viewTransitions` option (default `true`).
+
+```js
+installFragmentNavigation({
+  prefetch: "intent",
+  viewTransitions: true, // the default
+});
+```
+
+> **Good to know:** Fragment responses are validated by Content-Type: a non-text/html response falls back to a full document navigation instead of swapping garbage into the slot. Server redirects are followed, and the final URL lands in the address bar.
+
+## Window globals
+
+Module imports are preferred, but the router also exposes globals for inline handlers and console debugging: `window.nativeFragmentsNavigate(href, pushState?, slot?)`, `window.nativeFragmentsPrefetch(href, slot?)`, and `window.nativeFragmentsClearFragmentCache(href?)`.
 
 ## Prefetch discovery
 
@@ -70,4 +111,4 @@ Fragments can also stream. When a route calls `context.defer(fragment)`, the doc
 - [Routing](/concepts/routing) — define the routes fragments navigate between.
 - [Streaming](/concepts/streaming) — defer slow fragments and stream them out of order.
 - [Components](/concepts/components) — keep components alive across swaps.
-- [Reference: installFragmentNavigation](/reference#installFragmentNavigation), [fragment](/reference#fragment), [prefetchFragment](/reference#prefetchFragment).
+- [Reference: installFragmentNavigation](/reference#installFragmentNavigation), [prefetchFragment](/reference#prefetchFragment), [clearFragmentCache](/reference#clearFragmentCache).

@@ -24,7 +24,7 @@ export const routes = [
 ];
 
 // site/shell.js
-import { html, raw } from "@nativefragments/core/server";
+import { html } from "@nativefragments/core/server";
 
 export const shell = ({ body, meta }) => html`<!doctype html>
 <html lang="en">
@@ -40,7 +40,7 @@ import { shell } from "./site/shell.js";
 export default createCloudflareHandler({ routes, shell });
 ```
 
-Uses [route](/reference#route), [html](/reference#html), [raw](/reference#raw), and [createCloudflareHandler](/reference#createCloudflareHandler). The [shell](/concepts/shell) wraps every route body; `#content-slot` is where fragment navigation swaps content later.
+Uses [route](/reference#route), [html](/reference#html), and [createCloudflareHandler](/reference#createCloudflareHandler). The [shell](/concepts/shell) interpolates the route body as `${body}` and wraps it in a full document; `#content-slot` is where fragment navigation swaps content later.
 
 ## How it fits together
 

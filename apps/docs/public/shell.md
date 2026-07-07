@@ -8,11 +8,11 @@ A route renders the part of the page that changes. The shell renders everything 
 
 ## A minimal shell
 
-A shell is a plain function from `{ body, meta, nonce }` to a document string. Interpolate `body` with [raw](/reference#raw) — it is already rendered, escaped HTML.
+A shell is a plain function from `{ body, meta, nonce }` to a document string. Interpolate `body` directly as `${body}` — the adapter hands it in as already-rendered, trusted HTML, so it composes into the document with no [raw](/reference#raw) call.
 
 ```js
 // site/shell.js
-import { html, raw } from "@nativefragments/core/server";
+import { html } from "@nativefragments/core/server";
 
 export const shell = ({ body, meta }) => html`<!doctype html>
 <html lang="en">
@@ -39,6 +39,10 @@ export const shell = ({ body, meta }) => html`<!doctype html>
 ## Metadata
 
 `meta` arrives normalized from the route's [meta()](/concepts/routing) function — `title`, `description`, and `canonical` always exist (empty string or the pathname when unset). On fragment navigation the browser router updates the document head from the fragment response, so the shell's head markup stays correct without re-rendering.
+
+## The `${body}` contract
+
+The adapter renders the route body and passes it to the shell as trusted [RawHtml](/reference#raw) under the `body` key. Interpolate it verbatim as `${body}`. Do **not** wrap it in `raw()` and do not escape it — that is also how streaming finds the body's position. If the shell escapes or transforms `body`, the adapter falls back to buffered rendering and logs a warning.
 
 ## Streaming shells
 

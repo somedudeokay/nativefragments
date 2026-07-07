@@ -1,38 +1,69 @@
 # API Routes
 
-Serve a JSON or HTTP API alongside your pages. The Cloudflare adapter delegates a URL prefix to any router with a Web Standards fetch method — Hono works directly, and core stays dependency-free.
+Serve a JSON API alongside your pages. Define endpoints with apiRoute and createApi — the same :param and :rest* matcher as page routes, dependency-free — or delegate the prefix to any router with a Web Standards fetch method.
+
+## Defining routes
+
+[apiRoute(method, path, handler)](/reference#apiRoute) creates one endpoint; [createApi(routes, options)](/reference#createApi) assembles them into a Fetch-compatible router. Handlers receive `{ request, env, context, url, params, query, signal }`. A returned `Response` passes through; any other value becomes `Response.json(value)`.
+
+```js
+// site/api.js
+import { apiRoute, createApi } from "@nativefragments/core/server";
+
+export const api = createApi([
+  apiRoute("GET", "/api/todos", ({ query }) => listTodos(query.get("filter"))),
+  apiRoute("POST", "/api/todos", async ({ request }) =>
+    Response.json(await createTodo(await request.json()), { status: 201 }),
+  ),
+  apiRoute("DELETE", "/api/todos/:id", ({ params }) => removeTodo(params.id)),
+]);
+```
+
+API paths use the same matcher as pages: `:id` captures one segment onto `params`, and a trailing `:rest*` captures the remainder.
 
 ## Mounting an API
 
-Pass an `api` to [createCloudflareHandler](/reference#createCloudflareHandler). Requests under `apiPrefix` (default `/api`) go to the API; everything else renders pages.
+Pass the `api` to [createCloudflareHandler](/reference#createCloudflareHandler). Requests under `apiPrefix` (default `/api`) go to the API; everything else renders pages. The adapter also accepts an array of `apiRoute()` items directly and calls `createApi` for you.
 
 ```js
 // worker.js
 import { createCloudflareHandler } from "@nativefragments/core/cloudflare";
-import { Hono } from "hono";
+import { api } from "./site/api.js";
 import { routes } from "./site/routes.js";
 import { shell } from "./site/shell.js";
-
-const api = new Hono();
-api.get("/api/health", (c) => c.json({ ok: true }));
 
 export default createCloudflareHandler({ routes, shell, api });
 ```
 
-> **Note:** Requests under apiPrefix are delegated to api.fetch before route matching. The shell does not parse them, so the API owns its own request/response handling.
+> **Note:** API-prefixed requests are delegated to api.fetch before page method handling. The shell does not wrap them, so the API owns its own request and response.
+
+## Dispatch semantics
+
+[createApi](/reference#createApi) resolves each request against the matched path:
+
+- No path match returns JSON `404`.
+- A path match with an unsupported method returns `405` with an `Allow` header listing the methods.
+- `HEAD` falls back to the `GET` handler when no `HEAD` handler exists.
+- A handler that throws calls `onError` and returns JSON `500` without leaking the message.
+
+```js
+export const api = createApi(routes, {
+  onError: ({ error, request, route }) =>
+    console.error(request.url, route?.path, error),
+});
+```
 
 ## Any Web Standards router
 
-`api` only needs a `fetch(request, env, context)` method, so anything that speaks the Workers fetch contract works — Hono is one option, a plain function is another.
+You are not limited to `createApi`. `api` only needs a `fetch(request, env, context)` method, so anything that speaks the Workers fetch contract works — a Hono app, or a plain object.
 
 ```js
-const api = {
-  fetch(request) {
-    return new Response(JSON.stringify({ ok: true }), {
-      headers: { "Content-Type": "application/json" },
-    });
-  },
-};
+import { Hono } from "hono";
+
+const app = new Hono();
+app.get("/api/health", (c) => c.json({ ok: true }));
+
+export default createCloudflareHandler({ routes, shell, api: app });
 ```
 
 ## Changing the prefix
@@ -81,6 +112,6 @@ export default createCloudflareHandler({
 
 ## See also
 
-- [Routing](/concepts/routing) — page routes the adapter renders.
+- [Routing](/concepts/routing) — page routes, and `action` for form mutations.
 - [Workers](/concepts/workers) — offload client-side work instead.
-- [Reference: createCloudflareHandler](/reference#createCloudflareHandler).
+- [Reference: apiRoute](/reference#apiRoute), [createApi](/reference#createApi), [createCloudflareHandler](/reference#createCloudflareHandler).

@@ -21,12 +21,13 @@ export const shellPage = () =>
       <h2>A minimal shell</h2>
       <p>
         A shell is a plain function from <code>{ body, meta, nonce }</code> to a
-        document string. Interpolate <code>body</code> with
-        <a href="/reference#raw"><code>raw</code></a> — it is already rendered,
-        escaped HTML.
+        document string. Interpolate <code>body</code> directly as
+        <code>\${body}</code> — the adapter hands it in as already-rendered,
+        trusted HTML, so it composes into the document with no
+        <a href="/reference#raw"><code>raw</code></a> call.
       </p>
       ${code(`// site/shell.js
-import { html, raw } from "@nativefragments/core/server";
+import { html } from "@nativefragments/core/server";
 
 export const shell = ({ body, meta }) => html\`<!doctype html>
 <html lang="en">
@@ -64,6 +65,18 @@ export const shell = ({ body, meta }) => html\`<!doctype html>
         unset). On fragment navigation the browser router updates the document
         head from the fragment response, so the shell's head markup stays
         correct without re-rendering.
+      </p>
+
+      <h2>The <code>\${body}</code> contract</h2>
+      <p>
+        The adapter renders the route body and passes it to the shell as trusted
+        <a href="/reference#raw"><code>RawHtml</code></a> under the
+        <code>body</code> key. Interpolate it verbatim as
+        <code>\${body}</code>. Do <strong>not</strong> wrap it in
+        <code>raw()</code> and do not escape it — that is also how streaming
+        finds the body's position. If the shell escapes or transforms
+        <code>body</code>, the adapter falls back to buffered rendering and logs
+        a warning.
       </p>
 
       <h2>Streaming shells</h2>
