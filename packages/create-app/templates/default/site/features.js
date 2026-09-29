@@ -1,13 +1,13 @@
 import { html } from "@nativefragments/core/server";
 
 const features = [
-  { name: "Pure HTML", note: "Readable, no build step" },
-  { name: "Isolated styles", note: "Scoped with Shadow DOM" },
+  { name: "Explicit HTML", note: "Readable server output" },
+  { name: "Lit islands", note: "SSR + hydration" },
   { name: "Nested routes", note: "Real, crawlable URLs" },
-  { name: "Reactive state", note: "Signals, opt-in" },
+  { name: "Local state", note: "Owned by Lit elements" },
   { name: "Partial rerender", note: "Swap one fragment" },
   { name: "Server-side rendering", note: "Instant first paint" },
-  { name: "Zero dependencies", note: "Just the platform" },
+  { name: "Modern ESM", note: "Resolved by esbuild" },
 ];
 
 export const featureList = () =>

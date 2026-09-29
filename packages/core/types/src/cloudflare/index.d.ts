@@ -1,5 +1,5 @@
-export function createCloudflareHandler({ routes, shell, api, apiPrefix, notFound, error, onError, assetsBinding, deferredTimeout, contentSecurityPolicy, }: CloudflareHandlerOptions): {
-    fetch(request: Request, env: Record<string, unknown>): Promise<Response>;
+export function createCloudflareHandler({ routes, shell, api, prepare, apiPrefix, notFound, error, onError, assetsBinding, deferredTimeout, contentSecurityPolicy, }: CloudflareHandlerOptions): {
+    fetch(request: Request, env?: Record<string, unknown>, context?: unknown): Promise<Response>;
 };
 export type Route = import("../server/router.js").Route;
 export type CloudflareHandlerOptions = {
@@ -17,7 +17,10 @@ export type CloudflareHandlerOptions = {
     }) => string | import("../server/html.js").RawHtml | {
         before: string | import("../server/html.js").RawHtml;
         after: string | import("../server/html.js").RawHtml;
-    };
+    } | Promise<string | import("../server/html.js").RawHtml | {
+        before: string | import("../server/html.js").RawHtml;
+        after: string | import("../server/html.js").RawHtml;
+    }>;
     /**
      * Optional Web Standards API router or array of `apiRoute()` definitions. Hono
      * apps work here because they expose a compatible `fetch` method.
@@ -25,6 +28,10 @@ export type CloudflareHandlerOptions = {
     api?: {
         fetch(request: Request, env: Record<string, unknown>, context?: unknown): Promise<Response> | Response;
     } | import("../server/api.js").ApiRoute[];
+    /**
+     * Prepare application locals once per request, or return/throw a Response.
+     */
+    prepare?: (scope: import("../server/context.js").RequestContext) => Record<string, unknown> | Response | Promise<Record<string, unknown> | Response>;
     /**
      * URL prefix handled by `api`.
      */
@@ -43,7 +50,7 @@ export type CloudflareHandlerOptions = {
     onError?: ({ error, request, phase }: {
         error: unknown;
         request: Request;
-        phase: "route" | "error-route" | "api";
+        phase: "route" | "error-route" | "api" | "assets";
     }) => void;
     /**
      * Cloudflare assets binding name.

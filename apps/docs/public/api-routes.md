@@ -2,6 +2,23 @@
 
 Serve a JSON API alongside your pages. Define endpoints with apiRoute and createApi — the same :param and :rest* matcher as page routes, dependency-free — or delegate the prefix to any router with a Web Standards fetch method.
 
+## Shared request preparation
+
+See the [Fieldwork D1 workspace](https://task-board.nativefragments.org) for sign-in, persistent mutations and native form fallbacks. Its [source and migrations](https://github.com/somedudeokay/nativefragments/tree/main/apps/task-board) are included in the framework repository.
+
+Pass `prepare` to the adapter to initialize application locals once per request. Routes, metadata, headers, actions, deferred fragments and array-based APIs receive the same locals and runtime bindings. External API routers keep their native fetch interface.
+
+```js
+createCloudflareHandler({
+  routes, shell, api,
+  prepare: async ({ request, env }) => ({
+    user: await readSession(request, env.DB),
+  }),
+});
+// In any renderer/action: context.locals.user, context.env.DB,
+// context.context (runtime execution context), context.signal.
+```
+
 ## Defining routes
 
 [apiRoute(method, path, handler)](/reference#apiRoute) creates one endpoint; [createApi(routes, options)](/reference#createApi) assembles them into a Fetch-compatible router. Handlers receive `{ request, env, context, url, params, query, signal }`. A returned `Response` passes through; any other value becomes `Response.json(value)`.

@@ -1,17 +1,21 @@
 import { attrs, html, jsonScript, raw } from "./html.js";
 import { createRouteContext, defaultDeferredTimeout } from "./defer.js";
+import { createRequestContext } from "./context.js";
 
 /**
  * @typedef {object} RouteContext
  * @property {Request} request Original request.
  * @property {AbortSignal} signal Request cancellation signal.
+ * @property {Record<string, unknown>} env Runtime bindings for this request.
+ * @property {unknown} context Runtime execution context.
+ * @property {Record<string, unknown>} locals Application state prepared once per request.
  * @property {URL} url Parsed request URL.
  * @property {URLSearchParams} query Parsed query parameters from `url.searchParams`.
  * @property {Record<string, string>} params Path parameters captured from a
  * route pattern like `/posts/:slug`.
  * @property {(fragment: FragmentDefinition | string, attributes?: import("./html.js").HtmlAttrs) => import("./html.js").RawHtml} defer
  * Render a stable loading boundary and collect a named fragment for deferred
- * document streaming.
+ * HTML streaming during document loads and browser fragment navigation.
  */
 
 /**
@@ -40,9 +44,9 @@ import { createRouteContext, defaultDeferredTimeout } from "./defer.js";
  * @property {string} name Fragment slot name.
  * @property {FragmentRenderer} render Fragment renderer.
  * @property {FragmentLoadingRenderer} [loading] Loading renderer used by
- * deferred document streaming.
+ * deferred HTML streaming.
  * @property {FragmentErrorRenderer} [error] Error renderer used when a
- * deferred fragment fails after the document response has started.
+ * deferred fragment fails after its HTML response has started.
  * @property {number} [timeout] Maximum deferred render time in milliseconds.
  * @property {(attributes?: import("./html.js").HtmlAttrs) => import("./html.js").RawHtml} attrs
  * Attributes for links and target containers using this fragment slot.
@@ -304,24 +308,28 @@ export const fragmentMeta = (meta) =>
 /**
  * Render a matched route and normalize metadata defaults.
  *
- * @param {{ match: Route, request: Request, slot?: string | null, deferredTimeout?: number | null }} options
+ * @param {{ match: Route, request: Request, slot?: string | null, deferredTimeout?: number | null, scope?: import("./context.js").RequestContext }} options
  * Render options. When `slot` matches a registered named fragment, only that
  * fragment renderer is used. Calls to `context.defer()` always collect
  * deferred work for the adapter to stream or inline.
- * @returns {Promise<{ body: string, meta: Required<Pick<RouteMeta, "title" | "description" | "canonical">> & RouteMeta, deferred: unknown[], status: number, headers: Record<string, string> } | { response: Response }>} Rendered route.
+ * @returns {Promise<{ body: string, meta: Required<Pick<RouteMeta, "title" | "description" | "canonical">> & RouteMeta, deferred: unknown[], status: number, headers: Record<string, string>, cancel: (reason?: unknown) => void } | { response: Response }>} Rendered route.
  */
 export const renderRoute = async ({
   match,
   request,
   slot = null,
+  scope,
   deferredTimeout: fallbackDeferredTimeout = defaultDeferredTimeout,
 }) => {
   const deferred = [];
+  const lifetime = new AbortController();
+  scope = { ...(scope ?? createRequestContext({ request })), signal: AbortSignal.any([scope?.signal ?? request.signal, lifetime.signal]) };
   const context = createRouteContext({
     deferred,
     fallbackDeferredTimeout,
     match,
     request,
+    scope,
   });
   let meta;
   try {
@@ -349,6 +357,7 @@ export const renderRoute = async ({
 
   return {
     body: String(body),
+    cancel: reason => lifetime.abort(reason),
     deferred,
     headers: routeHeaders ?? {},
     meta: {
@@ -365,10 +374,10 @@ export const renderRoute = async ({
  * Run a route action for POST-redirect-GET mutations.
  *
  * @private
- * @param {{ match: Route, request: Request }} options Action options.
+ * @param {{ match: Route, request: Request, scope?: import("./context.js").RequestContext }} options Action options.
  * @returns {Promise<Response>} Action response.
  */
-export const runRouteAction = async ({ match, request }) => {
+export const runRouteAction = async ({ match, request, scope }) => {
   if (!match.action) {
     throw new Error(`Route "${match.path}" does not define an action.`);
   }
@@ -378,6 +387,7 @@ export const runRouteAction = async ({ match, request }) => {
     fallbackDeferredTimeout: null,
     match,
     request,
+    scope,
   });
   let response;
   try {

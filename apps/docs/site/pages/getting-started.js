@@ -1,68 +1,81 @@
 import { html } from "@nativefragments/core/server";
-import { code, docPage } from "./blocks.js";
+import { callout, code, docPage } from "./blocks.js";
 
 export const gettingStartedPage = () =>
   docPage({
     eyebrow: "Start",
     title: "Getting Started",
     intro:
-      "Create and run a Native Fragments app on Cloudflare Workers. The scaffold ships routes, a shell, browser helpers, and a Shadow DOM component.",
+      "Create a Native Fragments application with streamed routes, package-based browser imports, Lit SSR, and a local Cloudflare Worker.",
     body: html`
-      <h2>Prerequisites</h2>
-      <p>
-        Node.js and npm to develop; a Cloudflare account to deploy. The app runs
-        on Wrangler — run <code>npx wrangler login</code> before your first
-        deploy if this machine is not authenticated yet.
-      </p>
-
-      <h2>Create</h2>
+      <h2>Create and run</h2>
       ${code(`npm create @nativefragments/app@latest my-app
 cd my-app
 npm install
 npm run dev`, "shell")}
       <p>
-        <code>npm run dev</code> starts a local Worker and prints a URL —
-        usually <code>http://localhost:8787</code>.
+        The dev command builds the Worker and browser entry, starts
+        <code>wrangler dev --live-reload</code>, and watches <code>site/</code>
+        and <code>client/</code>. It is the Cloudflare runtime locally—not a
+        second framework server.
       </p>
 
       <h2>Project structure</h2>
-      ${code(`worker.js                  # Cloudflare entrypoint — createCloudflareHandler
-site/routes.js             # the route manifest
-site/api.js                # JSON endpoints (apiRoute + createApi)
-site/shell.js              # the full HTML document
-site/pages/home.js         # one renderer per route
-public/app/client.js       # installs fragment navigation
-public/app/components/     # Custom Elements
-public/nativefragments/    # browser helpers (router, component, worker)`, "shell")}
-      <p>
-        One route, one renderer, one component file — the layout stays obvious.
-        The scaffold wires <code>site/api.js</code> into the handler so an
-        <a href="/concepts/api-routes"><code>/api</code></a> endpoint works out
-        of the box.
-      </p>
+      ${code(`worker.js                     # Cloudflare entry
+site/routes.js                # route manifest
+site/shell.js                 # persistent document shell
+site/pages/                   # server HTML renderers
+client/index.js               # hydration + startRouter()
+client/components/            # Lit elements
+public/app/                   # CSS and static assets
+scripts/build-app.mjs         # small esbuild step
+wrangler.jsonc                # runtime, assets, build command
+.nativefragments/worker.js    # generated, ignored
+public/build/client.js        # generated, ignored`, "shell")}
 
-      <h2>Make your first change</h2>
-      <p>
-        Open <code>site/pages/home.js</code>, change the heading, and reload.
-        There is no bundler in the loop — the file you edited is the file the
-        Worker runs, so the change is live as fast as Wrangler restarts.
-      </p>
+      <h2>Edit server HTML</h2>
       ${code(`// site/pages/home.js
-render: () => html\`<h1>My first fragment</h1>\`,`)}
+import { html } from "@nativefragments/core/server";
 
-      <h2>Deploy</h2>
+export const homePage = () => html\`
+  <section>
+    <h1>My first HTML application</h1>
+    <a href="/about">About</a>
+  </section>
+\`;`)}
+
+      <h2>Add a Lit element</h2>
       <p>
-        The Worker renders pages, fragments, and API routes at the edge.
+        Define the element once in <code>client/components</code>, import it on
+        the server, and pass a Lit template to <code>renderLit()</code>. The
+        response contains hydratable Declarative Shadow DOM.
       </p>
-      ${code(`npm run deploy`, "shell")}
+      ${code(`import { renderLit } from "@nativefragments/lit/server";
+import { html } from "lit";
+import "../../client/components/app-counter.js";
 
-      <h2>See also</h2>
+export const counter = () =>
+  renderLit(html\`<app-counter count="0"></app-counter>\`);`)}
+
+      ${callout(
+        "Why Lit Labs is isolated",
+        "Lit SSR is mature in practice but still published under @lit-labs. Native Fragments pins that evolving surface inside @nativefragments/lit so applications only depend on renderLit() and the client hydration import.",
+      )}
+
+      <h2>Build and deploy</h2>
+      ${code(`npm run build
+npm run deploy`, "shell")}
+      <p>
+        Deployment is intentionally a separate command. Nothing in the
+        development or verification workflow publishes your application.
+      </p>
+
+      <h2>Next</h2>
       <ul>
-        <li><a href="/concepts/routing">Routing</a> — structure your URLs.</li>
-        <li><a href="/concepts/shell">Shell</a> — the document around every route.</li>
-        <li><a href="/concepts/fragments">Fragments</a> — fast partial navigation.</li>
-        <li><a href="/concepts/api-routes">API Routes</a> — the <code>site/api.js</code> the scaffold ships.</li>
-        <li><a href="/concepts/components">Components</a> — build UI with Shadow DOM.</li>
+        <li><a href="/concepts/routing">Routing</a> — paths, metadata, and actions.</li>
+        <li><a href="/concepts/streaming">Streaming</a> — reveal slow regions independently.</li>
+        <li><a href="/concepts/fragments">Fragments</a> — browser navigation and named targets.</li>
+        <li><a href="/concepts/components">Components</a> — Lit SSR and hydration.</li>
       </ul>
     `,
   });

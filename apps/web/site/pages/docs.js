@@ -5,7 +5,7 @@ const createExample = `npm create @nativefragments/app@latest my-app
 cd my-app
 npm run dev`;
 
-const installExample = `npm i @nativefragments/core`;
+const installExample = `npm i @nativefragments/core @nativefragments/lit lit`;
 
 const workerExample = `import { createCloudflareHandler } from "@nativefragments/core/cloudflare";
 import { routes } from "./routes.js";
@@ -25,18 +25,21 @@ const routeExample = `route("/", {
   render: () => html\`<h1>Hello</h1>\`
 })`;
 
-const browserExample = `import { installFragmentNavigation }
-  from "/nativefragments/router.js";
+const browserExample = `import "@nativefragments/lit/client";
+import { startRouter }
+  from "@nativefragments/core/client/router.js";
 
-installFragmentNavigation();`;
+const router = startRouter({ prefetch: "intent" });`;
 
-const componentExample = `class AppCounter extends HTMLElement {
-  connectedCallback() {
-    this.attachShadow({ mode: "open" });
-    this.shadowRoot.innerHTML =
-      \`<style>button{...}</style><button>0</button>\`;
+const componentExample = `import { LitElement, html } from "lit";
+
+class AppCounter extends LitElement {
+  render() {
+    return html\`<button @click=\${this.increment}>0</button>\`;
   }
-}`;
+}
+
+customElements.define("app-counter", AppCounter);`;
 
 const skillExample = `cat node_modules/@nativefragments/core/skills/nativefragments/SKILL.md`;
 
@@ -46,8 +49,8 @@ export const docsPage = () => html`<section class="page-hero compact">
   <p>
     Native Fragments is intentionally thin. Agents use it to build fast,
     maintainable, AI-friendly applications. A route renders HTML. The shell
-    wraps it. Fragment navigation swaps the content slot. Custom Elements own
-    their Shadow DOM.
+    wraps it. Fragment navigation swaps the content slot. Lit elements own
+    local interaction.
   </p>
 </section>
 
@@ -115,7 +118,7 @@ export const docsPage = () => html`<section class="page-hero compact">
   <p>
     Apps built this way are easier for agents to browse too. They expose real
     links, real HTML, native custom elements, and browser modules instead of a
-    heavy transpiled bundle. That makes pages easier to inspect, click, scrape,
+    client-only application shell. That makes pages easier to inspect, click, scrape,
     and reason about.
   </p>
 </section>

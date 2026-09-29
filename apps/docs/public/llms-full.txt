@@ -1,23 +1,87 @@
-# Native Fragments Full Docs
+# Native Fragments Full Context
 
-Native Fragments is a zero-dependency, zero-build frontend framework for agents
-building AI-friendly web applications.
+Native Fragments builds fast, explicit HTML applications on Cloudflare Workers.
+Core owns server routing, fragments, streaming, actions, APIs, and browser
+navigation. `@nativefragments/lit` owns Lit SSR and hydration integration.
 
-## Install
+## Create an app
 
 ```sh
 npm create @nativefragments/app@latest my-app
 cd my-app
+npm install
 npm run dev
 ```
 
-## Human Docs
+The dev command runs esbuild and `wrangler dev --live-reload`. Source stays
+standards-based ESM; there is no framework compiler.
 
-- https://docs.nativefragments.org/
-- https://docs.nativefragments.org/getting-started
-- https://docs.nativefragments.org/reference
+## Imports
 
-## Agent Docs
+```js
+import { html, fragment, route } from "@nativefragments/core/server";
+import { createCloudflareHandler } from "@nativefragments/core/cloudflare";
+import { startRouter } from "@nativefragments/core/client/router.js";
+import { createWorkerClient } from "@nativefragments/core/client/worker.js";
+import { renderLit } from "@nativefragments/lit/server";
+import "@nativefragments/lit/client";
+```
+
+## Browser navigation
+
+```js
+const router = startRouter({ prefetch: "intent" });
+await router.navigate("/reports");
+await router.prefetch("/settings");
+router.invalidate("/reports");
+```
+
+## Deferred streaming
+
+```js
+const panel = fragment("related", {
+  loading: () => html`<p>Loading…</p>`,
+  error: () => html`<p role="status">Unavailable.</p>`,
+  render: async ({ signal }) => html`…`,
+});
+
+route("/", {
+  render: (context) => html`${context.defer(panel)}`,
+  fragments: [panel],
+});
+```
+
+Document and fragment navigation both stream deferred HTML. Router requests
+negotiate protocol version 1; unsupported clients receive buffered HTML.
+
+## Lit SSR
+
+```js
+import { renderLit } from "@nativefragments/lit/server";
+import { html } from "lit";
+import "../../client/components/app-card.js";
+
+export const card = () => renderLit(html`<app-card>Ready</app-card>`);
+```
+
+The adapter pins the evolving `@lit-labs/ssr` contract. Application components
+are ordinary Lit elements and do not import Lit Labs directly.
+
+## App structure
+
+```txt
+worker.js
+site/routes.js
+site/shell.js
+site/pages/
+client/index.js
+client/components/
+public/app/
+scripts/build-app.mjs
+wrangler.jsonc
+```
+
+## Documentation
 
 - https://docs.nativefragments.org/index.md
 - https://docs.nativefragments.org/getting-started.md
@@ -28,97 +92,12 @@ npm run dev
 - https://docs.nativefragments.org/components.md
 - https://docs.nativefragments.org/api-routes.md
 - https://docs.nativefragments.org/workers.md
-- https://docs.nativefragments.org/signals.md
 - https://docs.nativefragments.org/agent-friendly.md
-- https://docs.nativefragments.org/ai.md
 - https://docs.nativefragments.org/reference.md
+- https://docs.nativefragments.org/ai.md
 
-## Core Package
-
-```sh
-npm i @nativefragments/core
-```
-
-Server imports:
-
-```js
-import { html, route } from "@nativefragments/core/server";
-import { createCloudflareHandler } from "@nativefragments/core/cloudflare";
-```
-
-Browser imports:
-
-```js
-import { installFragmentNavigation } from "/nativefragments/router.js";
-import { shadow, sheet } from "/nativefragments/component.js";
-import { createWorkerClient } from "/nativefragments/worker.js";
-```
-
-Fragment helpers:
-
-```js
-import { fragment } from "@nativefragments/core/server";
-const panel = fragment("settings-panel", renderPanel);
-```
-
-Fragment prefetch:
-
-```html
-<a href="/reports" data-fragment-prefetch="visible">Reports</a>
-<a href="/settings" data-fragment-prefetch="load">Settings</a>
-```
-
-Deferred streaming:
-
-```js
-const panel = fragment("related", {
-  loading: () => html`<p>Loading…</p>`,
-  error: () => html`<p role="status">Unavailable.</p>`,
-  render: async (context) => html`…await data…`,
-});
-route("/", {
-  render: (context) => html`${context.defer(panel)}`,
-  fragments: [panel],
-});
-```
-
-## Optional Signals Package
-
-```sh
-npm i @nativefragments/signals
-cp node_modules/@nativefragments/signals/public/nativefragments/*.js public/nativefragments/
-```
-
-```js
-import { bindText, computed, state } from "/nativefragments/signals.js";
-```
-
-## Agent Skill
-
-```sh
-node_modules/@nativefragments/core/skills/nativefragments/SKILL.md
-```
-
-## App Structure
+## Agent skill
 
 ```txt
-worker.js
-site/routes.js
-site/shell.js
-site/pages/home.js
-public/app/client.js
-public/nativefragments/router.js
-public/nativefragments/component.js
-public/nativefragments/worker.js
+node_modules/@nativefragments/core/skills/nativefragments/SKILL.md
 ```
-
-## Principles
-
-- HTML is the first payload.
-- Fragment navigation upgrades real links.
-- Custom Elements own behavior.
-- Shadow DOM scopes component CSS.
-- Signals are optional reactive islands.
-- Web Workers handle expensive client work.
-- Source files stay small and explicit for agents.
-- Runtime output remains readable HTML and browser modules.

@@ -1,6 +1,6 @@
 # Native Fragments API Reference
 
-> Generated from JSDoc comments in @nativefragments/core. For the full index, fetch https://docs.nativefragments.org/llms.txt.
+> Generated from JSDoc comments in @nativefragments/core and @nativefragments/lit. For the full index, fetch https://docs.nativefragments.org/llms.txt.
 
 ## Server HTML
 
@@ -11,19 +11,6 @@ Module: `@nativefragments/core/server`
 `{ [RAW]: true, value: string, toString(): string }`
 
 
-
-### DeclarativeShadowOptions
-
-`object`
-
-
-
-**Parameters**
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `styles` | `string[]` | `[]` | CSS text rendered into `<style>` tags inside the declarative shadow root. |
-| `html` | `string` | `""` | Trusted shadow root HTML. Build dynamic HTML with [`html`](#html) before passing it here. |
 
 ### HtmlAttrs
 
@@ -69,7 +56,7 @@ Escape a value for safe insertion into HTML text or attribute context.
 html(strings, ...values) → RawHtml
 ```
 
-Server-side HTML template tag with escaped interpolation by default. Arrays are flattened, `null`, `undefined`, and `false` become empty strings, and trusted values returned by [`html`](#html), [`raw`](#raw), [`attrs`](#attrs), or [`declarativeShadow`](#declarativeShadow) are inserted as HTML without being re-escaped.
+Server-side HTML template tag with escaped interpolation by default. Arrays are flattened, `null`, `undefined`, and `false` become empty strings, and trusted values returned by [`html`](#html), [`raw`](#raw), or [`attrs`](#attrs) are inserted as HTML without being re-escaped.
 
 **Parameters**
 
@@ -79,22 +66,6 @@ Server-side HTML template tag with escaped interpolation by default. Arrays are 
 | `values` | `...unknown` | required | Interpolated values. |
 
 **Returns** — `RawHtml`. Rendered HTML wrapper.
-
-### declarativeShadow
-
-```js
-declarativeShadow(options?) → RawHtml
-```
-
-Render a declarative Shadow DOM template for server-rendered components. Put this as the first child of a custom element to avoid a flash of unstyled light DOM before the component module loads. Pair it with the browser [`shadow`](#shadow) helper, which preserves an existing declarative shadow root on first upgrade and materializes declarative shadow templates inserted during fragment navigation.
-
-**Parameters**
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `options` | `DeclarativeShadowOptions` | `{}` | Shadow template options. |
-
-**Returns** — `RawHtml`. Trusted declarative shadow template.
 
 ### jsonScript
 
@@ -144,10 +115,13 @@ Module: `@nativefragments/core/server`
 | --- | --- | --- | --- |
 | `request` | `Request` | required | Original request. |
 | `signal` | `AbortSignal` | required | Request cancellation signal. |
+| `env` | `Record<string, unknown>` | required | Runtime bindings for this request. |
+| `context` | `unknown` | required | Runtime execution context. |
+| `locals` | `Record<string, unknown>` | required | Application state prepared once per request. |
 | `url` | `URL` | required | Parsed request URL. |
 | `query` | `URLSearchParams` | required | Parsed query parameters from `url.searchParams`. |
 | `params` | `Record<string, string>` | required | Path parameters captured from a route pattern like `/posts/:slug`. |
-| `defer` | `(fragment: FragmentDefinition | string, attributes?: import("./html.js").HtmlAttrs) => import("./html.js").RawHtml` | required | Render a stable loading boundary and collect a named fragment for deferred document streaming. |
+| `defer` | `(fragment: FragmentDefinition | string, attributes?: import("./html.js").HtmlAttrs) => import("./html.js").RawHtml` | required | Render a stable loading boundary and collect a named fragment for deferred HTML streaming during document loads and browser fragment navigation. |
 
 ### RouteMeta
 
@@ -194,8 +168,8 @@ Module: `@nativefragments/core/server`
 | --- | --- | --- | --- |
 | `name` | `string` | required | Fragment slot name. |
 | `render` | `FragmentRenderer` | required | Fragment renderer. |
-| `loading` | `FragmentLoadingRenderer` | — | Loading renderer used by deferred document streaming. |
-| `error` | `FragmentErrorRenderer` | — | Error renderer used when a deferred fragment fails after the document response has started. |
+| `loading` | `FragmentLoadingRenderer` | — | Loading renderer used by deferred HTML streaming. |
+| `error` | `FragmentErrorRenderer` | — | Error renderer used when a deferred fragment fails after its HTML response has started. |
 | `timeout` | `number` | — | Maximum deferred render time in milliseconds. |
 | `attrs` | `(attributes?: import("./html.js").HtmlAttrs) => import("./html.js").RawHtml` | required | Attributes for links and target containers using this fragment slot. |
 | `prefetchAttrs` | `(mode?: "intent" | "visible" | "load" | "none", attributes?: import("./html.js").HtmlAttrs) => import("./html.js").RawHtml` | required | Attributes for links using this fragment slot with a prefetch mode. |
@@ -326,7 +300,7 @@ Render fragment metadata for the browser fragment router.
 ### renderRoute
 
 ```js
-renderRoute(options) → Promise<{ body: string, meta: Required<Pick<RouteMeta, "title" | "description" | "canonical">> & RouteMeta, deferred: unknown[], status: number, headers: Record<string, string> } | { response: Response }>
+renderRoute(options) → Promise<{ body: string, meta: Required<Pick<RouteMeta, "title" | "description" | "canonical">> & RouteMeta, deferred: unknown[], status: number, headers: Record<string, string>, cancel: (reason?: unknown) => void } | { response: Response }>
 ```
 
 Render a matched route and normalize metadata defaults.
@@ -335,9 +309,9 @@ Render a matched route and normalize metadata defaults.
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `options` | `{ match: Route, request: Request, slot?: string | null, deferredTimeout?: number | null }` | required | Render options. When `slot` matches a registered named fragment, only that fragment renderer is used. Calls to `context.defer()` always collect deferred work for the adapter to stream or inline. |
+| `options` | `{ match: Route, request: Request, slot?: string | null, deferredTimeout?: number | null, scope?: import("./context.js").RequestContext }` | required | Render options. When `slot` matches a registered named fragment, only that fragment renderer is used. Calls to `context.defer()` always collect deferred work for the adapter to stream or inline. |
 
-**Returns** — `Promise<{ body: string, meta: Required<Pick<RouteMeta, "title" | "description" | "canonical">> & RouteMeta, deferred: unknown[], status: number, headers: Record<string, string> } | { response: Response }>`. Rendered route.
+**Returns** — `Promise<{ body: string, meta: Required<Pick<RouteMeta, "title" | "description" | "canonical">> & RouteMeta, deferred: unknown[], status: number, headers: Record<string, string>, cancel: (reason?: unknown) => void } | { response: Response }>`. Rendered route.
 
 ### renderFragment
 
@@ -392,6 +366,7 @@ Module: `@nativefragments/core/server`
 | `request` | `Request` | required | Original request. |
 | `env` | `Record<string, unknown>` | required | Runtime environment bindings. |
 | `context` | `unknown` | required | Runtime execution context. |
+| `locals` | `Record<string, unknown>` | required | Application state prepared once per request. |
 | `url` | `URL` | required | Parsed request URL. |
 | `query` | `URLSearchParams` | required | Parsed query parameters from `url.searchParams`. |
 | `params` | `Record<string, string>` | required | Path parameters captured from the API route. |
@@ -438,7 +413,7 @@ Create a normalized API route. Paths use the same `:param` and trailing `:rest*`
 ### createApi
 
 ```js
-createApi(routes, options?) → { fetch(request: Request, env?: Record<string, unknown>, context?: unknown): Promise<Response> }
+createApi(routes, options?) → { fetch(request: Request, env?: Record<string, unknown>, context?: unknown, scope?: import("./context.js").RequestContext): Promise<Response> }
 ```
 
 Create a Fetch-compatible API router.
@@ -450,7 +425,7 @@ Create a Fetch-compatible API router.
 | `routes` | `ApiRoute[]` | required | API route definitions. |
 | `options` | `{ onError?: (event: { error: unknown, request: Request, route?: ApiRoute }) => void }` | `{}` | API options. |
 
-**Returns** — `{ fetch(request: Request, env?: Record<string, unknown>, context?: unknown): Promise<Response> }`. Fetch-compatible API router.
+**Returns** — `{ fetch(request: Request, env?: Record<string, unknown>, context?: unknown, scope?: import("./context.js").RequestContext): Promise<Response> }`. Fetch-compatible API router.
 
 ## Cloudflare Adapter
 
@@ -473,12 +448,13 @@ Module: `@nativefragments/core/cloudflare`
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `routes` | `Route[]` | required | App route definitions. |
-| `shell` | `(rendered: { body?: import("../server/html.js").RawHtml, meta: object, nonce?: string }) => string | import("../server/html.js").RawHtml | { before: string | import("../server/html.js").RawHtml, after: string | import("../server/html.js").RawHtml }` | required | Function that wraps a rendered route body in a full HTML document. |
+| `shell` | `(rendered: { body?: import("../server/html.js").RawHtml, meta: object, nonce?: string }) => string | import("../server/html.js").RawHtml | { before: string | import("../server/html.js").RawHtml, after: string | import("../server/html.js").RawHtml } | Promise<string | import("../server/html.js").RawHtml | { before: string | import("../server/html.js").RawHtml, after: string | import("../server/html.js").RawHtml }>` | required | Function that wraps a rendered route body in a full HTML document. |
 | `api` | `{ fetch(request: Request, env: Record<string, unknown>, context?: unknown): Promise<Response> | Response } | import("../server/api.js").ApiRoute[]` | — | Optional Web Standards API router or array of `apiRoute()` definitions. Hono apps work here because they expose a compatible `fetch` method. |
+| `prepare` | `(scope: import("../server/context.js").RequestContext) => Record<string, unknown> | Response | Promise<Record<string, unknown> | Response>` | — | Prepare application locals once per request, or return/throw a Response. |
 | `apiPrefix` | `string` | `"/api"` | URL prefix handled by `api`. |
 | `notFound` | `Route` | — | Optional 404 route. |
 | `error` | `Route` | — | Optional 500 route. |
-| `onError` | `({ error, request, phase }: { error: unknown, request: Request, phase: "route" | "error-route" | "api" }) => void` | — | Error hook for caught route, error-route, and API failures. |
+| `onError` | `({ error, request, phase }: { error: unknown, request: Request, phase: "route" | "error-route" | "api" | "assets" }) => void` | — | Error hook for caught route, error-route, and API failures. |
 | `assetsBinding` | `string` | `"ASSETS"` | Cloudflare assets binding name. |
 | `deferredTimeout` | `number | null` | `15000` | Default timeout in milliseconds for each deferred fragment renderer. Set `null` to disable. |
 | `contentSecurityPolicy` | `string | false | ((options: { nonce: string, request: Request }) => string | false)` | — | Content Security Policy header. Defaults to `frame-ancestors 'self'`. Pass a function to build a nonce-based strict policy. |
@@ -486,10 +462,10 @@ Module: `@nativefragments/core/cloudflare`
 ### createCloudflareHandler
 
 ```js
-createCloudflareHandler(options) → { fetch(request: Request, env: Record<string, unknown>): Promise<Response> }
+createCloudflareHandler(options) → { fetch(request: Request, env?: Record<string, unknown>, context?: unknown): Promise<Response> }
 ```
 
-Create a Cloudflare Worker module for a Native Fragments app. Static assets are served from the configured assets binding. Normal document requests render the app shell. Requests with `x-fragment: true` return only the route body plus fragment metadata. Requests under `apiPrefix` are delegated to the optional API router before app route matching.
+Create a Cloudflare Worker module for a Native Fragments app. Static assets are served from the configured assets binding. Normal document requests render the app shell. Requests with `x-fragment: true` return the route body plus fragment metadata, using framed HTML streaming when the route has deferred content. Requests under `apiPrefix` are delegated to the optional API router before app route matching.
 
 **Parameters**
 
@@ -497,82 +473,19 @@ Create a Cloudflare Worker module for a Native Fragments app. Static assets are 
 | --- | --- | --- | --- |
 | `options` | `CloudflareHandlerOptions` | required | Worker adapter options. |
 
-**Returns** — `{ fetch(request: Request, env: Record<string, unknown>): Promise<Response> }`. Cloudflare Worker module.
+**Returns** — `{ fetch(request: Request, env?: Record<string, unknown>, context?: unknown): Promise<Response> }`. Cloudflare Worker module.
 
 ## Browser Router
 
-Module: `/nativefragments/router.js`
+Module: `@nativefragments/core/client/router.js`
 
-### FragmentNavigationOptions
+### PrefetchMode
 
-`object`
+`"none" | "intent" | "visible" | "load"`
 
 
 
-**Parameters**
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `slot` | `string` | `"#content-slot"` | Selector for the element replaced by fragment responses. |
-| `ttl` | `number` | `30000` | Fragment cache time in milliseconds. |
-| `prefetch` | `boolean | "none" | "intent" | "visible" | "load"` | `"intent"` | Default fragment prefetch behavior. Links can override this with `data-fragment-prefetch="intent|visible|load|none"`. |
-| `viewTransitions` | `boolean` | `true` | Whether to use `document.startViewTransition()` for DOM swaps when supported. |
-| `afterNavigate` | `(event: { meta: object | null, url: URL, slot: string }) => void` | — | Callback fired after a successful client-side navigation. |
-
-### clearFragmentCache
-
-```js
-clearFragmentCache(href?) → void
-```
-
-Clear cached fragment responses. With no argument, the entire cache and in-flight request map are cleared. With `href`, every cache entry for the resolved pathname and search is removed across all fragment slots.
-
-**Parameters**
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `href` | `string | URL` | — | Optional URL to clear. |
-
-**Returns** — `void`.
-
-### prefetchFragment
-
-```js
-prefetchFragment(href, options?) → Promise<string | null>
-```
-
-Prefetch a same-origin fragment into the shared fragment cache.
-
-**Parameters**
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `href` | `string | URL` | required | URL to prefetch. |
-| `options` | `{ slot?: string, ttl?: number, signal?: AbortSignal }` | `{}` | Prefetch options. |
-
-**Returns** — `Promise<string | null>`. Prefetched fragment HTML, or `null` for skipped cross-origin URLs and document-like URLs such as `/agents.txt`.
-
-### installFragmentNavigation
-
-```js
-installFragmentNavigation(options?) → ((href: string | URL, pushState?: boolean, nextSlot?: string) => Promise<void>) | undefined
-```
-
-Install same-origin fragment navigation. Clicked links are fetched with `x-fragment: true`, the configured content slot is replaced, document metadata is updated, and history state is pushed. Links with `data-fragment-slot="name"` replace only the matching `[data-fragment-slot="name"]` container and send `x-fragment-slot: name`. GET forms with `data-fragment-form` are intercepted the same way. POST forms are left to the browser so the server can run route actions and redirect. External links, document-like URLs such as `/agents.txt`, modified clicks, and links with `data-nativefragments-reload` or `data-fragment-navigation="false"` keep normal browser behavior.
-
-**Parameters**
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `options` | `FragmentNavigationOptions` | `{}` | Navigation options. |
-
-**Returns** — `((href: string | URL, pushState?: boolean, nextSlot?: string) => Promise<void>) | undefined`. Navigate function, or `undefined` if the slot does not exist.
-
-## Shadow DOM Components
-
-Module: `/nativefragments/component.js`
-
-### ShadowOptions
+### FragmentRouterOptions
 
 `object`
 
@@ -582,46 +495,86 @@ Module: `/nativefragments/component.js`
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `styles` | `CSSStyleSheet[]` | `[]` | Constructable stylesheets to adopt. |
-| `html` | `string` | `""` | Shadow root HTML. |
-| `hydrate` | `boolean` | `true` | Preserve an existing declarative shadow root on the first render so server-rendered components do not flash. |
+| `target` | `string | Element` | `"#content-slot"` | Primary navigation target. |
+| `cacheTtl` | `number` | `30000` | Maximum completed fragment cache lifetime. |
+| `cacheMaxEntries` | `number` | `100` | Maximum cached response groups (including redirect aliases). |
+| `cacheMaxBytes` | `number` | `2000000` | Maximum retained HTML bytes. |
+| `prefetch` | `PrefetchMode | boolean` | `"intent"` | Default automatic prefetch policy. |
+| `viewTransitions` | `boolean` | `true` | Use View Transitions when available. |
+| `signal` | `AbortSignal` | — | Aborting this signal tears down the router. |
 
-### sheet
+### NavigateOptions
 
-```js
-sheet(cssText) → CSSStyleSheet
-```
+`object`
 
-Create a constructable stylesheet for Shadow DOM components.
 
-**Parameters**
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `cssText` | `string` | required | CSS source. |
-
-**Returns** — `CSSStyleSheet`. Constructable stylesheet.
-
-### shadow
-
-```js
-shadow(element, options?) → ShadowRoot
-```
-
-Attach or reuse an open shadow root, adopt stylesheets, and set its HTML. If the element already has declarative shadow DOM from server HTML, the first call preserves that DOM by default. Fragment navigation inserts HTML with `template.innerHTML`, so declarative shadow templates are materialized manually before hydration to keep server-rendered components visible.
 
 **Parameters**
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `element` | `HTMLElement` | required | Custom element receiving the shadow root. |
-| `options` | `ShadowOptions` | `{}` | Shadow render options. |
+| `slot` | `string` | — | Named fragment target; omit for the primary target. |
+| `history` | `"push" | "replace" | "none"` | `"push"` | History behavior. |
+| `signal` | `AbortSignal` | — | Abort this navigation consumer. |
 
-**Returns** — `ShadowRoot`. The element's shadow root.
+### FragmentRequestOptions
+
+`object`
+
+
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `slot` | `string` | — | Named fragment target. |
+| `signal` | `AbortSignal` | — | Abort this request consumer. |
+
+### InvalidateOptions
+
+`object`
+
+
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `slot` | `string` | — | Limit invalidation to one named fragment target. |
+
+### FragmentRouter
+
+`object`
+
+
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `navigate` | `(href: string | URL, options?: NavigateOptions) => Promise<void>` | required | Navigate to a route or named fragment. |
+| `prefetch` | `(href: string | URL, options?: FragmentRequestOptions) => Promise<void>` | required | Warm a completed fragment in the shared cache. |
+| `invalidate` | `(href?: string | URL, options?: InvalidateOptions) => void` | required | Drop matching cached and in-flight fragments, or all fragments when omitted. |
+
+### startRouter
+
+```js
+startRouter(options?) → Readonly<FragmentRouter>
+```
+
+Start document navigation and return a small imperative controller. Links and opted-in GET forms retain their native behavior when JavaScript is unavailable. While active, same-origin navigation is upgraded with streamed HTML fragments, history, metadata, focus, scrolling, and prefetching.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `options` | `FragmentRouterOptions` | `{}` | Router options. |
+
+**Returns** — `Readonly<FragmentRouter>`. Router controller.
 
 ## Web Workers
 
-Module: `/nativefragments/worker.js`
+Module: `@nativefragments/core/client/worker.js`
 
 ### WorkerClientOptions
 
@@ -731,214 +684,24 @@ Expose named handlers inside a dedicated Web Worker.
 
 **Returns** — `() => void`. Cleanup function.
 
-## State
+## Lit SSR
 
-Module: `@nativefragments/signals`
+Module: `@nativefragments/lit/server`
 
 
-### state
+### renderLit
 
 ```js
-state(initial, options?) → Signal.State
+renderLit(value) → Promise<import("@nativefragments/core/server").RawHtml>
 ```
 
-Create a writable signal. Read it with `.get()` and update it with `.set()`.
+Render a Lit template or component tree to trusted server HTML. Component modules must be imported by the Worker so their custom element definitions are registered in Lit's server DOM shim.
 
 **Parameters**
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `initial` | `unknown` | required | Initial value. |
-| `options` | `object` | — | Signal options (custom equality, etc.). |
+| `value` | `unknown` | required | Lit template value to render. |
 
-**Returns** — `Signal.State`. A writable signal.
-
-### computed
-
-```js
-computed(callback, options?) → Signal.Computed
-```
-
-Create a read-only signal derived from other signals. It recomputes lazily when a dependency changes.
-
-**Parameters**
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `callback` | `() => unknown` | required | Computation that reads other signals. |
-| `options` | `object` | — | Signal options. |
-
-**Returns** — `Signal.Computed`. A derived, read-only signal.
-
-### isSignal
-
-```js
-isSignal(value) → boolean
-```
-
-Test whether a value is a signal (state or computed).
-
-**Parameters**
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `unknown` | required | Value to test. |
-
-**Returns** — `boolean`. True for a state or computed signal.
-
-### read
-
-```js
-read(value) → unknown
-```
-
-Resolve a value: call `.get()` on a signal, invoke a function, or return a plain value unchanged. Lets every binding helper accept a signal, a getter, or a static value.
-
-**Parameters**
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `unknown` | required | Signal, getter, or plain value. |
-
-**Returns** — `unknown`. The current value.
-
-### effect
-
-```js
-effect(callback) → () => void
-```
-
-Run a callback immediately and re-run it whenever a signal it read changes (batched on the microtask queue). Return a function from the callback to run cleanup before the next run.
-
-**Parameters**
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `callback` | `() => (void | (() => void))` | required | Effect; may return a cleanup. |
-
-**Returns** — `() => void`. Dispose function that stops the effect.
-
-### bindText
-
-```js
-bindText(node, value) → () => void
-```
-
-Bind a node's text content to a signal.
-
-**Parameters**
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `node` | `Node` | required | Target node. |
-| `value` | `unknown` | required | Signal, getter, or value. |
-
-**Returns** — `() => void`. Dispose function.
-
-### bindHTML
-
-```js
-bindHTML(element, value) → () => void
-```
-
-Bind an element's `innerHTML` to a signal. Use trusted HTML only.
-
-**Parameters**
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `element` | `Element` | required | Target element. |
-| `value` | `unknown` | required | Signal, getter, or value. |
-
-**Returns** — `() => void`. Dispose function.
-
-### bindAttr
-
-```js
-bindAttr(element, name, value) → () => void
-```
-
-Bind an attribute to a signal. `false`, `null`, and `undefined` remove the attribute; `true` renders it empty.
-
-**Parameters**
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `element` | `Element` | required | Target element. |
-| `name` | `string` | required | Attribute name. |
-| `value` | `unknown` | required | Signal, getter, or value. |
-
-**Returns** — `() => void`. Dispose function.
-
-### bindProperty
-
-```js
-bindProperty(element, property, value) → () => void
-```
-
-Bind a DOM property to a signal.
-
-**Parameters**
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `element` | `Element` | required | Target element. |
-| `property` | `string` | required | Property name. |
-| `value` | `unknown` | required | Signal, getter, or value. |
-
-**Returns** — `() => void`. Dispose function.
-
-### bindClass
-
-```js
-bindClass(element, name, value) → () => void
-```
-
-Toggle a class on an element based on a signal's truthiness.
-
-**Parameters**
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `element` | `Element` | required | Target element. |
-| `name` | `string` | required | Class name. |
-| `value` | `unknown` | required | Signal, getter, or value. |
-
-**Returns** — `() => void`. Dispose function.
-
-### bindStyle
-
-```js
-bindStyle(element, name, value) → () => void
-```
-
-Bind a style property to a signal. `false`, `null`, and `undefined` remove the property.
-
-**Parameters**
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `element` | `Element` | required | Target element. |
-| `name` | `string` | required | CSS property name. |
-| `value` | `unknown` | required | Signal, getter, or value. |
-
-**Returns** — `() => void`. Dispose function.
-
-### model
-
-```js
-model(element, signal, eventName?) → () => void
-```
-
-Two-way bind an input-like element's `value` to a writable signal: the signal drives the element, and the element updates the signal on `eventName`.
-
-**Parameters**
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `element` | `HTMLElement` | required | Target element with a `value`. |
-| `signal` | `Signal.State` | required | Writable signal to sync. |
-| `eventName` | `string` | `"input"` | DOM event that updates the signal. |
-
-**Returns** — `() => void`. Dispose function.
+**Returns** — `Promise<import("@nativefragments/core/server").RawHtml>`.
 

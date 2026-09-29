@@ -1,4 +1,4 @@
-import { attrs, html, jsonScript, raw } from "@nativefragments/core/server";
+import { html } from "@nativefragments/core/server";
 import { appHeader } from "./header.js";
 
 const fontHref =
@@ -9,8 +9,6 @@ const faviconHref =
 
 const activePath = (canonical) =>
   canonical?.startsWith("http") ? new URL(canonical).pathname : (canonical ?? "/");
-
-const clickCount = (meta) => Number(meta.clickCount ?? 0);
 
 export const shell = ({ body, meta, nonce }) => html`<!doctype html>
 <html lang="en">
@@ -26,18 +24,10 @@ export const shell = ({ body, meta, nonce }) => html`<!doctype html>
     <link rel="icon" href="${faviconHref}" />
     <link rel="stylesheet" href="${fontHref}" />
     <link rel="stylesheet" href="/app/styles.css" />
-    <script${attrs({ nonce })}>
-      window.__NATIVEFRAGMENTS_STATE__ = ${raw(
-        jsonScript({ clickCount: clickCount(meta) }),
-      )};
-    </script>
-    <script${attrs({ nonce })} type="module" src="/app/client.js"></script>
+    <script type="module" src="/build/client.js"></script>
   </head>
   <body>
-    ${appHeader({
-      activePath: activePath(meta.canonical),
-      clickCount: clickCount(meta),
-    })}
+    ${appHeader({ activePath: activePath(meta.canonical) })}
     <main id="content-slot">${body}</main>
   </body>
 </html>`;

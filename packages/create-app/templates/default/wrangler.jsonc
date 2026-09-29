@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "__WORKER_NAME__",
+  "main": ".nativefragments/worker.js",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat", "enable_request_signal"],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+  "build": {
+    "command": "node scripts/build-app.mjs",
+    "watch_dir": ["worker.js", "site", "client"]
+  }
+}

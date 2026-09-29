@@ -4,13 +4,11 @@ import {
   nestedPanelFragment,
   nestedRoutePage,
 } from "./pages/nested-route.js";
-import { clickCounterMeta } from "./state.js";
 
 const origin = "https://example.com";
 
 const meta = (context, path, title, description) => ({
   canonical: `${origin}${path}`,
-  ...clickCounterMeta(context),
   description,
   title,
 });
@@ -22,7 +20,7 @@ export const routes = [
         context,
         "/",
         "Counter route - Native Fragments starter",
-        "A zero-build Native Fragments app with pure HTML shared state.",
+        "A Native Fragments app with streamed HTML and a server-rendered Lit component.",
       ),
     render: counterPage,
   }),

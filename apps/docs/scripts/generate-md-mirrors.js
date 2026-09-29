@@ -21,7 +21,6 @@ const mirrors = {
   "/concepts/components": "components",
   "/concepts/api-routes": "api-routes",
   "/concepts/workers": "workers",
-  "/concepts/signals": "signals",
   "/concepts/agent-friendly": "agent-friendly",
   "/ai": "ai",
 };

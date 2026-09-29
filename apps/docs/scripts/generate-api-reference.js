@@ -4,7 +4,7 @@ import path from "node:path";
 const root = process.cwd();
 // Read sibling workspace packages directly (monorepo layout: apps/docs/../../packages/*).
 const coreRoot = path.resolve(root, "../../packages/core");
-const signalsRoot = path.resolve(root, "../../packages/signals");
+const litRoot = path.resolve(root, "../../packages/lit");
 const outputPath = path.join(root, "site/generated/api-reference.js");
 const markdownOutputPath = path.join(root, "public/reference.md");
 
@@ -15,10 +15,9 @@ const sources = [
   { root: coreRoot, file: "src/server/router.js", repoPath: "packages/core/src/server/router.js", module: "@nativefragments/core/server", title: "Server Routing" },
   { root: coreRoot, file: "src/server/api.js", repoPath: "packages/core/src/server/api.js", module: "@nativefragments/core/server", title: "Server API" },
   { root: coreRoot, file: "src/cloudflare/index.js", repoPath: "packages/core/src/cloudflare/index.js", module: "@nativefragments/core/cloudflare", title: "Cloudflare Adapter" },
-  { root: coreRoot, file: "public/nativefragments/router.js", repoPath: "packages/core/public/nativefragments/router.js", module: "/nativefragments/router.js", title: "Browser Router" },
-  { root: coreRoot, file: "public/nativefragments/component.js", repoPath: "packages/core/public/nativefragments/component.js", module: "/nativefragments/component.js", title: "Shadow DOM Components" },
-  { root: coreRoot, file: "public/nativefragments/worker.js", repoPath: "packages/core/public/nativefragments/worker.js", module: "/nativefragments/worker.js", title: "Web Workers" },
-  { root: signalsRoot, file: "public/nativefragments/signals.js", repoPath: "packages/signals/public/nativefragments/signals.js", module: "@nativefragments/signals", title: "State" },
+  { root: coreRoot, file: "client/router.js", repoPath: "packages/core/client/router.js", module: "@nativefragments/core/client/router.js", title: "Browser Router" },
+  { root: coreRoot, file: "client/worker.js", repoPath: "packages/core/client/worker.js", module: "@nativefragments/core/client/worker.js", title: "Web Workers" },
+  { root: litRoot, file: "server.js", repoPath: "packages/lit/server.js", module: "@nativefragments/lit/server", title: "Lit SSR" },
 ];
 
 const cleanLine = (line) => line.replace(/^\s*\* ?/, "");
@@ -249,7 +248,7 @@ const mdReturns = (returns) => {
 
 const renderMarkdown = (sections) => `# Native Fragments API Reference
 
-> Generated from JSDoc comments in @nativefragments/core. For the full index, fetch https://docs.nativefragments.org/llms.txt.
+> Generated from JSDoc comments in @nativefragments/core and @nativefragments/lit. For the full index, fetch https://docs.nativefragments.org/llms.txt.
 
 ${sections
   .map(

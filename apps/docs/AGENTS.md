@@ -14,8 +14,10 @@ Run `npm run check` before commit or deploy.
 ## Rendering Preference
 
 For visible custom elements, prefer server-rendered declarative Shadow DOM and
-hydrate with `shadow()` on the client. Empty client-only custom element shells
+hydrate through `@nativefragments/lit/client` before element registration. Empty client-only custom element shells
 are a FOUC and layout-shift risk, especially in examples that agents may copy.
 
 Keep shared component HTML and CSS in modules that can be imported by both
 server renderers and browser components when the initial markup must match.
+
+Build policy is documented in ../../docs/adr/0001-runtime-and-tooling.md.

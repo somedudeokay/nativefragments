@@ -47,6 +47,44 @@ body {
   overflow-x: hidden;
 }
 
+.app-header {
+  align-items: center;
+  backdrop-filter: blur(18px);
+  background: color-mix(in srgb, var(--paper) 86%, transparent);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  min-height: 72px;
+  padding: 0 max(var(--pad), calc((100% - var(--container)) / 2));
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.app-header .brand {
+  font-family: var(--display);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.app-header nav {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.app-header nav a {
+  border-radius: var(--radius-pill);
+  color: var(--muted);
+  font-weight: 600;
+  padding: 0.45rem 0.8rem;
+  text-decoration: none;
+}
+
+.app-header nav a[aria-current="page"] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
 a {
   color: inherit;
 }

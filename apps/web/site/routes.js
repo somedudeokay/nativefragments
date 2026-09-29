@@ -18,8 +18,8 @@ export const routes = [
     meta: () =>
       meta(
         "/",
-        "Zero build web framework built for agents",
-        "Native Fragments streams server-rendered HTML from the edge with zero dependencies and no build step. Built for coding agents and very fast web apps.",
+        "Fast applications. Explicit HTML.",
+        "Native Fragments is an HTML application framework for Cloudflare Workers with streamed navigation, native links and forms, and Lit-powered interactive islands.",
       ),
     render: homePage,
   }),
@@ -28,7 +28,7 @@ export const routes = [
       meta(
         "/docs",
         "Docs",
-        "Learn the Native Fragments route, shell, fragment, and Shadow DOM component model.",
+        "Learn the Native Fragments route, shell, streaming fragment, router, and Lit component model.",
       ),
     render: docsPage,
   }),
@@ -37,7 +37,7 @@ export const routes = [
       meta(
         "/examples",
         "Examples",
-        "Explore deployed Native Fragments demo applications built as small Cloudflare Worker packages.",
+        "Explore deployed Native Fragments HTML applications built for Cloudflare Workers.",
       ),
     render: examplesPage,
   }),
@@ -46,7 +46,7 @@ export const routes = [
       meta(
         "/demos",
         "Demos",
-        "Inspect complete Native Fragments demos built with almost zero dependencies.",
+        "Inspect complete Native Fragments demos with streamed HTML and modern ESM tooling.",
       ),
     render: demosPage,
   }),
@@ -55,7 +55,7 @@ export const routes = [
       meta(
         "/manifesto",
         "Manifesto",
-        "The Native Fragments goals: zero dependencies, zero build, blazing fast, built for agents, AI-friendly applications, zero maintenance, free to deploy, infinite scale.",
+        "The Native Fragments goals: explicit HTML, native navigation, small framework contracts, fast work, and fast web applications.",
       ),
     render: manifestoPage,
   }),

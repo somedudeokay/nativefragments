@@ -6,7 +6,7 @@ export const workersPage = () =>
     eyebrow: "Concepts",
     title: "Workers",
     intro:
-      "Move expensive work — search, filtering, parsing — off the main thread with a tiny RPC layer over Web Workers. No build step, no message-plumbing boilerplate.",
+      "Move expensive work — search, filtering, parsing — off the main thread with a tiny RPC layer over Web Workers and no message-plumbing boilerplate.",
     body: html`
       <p>
         Three helpers cover the whole loop:
@@ -25,8 +25,8 @@ export const workersPage = () =>
         of named handlers. Each handler receives the call payload and returns a
         value (or a promise).
       </p>
-      ${code(`// public/app/search-worker.js
-import { exposeWorker } from "/nativefragments/worker.js";
+      ${code(`// client/search-worker.js
+import { exposeWorker } from "@nativefragments/core/client/worker.js";
 
 exposeWorker({
   // "search" is the handler name the page will call.
@@ -43,10 +43,10 @@ exposeWorker({
         <code>call(name, payload)</code> resolves with the handler's result and
         rejects on error or timeout.
       </p>
-      ${code(`// public/app/client.js
-import { createWorkerClient } from "/nativefragments/worker.js";
+      ${code(`// client/index.js
+import { createWorkerClient } from "@nativefragments/core/client/worker.js";
 
-const search = createWorkerClient("/app/search-worker.js");
+const search = createWorkerClient("/build/search-worker.js");
 
 // Runs off the main thread — typing stays responsive.
 const hits = await search.call("search", { rows, query: "native" });
@@ -64,8 +64,8 @@ search.dispose(); // detach listeners + reject pending calls when done`)}
         <em>transfer</em> ownership of an <code>ArrayBuffer</code> or other
         Transferable instead — no copy.
       </p>
-      ${code(`// public/app/decode-worker.js
-import { exposeWorker, transferResult } from "/nativefragments/worker.js";
+      ${code(`// client/decode-worker.js
+import { exposeWorker, transferResult } from "@nativefragments/core/client/worker.js";
 
 exposeWorker({
   decode: (buffer) => {

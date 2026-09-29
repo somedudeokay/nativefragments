@@ -9,7 +9,6 @@ import { homePage } from "./pages/home.js";
 import { referencePage } from "./pages/reference.js";
 import { routingPage } from "./pages/routing.js";
 import { shellPage } from "./pages/shell.js";
-import { signalsPage } from "./pages/signals.js";
 import { streamingPage } from "./pages/streaming.js";
 import { workersPage } from "./pages/workers.js";
 
@@ -73,7 +72,7 @@ export const routes = [
       meta(
         "/concepts/components",
         "Components",
-        "Custom Elements and Shadow DOM component patterns.",
+        "Lit custom elements rendered on the server and hydrated in the browser.",
       ),
     render: componentsPage,
   }),
@@ -94,15 +93,6 @@ export const routes = [
         "Use first-class worker helpers in Native Fragments apps.",
       ),
     render: workersPage,
-  }),
-  route("/concepts/signals", {
-    meta: () =>
-      meta(
-        "/concepts/signals",
-        "State",
-        "Optional reactive state for Native Fragments apps, based on the TC39 Signals proposal.",
-      ),
-    render: signalsPage,
   }),
   route("/concepts/agent-friendly", {
     meta: () =>

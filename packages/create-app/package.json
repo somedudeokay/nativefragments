@@ -1,7 +1,7 @@
 {
   "name": "@nativefragments/create-app",
-  "version": "0.5.0",
-  "description": "Create a zero-build Native Fragments app.",
+  "version": "0.7.0",
+  "description": "Create a fast, explicit HTML application with Native Fragments.",
   "type": "module",
   "bin": {
     "create-app": "bin/create-app.js"
@@ -10,7 +10,9 @@
     "bin",
     "templates",
     "README.md",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "build.js",
+    "http.js"
   ],
   "repository": {
     "type": "git",
@@ -22,7 +24,7 @@
     "access": "public"
   },
   "scripts": {
-    "check": "node --check bin/create-app.js && find templates -name '*.js' -print0 | xargs -0 -n1 node --check",
+    "check": "node --check bin/create-app.js && find templates -name '*.js' -print0 | xargs -0 -n1 node --check && node --check build.js && node --check http.js",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "npm run check && changeset publish"
@@ -31,11 +33,18 @@
     "nativefragments",
     "create",
     "cloudflare-workers",
-    "zero-build"
+    "html-streaming"
   ],
   "license": "MIT",
   "devDependencies": {
     "@changesets/changelog-github": "^0.7.0",
     "@changesets/cli": "^2.31.0"
+  },
+  "exports": {
+    "./build": "./build.js",
+    "./http": "./http.js"
+  },
+  "dependencies": {
+    "esbuild": "^0.25.0"
   }
 }

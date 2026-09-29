@@ -23,9 +23,47 @@ test("HTML responses include default HTML, security, and Vary headers", async ()
   const response = await app.fetch(new Request("https://example.com/"), {}, {});
 
   assert.equal(response.status, 200);
-  assert.equal(response.headers.get("vary"), "x-fragment, x-fragment-slot");
+  assert.equal(
+    response.headers.get("vary"),
+    "x-fragment, x-fragment-slot, x-nativefragments-protocol",
+  );
   assert.equal(response.headers.get("content-type"), "text/html; charset=utf-8");
   assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+});
+
+test("shells may render asynchronously", async () => {
+  const app = createCloudflareHandler({
+    shell: async ({ body, meta }) => {
+      await Promise.resolve();
+      return html`<!doctype html><title>${meta.title}</title><main>${body}</main>`;
+    },
+    routes: [
+      route("/", {
+        meta: () => ({ title: "Async shell" }),
+        render: () => html`<p>Ready</p>`,
+      }),
+    ],
+  });
+  const response = await app.fetch(new Request("https://example.com/"), {}, {});
+  const body = await response.text();
+
+  assert.equal(response.status, 200);
+  assert.match(body, /<title>Async shell<\/title>/);
+  assert.match(body, /<main><p>Ready<\/p><\/main>/);
+});
+
+test("route Vary headers preserve framework representation fields", async () => {
+  for (const vary of ["Accept-Language, X-Fragment", "", "*"]) {
+    const app = createCloudflareHandler({
+      shell,
+      routes: [route("/", { headers: { vArY: vary }, render: () => html`Home` })],
+    });
+    for (const headers of [{}, { "x-fragment": "true", "x-nativefragments-protocol": "2" }]) {
+      const response = await app.fetch(new Request("https://example.com/", { headers }), {});
+      assert.equal(response.headers.get("vary"), vary === "*" ? "*" :
+        `x-fragment, x-fragment-slot, x-nativefragments-protocol${vary ? ", accept-language" : ""}`);
+    }
+  }
 });
 
 test("throwing render produces the error route and calls onError", async () => {
@@ -102,7 +140,7 @@ test("routes can return redirects from render", async () => {
   assert.equal(response.headers.get("location"), "/other");
 });
 
-test("fragment redirects render the target route and expose the final hash URL", async () => {
+test("legacy fragment redirects preserve native HTTP redirect semantics", async () => {
   const app = createCloudflareHandler({
     shell,
     routes: [
@@ -119,12 +157,12 @@ test("fragment redirects render the target route and expose the final hash URL",
   );
   const body = await response.text();
 
-  assert.equal(response.status, 200);
+  assert.equal(response.status, 302);
   assert.equal(
-    response.headers.get("x-nativefragments-url"),
-    "https://example.com/done#anchor",
+    response.headers.get("location"),
+    "/done#anchor",
   );
-  assert.match(body, /<h1 id="anchor">Done<\/h1>/);
+  assert.equal(body, "");
 });
 
 test("route status and headers land on rendered responses", async () => {

@@ -6,7 +6,7 @@ export function createApi(routes: ApiRoute[], { onError }?: {
         route?: ApiRoute;
     }) => void;
 }): {
-    fetch(request: Request, env?: Record<string, unknown>, context?: unknown): Promise<Response>;
+    fetch(request: Request, env?: Record<string, unknown>, context?: unknown, scope?: import("./context.js").RequestContext): Promise<Response>;
 };
 export type ApiContext = {
     /**
@@ -21,6 +21,10 @@ export type ApiContext = {
      * Runtime execution context.
      */
     context: unknown;
+    /**
+     * Application state prepared once per request.
+     */
+    locals: Record<string, unknown>;
     /**
      * Parsed request URL.
      */

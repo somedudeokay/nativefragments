@@ -4,7 +4,6 @@ export {
 } from "./api.js";
 export {
   attrs,
-  declarativeShadow,
   escapeHtml,
   html,
   jsonScript,
@@ -22,3 +21,10 @@ export {
   renderRoute,
   route,
 } from "./router.js";
+/** @typedef {import("./html.js").RawHtml} RawHtml */
+/** @typedef {import("./html.js").HtmlAttrs} HtmlAttrs */
+/** @typedef {import("./context.js").RequestContext} RequestContext */
+/** @typedef {import("./router.js").RouteContext} RouteContext */
+/** @typedef {import("./router.js").Route} Route */
+/** @typedef {import("./router.js").FragmentDefinition} FragmentDefinition */
+/** @typedef {import("./api.js").ApiContext} ApiContext */

@@ -44,14 +44,14 @@ export const siteFooter = () => html`<footer class="site-footer">
     <div class="footer-brand">
       <p class="footer-mark">Native Fragments</p>
       <p class="footer-line">
-        A zero-dependency web framework that streams server-rendered HTML from
-        the edge. This site is built with it.
+        Fast HTML applications on Cloudflare Workers. Streamed routes, native
+        navigation, and Lit where state belongs. This site is built with it.
       </p>
     </div>
     ${groups.map(footerGroup)}
   </div>
   <div class="footer-meta">
     <p>MIT licensed.</p>
-    <p>Runs on Cloudflare Workers. No build step was harmed — or used.</p>
+    <p>Runs on Cloudflare Workers. Built from standards-based ESM.</p>
   </div>
 </footer>`;

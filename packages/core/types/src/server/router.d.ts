@@ -7,23 +7,26 @@ export function createRoutes(routes: Route[]): {
     match(pathname: string): Route | null;
 };
 export function fragmentMeta(meta: RouteMeta): import("./html.js").RawHtml;
-export function renderRoute({ match, request, slot, deferredTimeout: fallbackDeferredTimeout, }: {
+export function renderRoute({ match, request, slot, scope, deferredTimeout: fallbackDeferredTimeout, }: {
     match: Route;
     request: Request;
     slot?: string | null;
     deferredTimeout?: number | null;
+    scope?: import("./context.js").RequestContext;
 }): Promise<{
     body: string;
     meta: Required<Pick<RouteMeta, "title" | "description" | "canonical">> & RouteMeta;
     deferred: unknown[];
     status: number;
     headers: Record<string, string>;
+    cancel: (reason?: unknown) => void;
 } | {
     response: Response;
 }>;
-export function runRouteAction({ match, request }: {
+export function runRouteAction({ match, request, scope }: {
     match: Route;
     request: Request;
+    scope?: import("./context.js").RequestContext;
 }): Promise<Response>;
 export function renderFragment({ body, meta }: {
     body: string;
@@ -51,6 +54,18 @@ export type RouteContext = {
      */
     signal: AbortSignal;
     /**
+     * Runtime bindings for this request.
+     */
+    env: Record<string, unknown>;
+    /**
+     * Runtime execution context.
+     */
+    context: unknown;
+    /**
+     * Application state prepared once per request.
+     */
+    locals: Record<string, unknown>;
+    /**
      * Parsed request URL.
      */
     url: URL;
@@ -65,7 +80,7 @@ export type RouteContext = {
     params: Record<string, string>;
     /**
      * Render a stable loading boundary and collect a named fragment for deferred
-     * document streaming.
+     * HTML streaming during document loads and browser fragment navigation.
      */
     defer: (fragment: FragmentDefinition | string, attributes?: import("./html.js").HtmlAttrs) => import("./html.js").RawHtml;
 };
@@ -105,12 +120,12 @@ export type FragmentDefinition = {
     render: FragmentRenderer;
     /**
      * Loading renderer used by
-     * deferred document streaming.
+     * deferred HTML streaming.
      */
     loading?: FragmentLoadingRenderer;
     /**
      * Error renderer used when a
-     * deferred fragment fails after the document response has started.
+     * deferred fragment fails after its HTML response has started.
      */
     error?: FragmentErrorRenderer;
     /**

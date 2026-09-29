@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   attrs,
-  declarativeShadow,
   html,
   jsonScript,
   raw,
@@ -54,18 +53,6 @@ test("jsonScript escapes script terminators", () => {
 
   assert.doesNotMatch(rendered, /<\/script><\/script>/);
   assert.match(rendered, /\\u003c\/script>/);
-});
-
-test("declarativeShadow escapes style terminators", () => {
-  const rendered = String(
-    declarativeShadow({
-      styles: ["x{color:red}</style><script>alert(1)</script>"],
-      html: "<span>ok</span>",
-    }),
-  );
-
-  assert.match(rendered, /<\\\/style><script>/);
-  assert.doesNotMatch(rendered, /<\/style><script>/);
 });
 
 test("attrs rejects unsafe attribute names", () => {

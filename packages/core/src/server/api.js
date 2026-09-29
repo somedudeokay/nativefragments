@@ -1,4 +1,5 @@
 import { createRoutes, route } from "./router.js";
+import { createRequestContext, reportError } from "./context.js";
 
 const defaultOnError = (event) =>
   console.error("Native Fragments API:", event.error);
@@ -15,6 +16,7 @@ const isResponse = (value) => value instanceof Response;
  * @property {Request} request Original request.
  * @property {Record<string, unknown>} env Runtime environment bindings.
  * @property {unknown} context Runtime execution context.
+ * @property {Record<string, unknown>} locals Application state prepared once per request.
  * @property {URL} url Parsed request URL.
  * @property {URLSearchParams} query Parsed query parameters from `url.searchParams`.
  * @property {Record<string, string>} params Path parameters captured from the API route.
@@ -89,14 +91,14 @@ const handlerForMethod = (routes, method) => {
  * @param {ApiRoute[]} routes API route definitions.
  * @param {{ onError?: (event: { error: unknown, request: Request, route?: ApiRoute }) => void }} [options={}]
  * API options.
- * @returns {{ fetch(request: Request, env?: Record<string, unknown>, context?: unknown): Promise<Response> }}
+ * @returns {{ fetch(request: Request, env?: Record<string, unknown>, context?: unknown, scope?: import("./context.js").RequestContext): Promise<Response> }}
  * Fetch-compatible API router.
  */
 export const createApi = (routes, { onError = defaultOnError } = {}) => {
   const manifest = createRoutes(groupedRoutes(routes));
 
   return {
-    async fetch(request, env = {}, context) {
+    async fetch(request, env = {}, context, scope = createRequestContext({ request, env, context })) {
       const url = new URL(request.url);
       const match = manifest.match(url.pathname);
 
@@ -117,8 +119,7 @@ export const createApi = (routes, { onError = defaultOnError } = {}) => {
 
       try {
         const result = await routeMatch.handler({
-          context,
-          env,
+          ...scope,
           params: match.params ?? {},
           query: url.searchParams,
           request,
@@ -127,7 +128,8 @@ export const createApi = (routes, { onError = defaultOnError } = {}) => {
         });
         return isResponse(result) ? result : Response.json(result);
       } catch (error) {
-        onError({ error, request, route: routeMatch });
+        if (isResponse(error)) return error;
+        reportError(onError, { error, request, route: routeMatch });
         return jsonError("Internal error", { status: 500 });
       }
     },

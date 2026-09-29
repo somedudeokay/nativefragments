@@ -1,0 +1,679 @@
+{
+  "recordedAt": "2026-09-29T10:05:24.671Z",
+  "core": "0.8.0",
+  "createApp": "0.7.0",
+  "lit": "0.1.1",
+  "checks": {
+    "frameworkNode": 71,
+    "workerdDisconnect": 1,
+    "frameworkBrowser": 33,
+    "packedInstall": "passed",
+    "strictConsumerTypes": "passed"
+  },
+  "evaluations": {
+    "coreStreaming": {
+      "startTime": "2026-09-29T09:57:01.633Z",
+      "duration": 21938.915,
+      "expected": 60,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "gallery": {
+      "startTime": "2026-09-29T09:56:52.349Z",
+      "duration": 52486.207,
+      "expected": 45,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "method": "Five repetitions per scenario in Chromium, Firefox and WebKit; deterministic museum fixtures, real renderers/streams/artificial latency. Timings describe these local runs, not production benchmarks.",
+  "galleryTimings": [
+    {
+      "browser": "chromium",
+      "documentReveals": [
+        {
+          "slot": "collection-stats",
+          "milliseconds": 263
+        },
+        {
+          "slot": "provenance-feed",
+          "milliseconds": 415
+        },
+        {
+          "slot": "featured-object",
+          "milliseconds": 665
+        },
+        {
+          "slot": "artworks",
+          "milliseconds": 1165
+        }
+      ],
+      "navigations": [
+        {
+          "streaming": true,
+          "milliseconds": 1159
+        },
+        {
+          "streaming": true,
+          "milliseconds": 1153
+        },
+        {
+          "streaming": false,
+          "milliseconds": 16
+        },
+        {
+          "streaming": false,
+          "milliseconds": 5
+        },
+        {
+          "streaming": false,
+          "milliseconds": 8
+        }
+      ]
+    },
+    {
+      "browser": "chromium",
+      "documentReveals": [
+        {
+          "slot": "collection-stats",
+          "milliseconds": 254
+        },
+        {
+          "slot": "provenance-feed",
+          "milliseconds": 406
+        },
+        {
+          "slot": "featured-object",
+          "milliseconds": 656
+        },
+        {
+          "slot": "artworks",
+          "milliseconds": 1156
+        }
+      ],
+      "navigations": [
+        {
+          "streaming": true,
+          "milliseconds": 1158
+        },
+        {
+          "streaming": true,
+          "milliseconds": 1153
+        },
+        {
+          "streaming": false,
+          "milliseconds": 17
+        },
+        {
+          "streaming": false,
+          "milliseconds": 12
+        },
+        {
+          "streaming": false,
+          "milliseconds": 15
+        }
+      ]
+    },
+    {
+      "browser": "chromium",
+      "documentReveals": [
+        {
+          "slot": "collection-stats",
+          "milliseconds": 253
+        },
+        {
+          "slot": "provenance-feed",
+          "milliseconds": 406
+        },
+        {
+          "slot": "featured-object",
+          "milliseconds": 655
+        },
+        {
+          "slot": "artworks",
+          "milliseconds": 1155
+        }
+      ],
+      "navigations": [
+        {
+          "streaming": true,
+          "milliseconds": 1159
+        },
+        {
+          "streaming": true,
+          "milliseconds": 1155
+        },
+        {
+          "streaming": false,
+          "milliseconds": 22
+        },
+        {
+          "streaming": false,
+          "milliseconds": 5
+        },
+        {
+          "streaming": false,
+          "milliseconds": 9
+        }
+      ]
+    },
+    {
+      "browser": "chromium",
+      "documentReveals": [
+        {
+          "slot": "collection-stats",
+          "milliseconds": 255
+        },
+        {
+          "slot": "provenance-feed",
+          "milliseconds": 405
+        },
+        {
+          "slot": "featured-object",
+          "milliseconds": 655
+        },
+        {
+          "slot": "artworks",
+          "milliseconds": 1156
+        }
+      ],
+      "navigations": [
+        {
+          "streaming": true,
+          "milliseconds": 1158
+        },
+        {
+          "streaming": true,
+          "milliseconds": 1154
+        },
+        {
+          "streaming": false,
+          "milliseconds": 12
+        },
+        {
+          "streaming": false,
+          "milliseconds": 16
+        },
+        {
+          "streaming": false,
+          "milliseconds": 3
+        }
+      ]
+    },
+    {
+      "browser": "chromium",
+      "documentReveals": [
+        {
+          "slot": "collection-stats",
+          "milliseconds": 257
+        },
+        {
+          "slot": "provenance-feed",
+          "milliseconds": 407
+        },
+        {
+          "slot": "featured-object",
+          "milliseconds": 656
+        },
+        {
+          "slot": "artworks",
+          "milliseconds": 1157
+        }
+      ],
+      "navigations": [
+        {
+          "streaming": true,
+          "milliseconds": 1160
+        },
+        {
+          "streaming": true,
+          "milliseconds": 1155
+        },
+        {
+          "streaming": false,
+          "milliseconds": 15
+        },
+        {
+          "streaming": false,
+          "milliseconds": 17
+        },
+        {
+          "streaming": false,
+          "milliseconds": 10
+        }
+      ]
+    },
+    {
+      "browser": "firefox",
+      "documentReveals": [
+        {
+          "slot": "collection-stats",
+          "milliseconds": 291
+        },
+        {
+          "slot": "provenance-feed",
+          "milliseconds": 456
+        },
+        {
+          "slot": "featured-object",
+          "milliseconds": 692
+        },
+        {
+          "slot": "artworks",
+          "milliseconds": 1173
+        }
+      ],
+      "navigations": [
+        {
+          "streaming": true,
+          "milliseconds": 1158
+        },
+        {
+          "streaming": true,
+          "milliseconds": 1156
+        },
+        {
+          "streaming": false,
+          "milliseconds": 3
+        },
+        {
+          "streaming": false,
+          "milliseconds": 46
+        },
+        {
+          "streaming": false,
+          "milliseconds": 39
+        }
+      ]
+    },
+    {
+      "browser": "firefox",
+      "documentReveals": [
+        {
+          "slot": "collection-stats",
+          "milliseconds": 316
+        },
+        {
+          "slot": "provenance-feed",
+          "milliseconds": 483
+        },
+        {
+          "slot": "featured-object",
+          "milliseconds": 721
+        },
+        {
+          "slot": "artworks",
+          "milliseconds": 1195
+        }
+      ],
+      "navigations": [
+        {
+          "streaming": true,
+          "milliseconds": 1163
+        },
+        {
+          "streaming": true,
+          "milliseconds": 1162
+        },
+        {
+          "streaming": false,
+          "milliseconds": 24
+        },
+        {
+          "streaming": false,
+          "milliseconds": 77
+        },
+        {
+          "streaming": false,
+          "milliseconds": 39
+        }
+      ]
+    },
+    {
+      "browser": "firefox",
+      "documentReveals": [
+        {
+          "slot": "collection-stats",
+          "milliseconds": 301
+        },
+        {
+          "slot": "provenance-feed",
+          "milliseconds": 439
+        },
+        {
+          "slot": "featured-object",
+          "milliseconds": 698
+        },
+        {
+          "slot": "artworks",
+          "milliseconds": 1165
+        }
+      ],
+      "navigations": [
+        {
+          "streaming": true,
+          "milliseconds": 1165
+        },
+        {
+          "streaming": true,
+          "milliseconds": 1156
+        },
+        {
+          "streaming": false,
+          "milliseconds": 18
+        },
+        {
+          "streaming": false,
+          "milliseconds": 2
+        },
+        {
+          "streaming": false,
+          "milliseconds": 17
+        }
+      ]
+    },
+    {
+      "browser": "firefox",
+      "documentReveals": [
+        {
+          "slot": "collection-stats",
+          "milliseconds": 286
+        },
+        {
+          "slot": "provenance-feed",
+          "milliseconds": 425
+        },
+        {
+          "slot": "featured-object",
+          "milliseconds": 686
+        },
+        {
+          "slot": "artworks",
+          "milliseconds": 1159
+        }
+      ],
+      "navigations": [
+        {
+          "streaming": true,
+          "milliseconds": 1158
+        },
+        {
+          "streaming": true,
+          "milliseconds": 1156
+        },
+        {
+          "streaming": false,
+          "milliseconds": 18
+        },
+        {
+          "streaming": false,
+          "milliseconds": 13
+        },
+        {
+          "streaming": false,
+          "milliseconds": 32
+        }
+      ]
+    },
+    {
+      "browser": "firefox",
+      "documentReveals": [
+        {
+          "slot": "collection-stats",
+          "milliseconds": 286
+        },
+        {
+          "slot": "provenance-feed",
+          "milliseconds": 434
+        },
+        {
+          "slot": "featured-object",
+          "milliseconds": 687
+        },
+        {
+          "slot": "artworks",
+          "milliseconds": 1162
+        }
+      ],
+      "navigations": [
+        {
+          "streaming": true,
+          "milliseconds": 1156
+        },
+        {
+          "streaming": true,
+          "milliseconds": 1155
+        },
+        {
+          "streaming": false,
+          "milliseconds": 16
+        },
+        {
+          "streaming": false,
+          "milliseconds": 13
+        },
+        {
+          "streaming": false,
+          "milliseconds": 54
+        }
+      ]
+    },
+    {
+      "browser": "webkit",
+      "documentReveals": [
+        {
+          "slot": "collection-stats",
+          "milliseconds": 256
+        },
+        {
+          "slot": "provenance-feed",
+          "milliseconds": 406
+        },
+        {
+          "slot": "featured-object",
+          "milliseconds": 655
+        },
+        {
+          "slot": "artworks",
+          "milliseconds": 1156
+        }
+      ],
+      "navigations": [
+        {
+          "streaming": true,
+          "milliseconds": 1158
+        },
+        {
+          "streaming": true,
+          "milliseconds": 1155
+        },
+        {
+          "streaming": false,
+          "milliseconds": 17
+        },
+        {
+          "streaming": false,
+          "milliseconds": 9
+        },
+        {
+          "streaming": false,
+          "milliseconds": 9
+        }
+      ]
+    },
+    {
+      "browser": "webkit",
+      "documentReveals": [
+        {
+          "slot": "collection-stats",
+          "milliseconds": 257
+        },
+        {
+          "slot": "provenance-feed",
+          "milliseconds": 406
+        },
+        {
+          "slot": "featured-object",
+          "milliseconds": 657
+        },
+        {
+          "slot": "artworks",
+          "milliseconds": 1156
+        }
+      ],
+      "navigations": [
+        {
+          "streaming": true,
+          "milliseconds": 1157
+        },
+        {
+          "streaming": true,
+          "milliseconds": 1154
+        },
+        {
+          "streaming": false,
+          "milliseconds": 16
+        },
+        {
+          "streaming": false,
+          "milliseconds": 16
+        },
+        {
+          "streaming": false,
+          "milliseconds": 12
+        }
+      ]
+    },
+    {
+      "browser": "webkit",
+      "documentReveals": [
+        {
+          "slot": "collection-stats",
+          "milliseconds": 254
+        },
+        {
+          "slot": "provenance-feed",
+          "milliseconds": 406
+        },
+        {
+          "slot": "featured-object",
+          "milliseconds": 656
+        },
+        {
+          "slot": "artworks",
+          "milliseconds": 1155
+        }
+      ],
+      "navigations": [
+        {
+          "streaming": true,
+          "milliseconds": 1155
+        },
+        {
+          "streaming": true,
+          "milliseconds": 1154
+        },
+        {
+          "streaming": false,
+          "milliseconds": 21
+        },
+        {
+          "streaming": false,
+          "milliseconds": 8
+        },
+        {
+          "streaming": false,
+          "milliseconds": 9
+        }
+      ]
+    },
+    {
+      "browser": "webkit",
+      "documentReveals": [
+        {
+          "slot": "collection-stats",
+          "milliseconds": 255
+        },
+        {
+          "slot": "provenance-feed",
+          "milliseconds": 407
+        },
+        {
+          "slot": "featured-object",
+          "milliseconds": 657
+        },
+        {
+          "slot": "artworks",
+          "milliseconds": 1156
+        }
+      ],
+      "navigations": [
+        {
+          "streaming": true,
+          "milliseconds": 1156
+        },
+        {
+          "streaming": true,
+          "milliseconds": 1157
+        },
+        {
+          "streaming": false,
+          "milliseconds": 26
+        },
+        {
+          "streaming": false,
+          "milliseconds": 8
+        },
+        {
+          "streaming": false,
+          "milliseconds": 9
+        }
+      ]
+    },
+    {
+      "browser": "webkit",
+      "documentReveals": [
+        {
+          "slot": "collection-stats",
+          "milliseconds": 255
+        },
+        {
+          "slot": "provenance-feed",
+          "milliseconds": 404
+        },
+        {
+          "slot": "featured-object",
+          "milliseconds": 655
+        },
+        {
+          "slot": "artworks",
+          "milliseconds": 1153
+        }
+      ],
+      "navigations": [
+        {
+          "streaming": true,
+          "milliseconds": 1161
+        },
+        {
+          "streaming": true,
+          "milliseconds": 1158
+        },
+        {
+          "streaming": false,
+          "milliseconds": 23
+        },
+        {
+          "streaming": false,
+          "milliseconds": 10
+        },
+        {
+          "streaming": false,
+          "milliseconds": 6
+        }
+      ]
+    }
+  ]
+}

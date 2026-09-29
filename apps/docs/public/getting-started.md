@@ -1,12 +1,8 @@
 # Getting Started
 
-Create and run a Native Fragments app on Cloudflare Workers. The scaffold ships routes, a shell, browser helpers, and a Shadow DOM component.
+Create a Native Fragments application with streamed routes, package-based browser imports, Lit SSR, and a local Cloudflare Worker.
 
-## Prerequisites
-
-Node.js and npm to develop; a Cloudflare account to deploy. The app runs on Wrangler — run `npx wrangler login` before your first deploy if this machine is not authenticated yet.
-
-## Create
+## Create and run
 
 ```shell
 npm create @nativefragments/app@latest my-app
@@ -15,44 +11,65 @@ npm install
 npm run dev
 ```
 
-`npm run dev` starts a local Worker and prints a URL — usually `http://localhost:8787`.
+The dev command builds the Worker and browser entry, starts `wrangler dev --live-reload`, and watches `site/` and `client/`. It is the Cloudflare runtime locally—not a second framework server.
 
 ## Project structure
 
 ```shell
-worker.js                  # Cloudflare entrypoint — createCloudflareHandler
-site/routes.js             # the route manifest
-site/api.js                # JSON endpoints (apiRoute + createApi)
-site/shell.js              # the full HTML document
-site/pages/home.js         # one renderer per route
-public/app/client.js       # installs fragment navigation
-public/app/components/     # Custom Elements
-public/nativefragments/    # browser helpers (router, component, worker)
+worker.js                     # Cloudflare entry
+site/routes.js                # route manifest
+site/shell.js                 # persistent document shell
+site/pages/                   # server HTML renderers
+client/index.js               # hydration + startRouter()
+client/components/            # Lit elements
+public/app/                   # CSS and static assets
+scripts/build-app.mjs         # small esbuild step
+wrangler.jsonc                # runtime, assets, build command
+.nativefragments/worker.js    # generated, ignored
+public/build/client.js        # generated, ignored
 ```
 
-One route, one renderer, one component file — the layout stays obvious. The scaffold wires `site/api.js` into the handler so an [/api](/concepts/api-routes) endpoint works out of the box.
-
-## Make your first change
-
-Open `site/pages/home.js`, change the heading, and reload. There is no bundler in the loop — the file you edited is the file the Worker runs, so the change is live as fast as Wrangler restarts.
+## Edit server HTML
 
 ```js
 // site/pages/home.js
-render: () => html`<h1>My first fragment</h1>`,
+import { html } from "@nativefragments/core/server";
+
+export const homePage = () => html`
+  <section>
+    <h1>My first HTML application</h1>
+    <a href="/about">About</a>
+  </section>
+`;
 ```
 
-## Deploy
+## Add a Lit element
 
-The Worker renders pages, fragments, and API routes at the edge.
+Define the element once in `client/components`, import it on the server, and pass a Lit template to `renderLit()`. The response contains hydratable Declarative Shadow DOM.
+
+```js
+import { renderLit } from "@nativefragments/lit/server";
+import { html } from "lit";
+import "../../client/components/app-counter.js";
+
+export const counter = () =>
+  renderLit(html`<app-counter count="0"></app-counter>`);
+```
+
+> **Why Lit Labs is isolated:** Lit SSR is mature in practice but still published under @lit-labs. Native Fragments pins that evolving surface inside @nativefragments/lit so applications only depend on renderLit() and the client hydration import.
+
+## Build and deploy
 
 ```shell
+npm run build
 npm run deploy
 ```
 
-## See also
+Deployment is intentionally a separate command. Nothing in the development or verification workflow publishes your application.
 
-- [Routing](/concepts/routing) — structure your URLs.
-- [Shell](/concepts/shell) — the document around every route.
-- [Fragments](/concepts/fragments) — fast partial navigation.
-- [API Routes](/concepts/api-routes) — the `site/api.js` the scaffold ships.
-- [Components](/concepts/components) — build UI with Shadow DOM.
+## Next
+
+- [Routing](/concepts/routing) — paths, metadata, and actions.
+- [Streaming](/concepts/streaming) — reveal slow regions independently.
+- [Fragments](/concepts/fragments) — browser navigation and named targets.
+- [Components](/concepts/components) — Lit SSR and hydration.

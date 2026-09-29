@@ -27,12 +27,6 @@ html\`<div>\${raw(userInput)}</div>\`   // bypasses escaping — trusted HTML on
 
 // false / null / undefined are dropped; true renders a boolean attribute.
 html\`<button \${attrs({ disabled: post.locked, "data-id": post.id })}>Edit</button>\`;`,
-  declarativeShadow: `import { declarativeShadow, html } from "@nativefragments/core/server";
-
-// Ship the shadow root in server HTML so the component never flashes unstyled.
-html\`<reading-progress>
-  \${declarativeShadow({ styles: [barCss], html: \`<div class="bar"></div>\` })}
-</reading-progress>\`;`,
   jsonScript: `import { html, jsonScript, raw } from "@nativefragments/core/server";
 
 // Safe to embed in an inline script — "<" is escaped.
@@ -62,42 +56,29 @@ import { routes } from "./site/routes.js";
 import { shell } from "./site/shell.js";
 
 export default createCloudflareHandler({ routes, shell });`,
-  installFragmentNavigation: `// app/client.js
-import { installFragmentNavigation } from "/nativefragments/router.js";
+  startRouter: `import { startRouter } from "@nativefragments/core/client/router.js";
 
-// Upgrade real links into fragment swaps; prefetch on hover/focus.
-const navigate = installFragmentNavigation({ prefetch: "intent" });`,
-  prefetchFragment: `import { prefetchFragment } from "/nativefragments/router.js";
+const router = startRouter({ prefetch: "intent" });
+await router.navigate("/blog/hello");
+router.invalidate("/blog/hello");`,
+  renderLit: `import { renderLit } from "@nativefragments/lit/server";
+import { html } from "lit";
+import "../../client/components/app-card.js";
 
-// Warm the cache so the next navigation swaps instantly.
-await prefetchFragment("/blog/hello");`,
-  sheet: `import { sheet } from "/nativefragments/component.js";
-
-// Build once at module scope and share across every instance.
-const styles = sheet(\`:host { display: block }\`);`,
-  shadow: `import { shadow, sheet } from "/nativefragments/component.js";
-
-const styles = sheet(\`button { font: inherit }\`);
-
-class ThemeToggle extends HTMLElement {
-  connectedCallback() {
-    // Reuses a server-rendered shadow root on first upgrade (no FOUC).
-    shadow(this, { styles: [styles], html: \`<button>Toggle</button>\` });
-  }
-}
-customElements.define("theme-toggle", ThemeToggle);`,
-  exposeWorker: `// public/app/search-worker.js
-import { exposeWorker } from "/nativefragments/worker.js";
+export const card = () =>
+  renderLit(html\`<app-card>Ready</app-card>\`);`,
+  exposeWorker: `// client/search-worker.js
+import { exposeWorker } from "@nativefragments/core/client/worker.js";
 
 exposeWorker({
   search: ({ rows, query }) =>
     rows.filter((row) => row.title.toLowerCase().includes(query.toLowerCase())),
 });`,
-  createWorkerClient: `import { createWorkerClient } from "/nativefragments/worker.js";
+  createWorkerClient: `import { createWorkerClient } from "@nativefragments/core/client/worker.js";
 
-const search = createWorkerClient("/app/search-worker.js");
+const search = createWorkerClient("/build/search-worker.js");
 const hits = await search.call("search", { rows, query: "native" });`,
-  transferResult: `import { exposeWorker, transferResult } from "/nativefragments/worker.js";
+  transferResult: `import { exposeWorker, transferResult } from "@nativefragments/core/client/worker.js";
 
 exposeWorker({
   // Move the buffer instead of copying it.
@@ -109,7 +90,6 @@ exposeWorker({
 const seeAlso = {
   html: [["Components", "/concepts/components"]],
   raw: [["Agent-Friendly Apps", "/concepts/agent-friendly"]],
-  declarativeShadow: [["Components", "/concepts/components"]],
   route: [["Routing", "/concepts/routing"]],
   createRoutes: [["Routing", "/concepts/routing"]],
   fragment: [["Fragments", "/concepts/fragments"]],
@@ -119,10 +99,8 @@ const seeAlso = {
     ["API Routes", "/concepts/api-routes"],
     ["Getting Started", "/getting-started"],
   ],
-  installFragmentNavigation: [["Fragments", "/concepts/fragments"]],
-  prefetchFragment: [["Fragments", "/concepts/fragments"]],
-  sheet: [["Components", "/concepts/components"]],
-  shadow: [["Components", "/concepts/components"]],
+  startRouter: [["Fragments", "/concepts/fragments"]],
+  renderLit: [["Lit Components", "/concepts/components"]],
   exposeWorker: [["Workers", "/concepts/workers"]],
   createWorkerClient: [["Workers", "/concepts/workers"]],
   workerClient: [["Workers", "/concepts/workers"]],
@@ -176,15 +154,15 @@ const symbolLink = (name, source) =>
 // One-line description per module, shown under each section heading.
 const moduleInfo = {
   "Server HTML":
-    "Tagged-template HTML rendering that escapes by default, with helpers for attributes, JSON, and declarative Shadow DOM.",
+    "Tagged-template HTML rendering that escapes by default, with helpers for attributes and embedded JSON.",
   "Server Routing":
     "Define routes, match requests, and render full pages or individual named fragments.",
   "Cloudflare Adapter":
     "Turn a route manifest into a Cloudflare Worker that serves pages, fragments, static assets, and API routes.",
   "Browser Router":
-    "Upgrade same-origin links into fragment navigations, with prefetching and metadata updates.",
-  "Shadow DOM Components":
-    "Attach scoped Shadow DOM and adopt constructable stylesheets inside Custom Elements.",
+    "Upgrade same-origin links into streamed fragment navigation with explicit control, caching, and lifecycle events.",
+  "Lit SSR":
+    "Render Lit templates and custom elements as hydratable server HTML.",
   "Web Workers":
     "A tiny RPC layer over Web Workers for moving expensive work off the main thread.",
 };
@@ -234,7 +212,7 @@ export const referencePage = () =>
     eyebrow: "Reference",
     title: "API Reference.",
     intro:
-      "Generated from JSDoc in @nativefragments/core. Each symbol links back to the concept guide that explains it.",
+      "Generated from JSDoc in @nativefragments/core and @nativefragments/lit. Each symbol links back to the concept guide that explains it.",
     body: html`${raw(
       `${apiSections
         .map(

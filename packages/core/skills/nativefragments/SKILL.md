@@ -1,252 +1,195 @@
 ---
 name: nativefragments
-description: Build and edit Native Fragments apps with zero dependencies, zero build, Cloudflare Workers, fragment navigation, API routes, forms, and Shadow DOM components.
+description: Build and edit fast, explicit HTML applications with Native Fragments, Lit, esbuild, and Cloudflare Workers.
 ---
 
-# Native Fragments Skill
+# Native Fragments
 
-Use this skill when creating or editing a Native Fragments app.
+Use Native Fragments for server-rendered HTML applications on Cloudflare
+Workers. Preserve these constraints:
 
-## Goals
+- HTML is useful in the first response.
+- Routes, anchors, and forms remain the canonical application interface.
+- Fragment navigation is progressive enhancement.
+- Lit custom elements own local interaction.
+- Keep Lit Labs imports behind `@nativefragments/lit`.
+- Use the scaffold's esbuild step to resolve package ESM; do not introduce a
+  framework compiler.
+- Never deploy unless the user explicitly asks.
 
-- Keep apps zero dependency and zero build unless the product explicitly earns
-  an exception.
-- Use native Fetch, Request, Response, URL, URLSearchParams, FormData, Custom
-  Elements, Shadow DOM, and History APIs.
-- Render real HTML on the server; enhance same-origin navigation with fragments.
-- Keep files obvious for agents: one route, one renderer, one API resource, one
-  component module.
-- Server-render initially visible custom elements with `declarativeShadow()`
-  and hydrate with `shadow()` on the client.
+## Project shape
 
-## Default Structure
-
-- `worker.js`: Cloudflare Worker entrypoint.
-- `site/routes.js`: explicit page route manifest.
-- `site/api.js`: exports `createApi([...])`.
-- `site/api/*.js`: optional resource route arrays for larger APIs.
-- `site/model.js`: pure URL/query/form parsing and domain helpers.
-- `site/pages/*.js`: route renderers.
-- `site/shell.js`: full document shell.
-- `public/nativefragments/*.js`: browser-loadable framework helpers.
-- `public/app/*.js`: app browser modules and custom elements.
-
-## HTML Safety
-
-`html` returns a trusted wrapper. Nested templates and arrays compose directly:
-
-```js
-const row = (item) => html`<li>${item.label}</li>`;
-html`<ul>${items.map(row)}</ul>`;
+```txt
+worker.js
+site/routes.js
+site/shell.js
+site/pages/
+client/index.js
+client/components/
+public/app/
+scripts/build-app.mjs
+wrangler.jsonc
 ```
 
-Never wrap a variable in `raw()` unless the value is framework-authored static
-markup. If you find yourself wrapping `html` output in `raw()`, the code is
-wrong.
+Generated files belong in `.nativefragments/` and `public/build/` and remain
+ignored.
 
-Correct `raw()` uses are external trusted strings: inline SVG constants,
-`jsonScript()` text, CSS text inside `<style>`, and syntax-highlighted HTML.
-
-## Route Pattern
-
-```js
-import { html, route } from "@nativefragments/core/server";
-
-route("/docs/:rest*", {
-  meta: ({ params }) => ({
-    title: params.rest || "Docs",
-    description: "Documentation",
-    canonical: "https://example.com/docs"
-  }),
-  render: ({ params, query }) => html`<h1>${params.rest || query.get("q")}</h1>`
-});
-```
-
-Exact static routes match first. Parameterized routes match in declaration
-order. A catch-all `:rest*` segment must be final.
-
-Use route `status` and `headers` for rendered HTML responses:
-
-```js
-route("/gone", {
-  status: 410,
-  headers: () => ({ "Cache-Control": "public, max-age=60" }),
-  render: () => html`<h1>Gone</h1>`
-});
-```
-
-Use `redirect(location, status)` or return/throw a native `Response` when a
-route owns the entire response.
-
-## Nested Fragment Pattern
-
-Use `fragment()` when a route contains a sub-region with its own links.
+## Server route
 
 ```js
 import { fragment, html, route } from "@nativefragments/core/server";
 
-const panel = fragment("settings-panel", settingsPanel);
+const details = fragment("details", {
+  loading: () => html`<p aria-live="polite">Loading…</p>`,
+  error: () => html`<p role="status">Unavailable.</p>`,
+  render: async ({ signal }) => detailsView(await loadDetails({ signal })),
+});
 
-route("/settings/:panel", {
-  render: (context) => html`<main>
-    <nav>
-      <a href="/settings/profile"${panel.prefetchAttrs("intent")}>Profile</a>
-    </nav>
-    <section${panel.attrs()}>${settingsPanel(context)}</section>
-  </main>`,
-  fragments: [panel]
+export const page = route("/items/:id", {
+  meta: ({ params }) => ({ title: `Item ${params.id}` }),
+  render: (context) => html`
+    <h1>Item ${context.params.id}</h1>
+    ${context.defer(details)}
+  `,
+  fragments: [details],
 });
 ```
 
-The link slot name, target slot name, and route fragment name must match. The
-full `render` output remains the no-JavaScript fallback.
+Interpolation through `html` is escaped. Use `raw()` only for trusted,
+validated markup.
 
-## API Routes
+Route `headers` override defaults except `Vary`, whose fields are combined with
+the framework's document, fragment-slot, and protocol selectors. Add application
+selectors such as `Accept-Language` there; `Vary: *` is also supported.
 
-Use `apiRoute()` and `createApi()` instead of hand-rolled pathname chains.
+## Shell and Worker
+
+The shell must interpolate `body` unmodified into `#content-slot`. It may be
+async. The Cloudflare adapter wraps the route manifest:
 
 ```js
-import { apiRoute, createApi } from "@nativefragments/core/server";
-
-export const api = createApi([
-  apiRoute("GET", "/api/todos", ({ query }) => listTodos(query.get("filter"))),
-  apiRoute("POST", "/api/todos", async ({ request }) =>
-    Response.json(await createTodo(await request.json()), { status: 201 }),
-  ),
-  apiRoute("DELETE", "/api/todos/:id", ({ params }) => removeTodo(params.id)),
-]);
+import { createCloudflareHandler } from "@nativefragments/core/cloudflare";
+export default createCloudflareHandler({ routes, shell, api });
 ```
 
-For complex APIs, each `site/api/<resource>.js` exports an array of
-`apiRoute()` entries:
+## Browser entry
 
 ```js
-// site/api/todos.js
-export const todoRoutes = [
-  apiRoute("GET", "/api/todos", listTodosHandler),
-  apiRoute("POST", "/api/todos", createTodoHandler),
-];
+import "@nativefragments/lit/client";
+import { startRouter } from "@nativefragments/core/client/router.js";
+import "./components/app-card.js";
 
-// site/api.js
-export const api = createApi([...todoRoutes]);
-```
-
-Handler context is `{ request, env, context, url, params, query, signal }`.
-Return a `Response` for full control; return any other value for `Response.json`.
-
-## Query Params
-
-Parse query state in pure model helpers, not inline in renderers.
-
-```js
-import { readSearch } from "@nativefragments/core/server";
-
-export const filtersFromSearch = (query) =>
-  readSearch(query, { filter: "all", sort: "newest" });
-```
-
-Renderers call the model helper:
-
-```js
-route("/todos", {
-  render: ({ query }) => todoPage(filtersFromSearch(query))
+const lifetime = new AbortController();
+export const router = startRouter({
+  prefetch: "intent",
+  signal: lifetime.signal,
 });
 ```
 
-## Mutations
-
-Use route `action()` for no-JavaScript POST-redirect-GET forms.
+Use returned capabilities rather than globals:
 
 ```js
-import { html, redirect, route } from "@nativefragments/core/server";
-
-route("/todos", {
-  action: async ({ request }) => {
-    const form = await request.formData();
-    await createTodo(form.get("title"));
-    return redirect("/todos", 303);
-  },
-  render: () => html`<form method="post"><input name="title" /></form>`
-});
+await router.navigate("/reports");
+await router.prefetch("/settings");
+router.invalidate("/reports");
 ```
 
-POST forms are never fragment-intercepted. They submit to the server, run
-`action()`, and return through a redirect.
+Invalidate affected URLs after client-side mutations. Pending requests cannot
+repopulate an invalidated cache entry. Cached HTML is shared across anchors,
+but each navigation keeps its own hash. Already-aborted navigation and prefetch
+signals reject before cached content is applied.
 
-After any request that mutates server state, call `clearFragmentCache()` before
-navigating.
+Listen for semantic DOM events when another component needs navigation state:
 
 ```js
-import { clearFragmentCache } from "/nativefragments/router.js";
-
-await fetch("/api/todos", { method: "POST", body: JSON.stringify(todo) });
-clearFragmentCache();
+document.addEventListener("nativefragments:navigation-complete", handler);
 ```
 
-Use `data-fragment-form` only for GET forms whose URL state should fragment
-navigate:
+## Named fragments
 
-```html
-<form action="/search" method="get" data-fragment-form>
-  <input name="q" />
-</form>
-```
-
-## Prefetch Pattern
-
-The router prefetches same-origin fragment links on hover/focus by default.
-Links can override the mode:
-
-```html
-<a href="/reports" data-fragment-prefetch="visible">Reports</a>
-<a href="/settings" data-fragment-prefetch="load">Settings</a>
-<a href="/logout" data-fragment-prefetch="none">Log out</a>
-```
-
-Use `data-nativefragments-reload` or `data-fragment-navigation="false"` for
-links that must use normal browser navigation.
-
-## Component Pattern
-
-For visible custom elements, share shadow CSS and HTML between server and
-client modules.
+Reuse a `fragment()` definition's attributes in both links and targets:
 
 ```js
-import { declarativeShadow, html } from "@nativefragments/core/server";
-
-export const appCard = (content) => html`<app-card>${declarativeShadow({
-  styles: [cardStyles],
-  html: html`<article>${content}</article>`
-})}</app-card>`;
+html`<a href="/settings/profile"${panel.prefetchAttrs("intent")}>Profile</a>
+<section${panel.attrs()}>${renderPanel()}</section>`;
 ```
 
-The browser component hydrates with `shadow()`. Do not send an empty
-above-the-fold custom element and fill it after module load.
+Different named targets can navigate concurrently. A later request supersedes
+an earlier request to the same target.
 
-## Worker Pattern
+## Lit components
 
-Use `/nativefragments/worker.js` for dedicated worker RPC.
+Application components import from `lit`:
 
 ```js
-import { exposeWorker } from "/nativefragments/worker.js";
+import { LitElement, css, html } from "lit";
 
-exposeWorker({
-  filter: ({ rows, query }) =>
-    rows.filter((row) => row.name.toLowerCase().includes(query.toLowerCase()))
-});
+class AppCard extends LitElement {
+  static styles = css`:host { display: block }`;
+  render() { return html`<slot></slot>`; }
+}
+customElements.define("app-card", AppCard);
 ```
+
+Server-render through the adapter:
 
 ```js
-import { createWorkerClient } from "/nativefragments/worker.js";
+import { renderLit } from "@nativefragments/lit/server";
+import { html } from "lit";
+import "../../client/components/app-card.js";
 
-const worker = createWorkerClient("/app/filter-worker.js");
-const rows = await worker.call("filter", { rows: allRows, query });
+export const card = () => renderLit(html`<app-card>Ready</app-card>`);
 ```
 
-Call `dispose()` when the owner tears down the client. Workers created by
-`createWorkerClient(url)` are terminated on dispose.
+## Forms and state
 
-## Testing Guidance
+- Opt GET forms into fragment navigation with `data-fragment-form`.
+- Keep POST forms native and handle them with a route `action()` followed by a
+  303 redirect.
+- After a client mutation, call `router.invalidate()` for affected HTML.
+- Local component state belongs in Lit. Durable state belongs in the URL,
+  browser storage, Worker bindings, or a database.
 
-Core uses `node --test` and `node --check`. App repos can add focused HTTP,
-component, and browser checks for navigation, layout, and real DOM behavior.
+## Web Workers
+
+Use package exports:
+
+```js
+import { exposeWorker } from "@nativefragments/core/client/worker.js";
+import { createWorkerClient } from "@nativefragments/core/client/worker.js";
+```
+
+Bundle dedicated browser workers to `public/build/`.
+
+## Verification
+
+Run the app's `npm run check` and tests. For navigation changes, verify in a
+real browser that:
+
+- direct refresh contains server HTML;
+- a link click sends protocol version 2;
+- the first streamed frame swaps immediately;
+- deferred regions reveal independently;
+- back/forward, focus, scroll, title, and canonical metadata work;
+- no JavaScript console errors or failed requests appear.
+
+## Request state and release guarantees
+
+Use adapter `prepare({request, env, context})` to return request-local state.
+Pages, actions, deferred fragments and array-based APIs receive `locals`, `env`,
+`context` and `signal`. Never put user state in module globals. Use private,
+no-store for authenticated responses and invalidate fragments after mutations.
+
+Protocol 2 follows redirect envelopes in the browser so Set-Cookie applies before
+the next render. Rebuild server and client together. Bound completed caches using
+cacheTtl, cacheMaxEntries and cacheMaxBytes. See ../../docs/migration-0.8.md for
+precise behavior and safe HTML/URL/JSON examples.
+
+Generated build URLs use revalidation, not immutable caching. Build apps through
+@nativefragments/create-app/build; declare browser worker entries explicitly in
+package.json.nativefragments.workers. Import @nativefragments/lit/client before
+registering Lit elements. Strict CSP must allow the response nonce in style-src
+as well as script-src for no-JavaScript streaming fallbacks.
+
+Before release run npm run verify from the framework root: Node/workerd tests,
+strict consumer types, three browser engines and clean packed scaffold installs.

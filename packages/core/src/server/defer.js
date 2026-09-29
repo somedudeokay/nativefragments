@@ -1,4 +1,5 @@
 import { attrs, html, raw } from "./html.js";
+import { createRequestContext } from "./context.js";
 
 const isFragmentDefinition = (value) =>
   Boolean(value && typeof value === "object" && value.name && value.render);
@@ -26,13 +27,13 @@ const deferredTagName = (value) => {
   return validTagName(tag) && !unsafeDeferredTags.has(tag) ? tag : "section";
 };
 
-const deferredId = (name, index) => {
+const deferredId = (name, index, scope) => {
   const slug = String(name)
     .toLowerCase()
     .replace(/[^a-z0-9_-]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-  return `nf-${slug || "fragment"}-${index}`;
+  return `nf-${slug || "fragment"}-${index}-${scope}`;
 };
 
 const defaultDeferredLoading = () => html`<div data-fragment-loading role="status">
@@ -194,7 +195,7 @@ const renderResolvedDeferredSlot = async (task) => {
  * Create the route context shared by renderers, actions, and deferred slots.
  *
  * @private
- * @param {{ deferred: unknown[], fallbackDeferredTimeout: number | null, match: import("./router.js").Route, request: Request }} options
+ * @param {{ deferred: unknown[], fallbackDeferredTimeout: number | null, match: import("./router.js").Route, request: Request, scope?: import("./context.js").RequestContext }} options
  * Context options.
  * @returns {import("./router.js").RouteContext} Route context.
  */
@@ -203,22 +204,19 @@ export const createRouteContext = ({
   fallbackDeferredTimeout,
   match,
   request,
+  scope = createRequestContext({ request }),
 }) => {
+  const renderId = crypto.randomUUID();
   const context = {
+    ...scope,
     params: match.params ?? {},
-    request,
-    signal: request.signal,
-    url: new URL(request.url),
-    get query() {
-      return this.url.searchParams;
-    },
     defer(fragmentOrName, attributes = {}) {
       const definition = resolveDeferredFragment(match, fragmentOrName);
       if (!definition) {
         throw new Error(`Unknown deferred fragment: ${String(fragmentOrName)}`);
       }
 
-      const id = deferredId(definition.name, deferred.length + 1);
+      const id = deferredId(definition.name, deferred.length + 1, renderId);
       const loading = String(renderLoading(definition, context));
       const task = createDeferredTask({
         attributes,
@@ -252,8 +250,21 @@ export const createRouteContext = ({
 /**
  * @private
  */
+export const warnForMissingDeferredSlots = (rendered) => {
+  for (const task of rendered.deferred ?? []) {
+    if (rendered.body.includes(task.placeholder)) continue;
+    console.warn(
+      `Native Fragments: the loading boundary for deferred fragment "${task.name}" was not found in the rendered body, so its resolved content was dropped. Interpolate the value returned by context.defer() into the render output unmodified.`,
+    );
+  }
+};
+
+/**
+ * @private
+ */
 export const inlineDeferredFragments = async (rendered) => {
   if (!rendered.deferred?.length) return rendered;
+  warnForMissingDeferredSlots(rendered);
   const replacements = await Promise.all(
     rendered.deferred.map(async (task) => [
       task,
@@ -263,12 +274,7 @@ export const inlineDeferredFragments = async (rendered) => {
   let body = rendered.body;
 
   for (const [task, resolved] of replacements) {
-    if (!body.includes(task.placeholder)) {
-      console.warn(
-        `Native Fragments: the loading boundary for deferred fragment "${task.name}" was not found in the rendered body, so its resolved content was dropped. Interpolate the value returned by context.defer() into the render output unmodified.`,
-      );
-      continue;
-    }
+    if (!body.includes(task.placeholder)) continue;
     body = body.split(task.placeholder).join(resolved);
   }
 
@@ -282,54 +288,61 @@ export const inlineDeferredFragments = async (rendered) => {
 /**
  * @private
  */
-export const renderDeferredFragment = async (task) => {
+export const renderDeferredFragment = async (task, { document = false } = {}) => {
   const resolved = await renderResolvedDeferredSlot(task);
 
   return html`<div hidden data-nativefragments-deferred-content="${task.id}" data-fragment-state="${resolved.state}">${raw(
     resolved.body,
-  )}</div>`;
+  )}</div><template data-nativefragments-deferred-complete="${task.id}"></template>${document ? html`<noscript><section data-fragment-fallback="${task.name}">${raw(resolved.body)}</section></noscript>` : ""}`;
 };
 
-/**
- * Single source of the deferred reveal logic. It streams inline (with the CSP
- * nonce) on every deferred document response, before any content chunk, so the
- * browser router does not need its own copy.
- *
- * @private
- */
-export const deferredFragmentBootstrap = ({ nonce } = {}) => html`<script${attrs({
+// Serialized as framework-authored script text. No application data is evaluated.
+const installDocumentReveals = () => {
+  const targets = new Map([...document.querySelectorAll("[data-nativefragments-deferred]")]
+    .map(target => [target.getAttribute("data-nativefragments-deferred"), target]));
+  const process = () => {
+    for (const marker of document.querySelectorAll("template[data-nativefragments-deferred-complete]")) {
+      if (!marker.isConnected) continue;
+      const id = marker.getAttribute("data-nativefragments-deferred-complete");
+      const source = marker.previousElementSibling;
+      if (!source?.isConnected || source.getAttribute("data-nativefragments-deferred-content") !== id) continue;
+      const target = targets.get(id);
+      if (target?.isConnected && target.getAttribute("data-nativefragments-deferred") === id) {
+        const content = document.createDocumentFragment();
+        while (source.firstChild) content.appendChild(source.firstChild);
+        target.replaceChildren(content);
+        const state = source.getAttribute("data-fragment-state") || "ready";
+        target.setAttribute("data-fragment-state", state);
+        target.removeAttribute("aria-busy");
+        target.dispatchEvent(new CustomEvent("nativefragments:fragment-reveal", {
+          bubbles: true, composed: true,
+          detail: { fragmentId: id, state, target, slot: target.getAttribute("data-fragment-slot"), url: new URL(location.href), streaming: true },
+        }));
+      }
+      source.remove();
+      marker.remove();
+      targets.delete(id);
+    }
+    if (document.querySelector("[data-nativefragments-stream-complete]")) finish();
+  };
+  const observer = new MutationObserver(process);
+  let finished = false;
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    observer.disconnect();
+    document.removeEventListener("DOMContentLoaded", loaded);
+    document.querySelector("[data-nativefragments-stream-complete]")?.remove();
+    document.dispatchEvent(new CustomEvent("nativefragments:document-stream-complete"));
+  };
+  const loaded = () => { process(); finish(); };
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+  document.addEventListener("DOMContentLoaded", loaded, { once: true });
+  process();
+};
+
+/** Install response-scoped reveals that wait for complete parser payloads. @private */
+export const deferredFragmentBootstrap = ({ nonce } = {}) => html`<noscript><style${attrs({ nonce })}>[data-nativefragments-deferred][data-fragment-state="loading"]{display:none}</style></noscript><script${attrs({
   nonce,
   "data-nativefragments-deferred-bootstrap": true,
-})}>
-(() => {
-  if (window.__nativeFragmentsDeferredFragments) return;
-  window.__nativeFragmentsDeferredFragments = true;
-
-  const escapeValue = (value) => String(value).replace(/["\\\\]/g, "\\\\$&");
-  const reveal = (node) => {
-    if (!(node instanceof Element)) return;
-    const id = node.getAttribute("data-nativefragments-deferred-content");
-    if (!id) return;
-    const target = document.querySelector('[data-nativefragments-deferred="' + escapeValue(id) + '"]');
-    if (!target) return;
-    const fragment = document.createDocumentFragment();
-    while (node.firstChild) fragment.appendChild(node.firstChild);
-    target.replaceChildren(fragment);
-    target.setAttribute("data-fragment-state", node.getAttribute("data-fragment-state") || "ready");
-    target.removeAttribute("aria-busy");
-    node.remove();
-  };
-
-  const process = (root) => {
-    reveal(root);
-    root.querySelectorAll?.("[data-nativefragments-deferred-content]").forEach(reveal);
-  };
-
-  document.querySelectorAll("[data-nativefragments-deferred-content]").forEach(reveal);
-  new MutationObserver((records) => {
-    for (const record of records) {
-      record.addedNodes.forEach(process);
-    }
-  }).observe(document.documentElement, { childList: true, subtree: true });
-})();
-</script>`;
+})}>(${raw(installDocumentReveals.toString())})();</script>`;

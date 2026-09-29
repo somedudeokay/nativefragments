@@ -2,8 +2,8 @@ const RAW = Symbol("nativefragments.raw");
 
 /**
  * @typedef {{ [RAW]: true, value: string, toString(): string }} RawHtml
- * Trusted HTML wrapper returned by {@link html}, {@link raw}, {@link attrs},
- * and {@link declarativeShadow}. Values with this marker bypass escaping when
+ * Trusted HTML wrapper returned by {@link html}, {@link raw}, and {@link attrs}.
+ * Values with this marker bypass escaping when
  * interpolated into {@link html}.
  */
 
@@ -55,8 +55,8 @@ const renderValue = (value) => {
  * Server-side HTML template tag with escaped interpolation by default.
  *
  * Arrays are flattened, `null`, `undefined`, and `false` become empty strings,
- * and trusted values returned by {@link html}, {@link raw}, {@link attrs}, or
- * {@link declarativeShadow} are inserted as HTML without being re-escaped.
+ * and trusted values returned by {@link html}, {@link raw}, or {@link attrs}
+ * are inserted as HTML without being re-escaped.
  *
  * @param {TemplateStringsArray} strings Template literal string parts.
  * @param {...unknown} values Interpolated values.
@@ -68,36 +68,6 @@ export const html = (strings, ...values) =>
       (output, string, index) => output + string + renderValue(values[index]),
       "",
     ),
-  );
-
-const escapeStyleText = (value) =>
-  String(value).replace(/<\/style/gi, "<\\/style");
-
-/**
- * @typedef {object} DeclarativeShadowOptions
- * @property {string[]} [styles=[]] CSS text rendered into `<style>` tags inside
- * the declarative shadow root.
- * @property {string} [html=""] Trusted shadow root HTML. Build dynamic HTML with
- * {@link html} before passing it here.
- */
-
-/**
- * Render a declarative Shadow DOM template for server-rendered components.
- *
- * Put this as the first child of a custom element to avoid a flash of unstyled
- * light DOM before the component module loads. Pair it with the browser
- * {@link shadow} helper, which preserves an existing declarative shadow root on
- * first upgrade and materializes declarative shadow templates inserted during
- * fragment navigation.
- *
- * @param {DeclarativeShadowOptions} [options={}] Shadow template options.
- * @returns {RawHtml} Trusted declarative shadow template.
- */
-export const declarativeShadow = ({ styles = [], html: shadowHtml = "" } = {}) =>
-  raw(
-    `<template shadowrootmode="open">${styles
-      .map((style) => `<style data-nativefragments-shadow>${escapeStyleText(style)}</style>`)
-      .join("")}${shadowHtml}</template>`,
   );
 
 /**

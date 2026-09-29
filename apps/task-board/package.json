@@ -1,0 +1,18 @@
+{
+  "name": "nativefragments-task-board",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node ../../scripts/build-app.mjs",
+    "dev": "wrangler dev --port 8922",
+    "deploy": "NODE_ENV=production wrangler deploy",
+    "check": "npm run build && node --check worker.js",
+    "test": "npm run build && node --test",
+    "db:local": "wrangler d1 migrations apply DB --local",
+    "db:remote": "wrangler d1 migrations apply DB --remote"
+  },
+  "dependencies": {
+    "@nativefragments/core": "*"
+  }
+}

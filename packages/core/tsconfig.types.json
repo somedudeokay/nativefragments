@@ -12,5 +12,5 @@
     "strict": false,
     "target": "ES2022"
   },
-  "include": ["src/**/*.js", "public/nativefragments/**/*.js"]
+  "include": ["src/**/*.js", "client/**/*.js"]
 }

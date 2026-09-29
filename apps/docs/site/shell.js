@@ -1,7 +1,10 @@
 import { attrs, html, raw } from "@nativefragments/core/server";
+import { renderLit } from "@nativefragments/lit/server";
+import { html as lit } from "lit";
 import { criticalStyles } from "./critical-styles.js";
 import { siteHeader } from "./header.js";
 import { navGroups } from "./nav.js";
+import "../client/components/docs-search.js";
 
 const renderNav = (pathname) => html`${navGroups.map(
   (group) => html`<section>
@@ -16,7 +19,7 @@ const renderNav = (pathname) => html`${navGroups.map(
       </section>`,
 )}`;
 
-export const shell = ({ body, meta, nonce }) => {
+export const shell = async ({ body, meta, nonce }) => {
   const pathname = meta.canonical?.startsWith("http")
     ? new URL(meta.canonical).pathname
     : (meta.canonical ?? "/");
@@ -41,7 +44,7 @@ export const shell = ({ body, meta, nonce }) => {
     <link rel="preload" href="/fonts/space-grotesk-700.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/jetbrains-mono-500.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="/app/styles.css" />
-    <script${attrs({ nonce })} type="module" src="/app/client.js"></script>
+    <script${attrs({ nonce })} type="module" src="/build/client.js"></script>
   </head>
   <body>
     <p class="agent-index">
@@ -49,7 +52,7 @@ export const shell = ({ body, meta, nonce }) => {
       curated documentation index, then use same-host Markdown pages when
       available.
     </p>
-    ${siteHeader()}
+    ${await siteHeader()}
     <div class="layout">
       <aside class="sidebar" id="docs-sidebar">
         <button type="button" class="search-trigger" data-search-trigger aria-label="Search documentation">
@@ -82,7 +85,7 @@ export const shell = ({ body, meta, nonce }) => {
         </span>
       </button>
     </nav>
-    <docs-search></docs-search>
+    ${await renderLit(lit`<docs-search></docs-search>`)}
   </body>
 </html>`;
 };

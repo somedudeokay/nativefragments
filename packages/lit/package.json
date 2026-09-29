@@ -1,0 +1,49 @@
+{
+  "name": "@nativefragments/lit",
+  "version": "0.1.1",
+  "description": "Lit server rendering and hydration for Native Fragments applications.",
+  "type": "module",
+  "exports": {
+    "./server": {
+      "types": "./types/server.d.ts",
+      "default": "./server.js"
+    },
+    "./client": {
+      "types": "./types/client.d.ts",
+      "default": "./client.js"
+    }
+  },
+  "files": [
+    "client.js",
+    "server.js",
+    "types",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "peerDependencies": {
+    "@nativefragments/core": ">=0.8.0",
+    "lit": "3.3.3"
+  },
+  "dependencies": {
+    "@lit-labs/ssr": "4.1.0",
+    "@lit-labs/ssr-client": "1.1.8"
+  },
+  "devDependencies": {
+    "@nativefragments/core": "^0.8.0",
+    "lit": "3.3.3"
+  },
+  "scripts": {
+    "check": "node --check client.js && node --check server.js",
+    "test": "node --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/somedudeokay/nativefragments.git",
+    "directory": "packages/lit"
+  },
+  "homepage": "https://nativefragments.org",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT"
+}

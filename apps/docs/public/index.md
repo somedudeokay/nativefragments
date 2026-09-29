@@ -1,36 +1,28 @@
-# Native Fragments
+# Fast applications. Explicit HTML.
 
-A zero-dependency, zero-build framework for server-rendered HTML with fragment navigation and Shadow DOM components, deployed to Cloudflare Workers — readable by humans and AI agents.
+Native Fragments is a small HTML application framework for Cloudflare Workers. Routes stream server-rendered HTML, the browser router upgrades native links and forms, and Lit powers interactive islands.
 
-## What you get
+## The architecture
 
-- **Real HTML, real links** — every route is a server-rendered `GET` URL.
-- **No build step** — ship ES modules and Custom Elements straight to the browser.
-- **HTML streaming** — defer slow fragments and stream them in as their data resolves, out of order.
-- **Fragment navigation** — swap a page region without reloading the document.
-- **Scoped components** — Shadow DOM with no global-CSS leakage.
-- **Edge-native** — pages, fragments, and API routes run on Cloudflare Workers.
+- **Core** — escaped HTML, route manifests, actions, fragments, streaming, and the browser router.
+- **Lit adapter** — server-renders Lit elements and installs Lit hydration support in the browser.
+- **Build** — esbuild resolves package imports and bundles two standards-based ESM entry points.
+- **Runtime** — one Cloudflare Worker serves documents, fragments, API routes, and static assets.
 
-## A 30-second example
+> **Design rule:** HTML is the application interface. JavaScript upgrades navigation and local interaction; it does not reconstruct the page before users can read it.
 
-A route maps a URL to HTML; the Cloudflare adapter serves it. That is a complete app.
+## A minimal route
 
 ```js
 // site/routes.js
 import { html, route } from "@nativefragments/core/server";
 
 export const routes = [
-  route("/", { render: () => html`<h1>Hello</h1>` }),
+  route("/", {
+    meta: () => ({ title: "Home" }),
+    render: () => html`<h1>Hello from the edge</h1>`,
+  }),
 ];
-
-// site/shell.js
-import { html } from "@nativefragments/core/server";
-
-export const shell = ({ body, meta }) => html`<!doctype html>
-<html lang="en">
-  <head><title>${meta.title}</title></head>
-  <body><main id="content-slot">${body}</main></body>
-</html>`;
 
 // worker.js
 import { createCloudflareHandler } from "@nativefragments/core/cloudflare";
@@ -40,15 +32,25 @@ import { shell } from "./site/shell.js";
 export default createCloudflareHandler({ routes, shell });
 ```
 
-Uses [route](/reference#route), [html](/reference#html), and [createCloudflareHandler](/reference#createCloudflareHandler). The [shell](/concepts/shell) interpolates the route body as `${body}` and wraps it in a full document; `#content-slot` is where fragment navigation swaps content later.
+## The browser entry
 
-## How it fits together
+```js
+// client/index.js
+import "@nativefragments/lit/client";
+import { startRouter } from "@nativefragments/core/client/router.js";
 
-The server renders HTML and streams it from the edge — slow data regions arrive as deferred fragments without blocking the page. Links swap fragments into a slot without a full reload. Interactive pieces are Custom Elements with Shadow DOM. Nothing in that chain needs a bundler or a client framework runtime, so the source an agent writes is the code the browser runs.
+startRouter({ prefetch: "intent" });
+```
 
-## See also
+The adapter import enables Lit hydration. `startRouter()` upgrades same-origin anchors and opted-in GET forms while preserving their native behavior when JavaScript is unavailable.
 
-- [Getting Started](/getting-started) — scaffold and run an app.
-- [Routing](/concepts/routing) — define routes and metadata.
-- [Streaming](/concepts/streaming) — defer slow fragments, stream them out of order.
-- [Agent-Friendly Apps](/concepts/agent-friendly) — why the output is easy for agents.
+## What the build does
+
+Native Fragments does not have a compiler. The scaffold uses esbuild to resolve bare package imports and create browser and Worker bundles, then Wrangler runs or deploys them. Application source remains ordinary ESM, Lit, Web Components, and Web APIs.
+
+## Continue
+
+- [Getting Started](/getting-started) — scaffold and run locally.
+- [Fragments](/concepts/fragments) — streamed partial navigation.
+- [Lit Components](/concepts/components) — SSR and hydration.
+- [API Reference](/reference) — generated from current source.

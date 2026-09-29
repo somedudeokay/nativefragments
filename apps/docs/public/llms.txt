@@ -1,7 +1,7 @@
 # Native Fragments Docs
 
-> Native Fragments is a zero-dependency, zero-build frontend framework for
-> agents building AI-friendly web applications.
+> Native Fragments is a framework for fast, explicit HTML applications on
+> Cloudflare Workers: streamed routes, native navigation, and Lit islands.
 
 ## Start
 
@@ -16,15 +16,14 @@
 - [Shell](https://docs.nativefragments.org/shell.md)
 - [Fragments](https://docs.nativefragments.org/fragments.md)
 - [Streaming](https://docs.nativefragments.org/streaming.md)
-- [Components](https://docs.nativefragments.org/components.md)
+- [Lit Components](https://docs.nativefragments.org/components.md)
 - [API Routes](https://docs.nativefragments.org/api-routes.md)
-- [Workers](https://docs.nativefragments.org/workers.md)
-- [Signals](https://docs.nativefragments.org/signals.md)
+- [Web Workers](https://docs.nativefragments.org/workers.md)
 - [Agent-Friendly Applications](https://docs.nativefragments.org/agent-friendly.md)
 
-## Complete Context
+## Packages and source
 
-- [llms-full.txt](https://docs.nativefragments.org/llms-full.txt)
 - [Core npm package](https://www.npmjs.com/package/@nativefragments/core)
-- [Signals npm package](https://www.npmjs.com/package/@nativefragments/signals)
-- [Core GitHub repo](https://github.com/somedudeokay/nativefragments)
+- [Lit adapter npm package](https://www.npmjs.com/package/@nativefragments/lit)
+- [GitHub](https://github.com/somedudeokay/nativefragments)
+- [Complete context](https://docs.nativefragments.org/llms-full.txt)

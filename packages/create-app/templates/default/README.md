@@ -1,26 +1,22 @@
 # __APP_NAME__
 
-A zero-build Native Fragments app.
+A Native Fragments HTML application on Cloudflare Workers.
 
 ```sh
 npm install
 npm run dev
 ```
 
-Deploy with:
+The starter includes:
+
+- Streamed server rendering and fragment navigation.
+- Native links, GET filters, and POST-redirect-GET actions.
+- Lit server rendering and browser hydration.
+- Package-based ESM imports bundled with esbuild.
+- Wrangler for the local Cloudflare runtime and deployment.
+
+Nothing is published by `npm run dev` or `npm run build`. Deploy explicitly:
 
 ```sh
 npm run deploy
 ```
-
-The starter includes:
-
-- Cloudflare Worker rendering through `@nativefragments/core`.
-- Built-in `apiRoute()`/`createApi()` mounted under `/api/*`.
-- Route query state read with `readSearch(query, defaults)`.
-- Fragment navigation with route-level and nested slot demos.
-- A persistent shell header that is not replaced during navigation.
-- Server-rendered Shadow DOM components with no refresh FOUC.
-- Shared state in `/nativefragments/signals.js`.
-- LocalStorage and cookie-backed counter state for refresh-safe SSR.
-- Worker RPC helpers in `/nativefragments/worker.js`.

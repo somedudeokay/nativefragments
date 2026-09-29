@@ -4,11 +4,19 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "npx wrangler dev",
-    "deploy": "npx wrangler deploy",
-    "check": "node --check worker.js && find site public/app public/nativefragments -name '*.js' -print0 | xargs -0 -n1 node --check"
+    "build": "node scripts/build-app.mjs",
+    "dev": "wrangler dev --live-reload",
+    "deploy": "NODE_ENV=production wrangler deploy",
+    "check": "npm run build && node --check worker.js && find site client -name '*.js' -print0 | xargs -0 -n1 node --check"
   },
   "dependencies": {
-    "@nativefragments/core": "^0.6.0"
+    "@nativefragments/core": "^0.8.0",
+    "@nativefragments/lit": "^0.1.1",
+    "lit": "3.3.3"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "wrangler": "^4.143.0",
+    "@nativefragments/create-app": "^0.7.0"
   }
 }

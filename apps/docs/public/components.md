@@ -1,74 +1,72 @@
-# Components
+# Lit Components
 
-A component is a Custom Element that renders into a Shadow DOM. Styles stay scoped to the element, and you can ship the shadow root in server HTML so it never flashes unstyled.
+Interactive regions are ordinary Lit custom elements. @nativefragments/lit renders them on the server and installs Lit's hydration support in the browser.
 
-Native Fragments adds two browser helpers — [shadow](/reference#shadow) and [sheet](/reference#sheet) — plus the server helper [declarativeShadow](/reference#declarativeShadow). Everything else is the platform: `customElements.define`, `HTMLElement`, and adopted stylesheets.
-
-## A minimal component
-
-Define a Custom Element and call [shadow](/reference#shadow) in `connectedCallback`. It attaches an open shadow root, adopts your stylesheets, and sets the inner HTML.
+## Define an element
 
 ```js
-// public/app/components/reading-progress.js
-import { shadow, sheet } from "/nativefragments/component.js";
+// client/components/app-counter.js
+import { LitElement, css, html } from "lit";
 
-const styles = sheet(`
-  :host { display: block; height: 3px; background: #eee; }
-  .bar { height: 100%; width: var(--progress, 0%); background: #1ed760; }
-`);
+export class AppCounter extends LitElement {
+  static properties = { count: { type: Number } };
+  static styles = css`
+    :host { display: block }
+    button { font: inherit }
+  `;
 
-class ReadingProgress extends HTMLElement {
-  connectedCallback() {
-    // Scoped CSS + markup, isolated from the page.
-    shadow(this, { styles: [styles], html: `<div class="bar"></div>` });
+  constructor() {
+    super();
+    this.count = 0;
+  }
+
+  render() {
+    return html`
+      <output>${this.count}</output>
+      <button @click=${() => this.count += 1}>Increment</button>
+    `;
   }
 }
 
-customElements.define("reading-progress", ReadingProgress);
+customElements.define("app-counter", AppCounter);
 ```
 
-Use it like any element: `<reading-progress></reading-progress>`. The `.bar` class can never collide with page CSS.
-
-## Sharing styles with sheet()
-
-[sheet](/reference#sheet) builds a `CSSStyleSheet` once and returns it. Create it at module scope so every instance adopts the _same_ stylesheet object instead of re-parsing CSS per element.
+## Render it on the Worker
 
 ```js
-// One stylesheet, shared by every <reading-progress> on the page.
-const styles = sheet(`:host { display: block }`);
+// site/pages/counter.js
+import { renderLit } from "@nativefragments/lit/server";
+import { html } from "lit";
+import "../../client/components/app-counter.js";
+
+export const counterPage = () =>
+  renderLit(html`<app-counter count="4"></app-counter>`);
 ```
 
-## Server-rendered components
+[renderLit](/reference#renderLit) returns trusted server HTML containing Lit hydration markers and Declarative Shadow DOM. Route and shell renderers may therefore be asynchronous.
 
-Render the shadow root on the server with [declarativeShadow](/reference#declarativeShadow). It emits a `<template shadowrootmode="open">` the browser upgrades before your module loads, so there is no flash of unstyled content.
+## Hydrate in the browser
 
 ```js
-// site/pages/article.js — on the server
-import { declarativeShadow, html } from "@nativefragments/core/server";
-
-export const article = () => html`<reading-progress>
-  ${declarativeShadow({
-    styles: [`:host { display: block } .bar { background: #1ed760 }`],
-    html: `<div class="bar"></div>`,
-  })}
-</reading-progress>`;
+// client/index.js
+import "@nativefragments/lit/client";
+import "./components/app-counter.js";
 ```
 
-Pair it with the same [shadow](/reference#shadow) call on the client. On first upgrade `shadow` preserves the server-rendered root instead of replacing it.
+Import hydration support before the element definitions. Lit attaches event listeners to the server-rendered tree instead of replacing the first paint.
 
-> **Good to know:** shadow() also materializes declarative shadow templates that arrive during a fragment swap, so server-rendered components keep working after client navigation.
+> **Adapter boundary:** Application components import from lit. Only server integration imports @nativefragments/lit/server. This keeps @lit-labs/ssr and its DOM shim out of core and behind a small replaceable contract.
 
-## Hydration across fragment navigation
+## State belongs to the element
 
-Fragment responses are inserted as HTML, which does not activate declarative shadow templates on its own. [shadow](/reference#shadow) handles this for you: with `hydrate` left on (the default), it adopts the existing root the first time the element upgrades and only writes `html` when there is nothing to preserve.
+Use Lit properties and normal JavaScript state for local interaction. Put durable state in your Worker, database, URL, or browser storage as appropriate. Native Fragments no longer ships a second reactive-state abstraction beside Lit.
 
-```js
-shadow(this, { styles: [styles], html: markup });        // hydrate: true (default)
-shadow(this, { styles: [styles], html: markup, hydrate: false }); // always overwrite
-```
+## Fragment navigation
+
+Lit elements can arrive in any streamed fragment frame. Once inserted, the browser upgrades and hydrates them through the same registered custom element definition. Persistent elements outside the navigation target remain mounted.
 
 ## See also
 
-- [Fragments](/concepts/fragments) — how components survive partial navigation.
-- [Signals](/concepts/signals) — add local reactive state inside a component.
-- [Reference: shadow](/reference#shadow), [sheet](/reference#sheet), [declarativeShadow](/reference#declarativeShadow).
+- [Fragments](/concepts/fragments) — target and swap regions.
+- [Streaming](/concepts/streaming) — components arriving in deferred frames.
+- [Reference: renderLit](/reference#renderLit).

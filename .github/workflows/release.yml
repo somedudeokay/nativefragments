@@ -32,6 +32,20 @@ jobs:
       - name: Check
         run: npm run check
 
+      - name: Test
+        run: npm test
+
+      - run: npm run test:runtime
+      - run: npm run test:types
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run test:browser
+      - run: npm run test:packed
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-results
+          path: test-results/
+
       - name: Create release pull request or publish
         id: changesets
         uses: changesets/action@v1

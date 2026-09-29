@@ -102,24 +102,53 @@ export const shell = ({ body, meta, nonce }) => {
         warning is logged, so streaming never fails silently.
       </p>
 
-      <h2>Fragment navigation is buffered</h2>
+      <h2>Fragment navigation streams too</h2>
       <p>
         Client-side navigation requests (the <code>x-fragment: true</code> path)
-        resolve all deferred work on the server and return completed HTML in
-        one response. The deferred renderers still run in parallel; only the
-        swap waits, because replacing a fragment slot is atomic. Direct visits
-        and reloads stream; in-app navigation arrives complete.
+        use the same deferred work. The browser router replaces the target with
+        the route body and its loading boundaries as soon as the first HTML
+        frame arrives, then reveals each completed fragment from later frames
+        on that same response. The shell stays mounted, links and history keep
+        their normal fragment-navigation behavior, and one slow region does not
+        hold the rest of the navigation hostage.
+      </p>
+      <p>
+        Streaming is negotiated with
+        <code>X-NativeFragments-Protocol: 2</code>. Compatible responses echo
+        the version and include a private frame token. Requests without a
+        supported version receive completed buffered HTML. This makes stale
+        browser tabs safe across protocol changes.
+      </p>
+      <p>
+        Prefetching still ends in completed HTML in the fragment cache. If a
+        prefetched route has finished before it is opened, navigation applies
+        it immediately; otherwise a user-initiated request streams normally.
       </p>
 
       <h2>Crawlers and SEO</h2>
       <p>
+        Reveals wait for the payload's closing tag and completion sentinel.
+        Response-scoped IDs and targets prevent old streams from changing a new
+        route. Both documents and navigation emit
+        <code>nativefragments:fragment-reveal</code>; use these events for timing,
+        including cached replay. Cancelling a body aborts deferred context signals.
+      </p>
+      <p>
+        With JavaScript disabled, resolved sections appear after the initial route
+        body through noscript fallbacks. A nonce-bearing style hides placeholders;
+        strict CSP must allow the nonce in both style-src and script-src. Router
+        parsing materializes declarative shadow roots before connecting custom
+        elements, preserving the original Lit SSR nodes during hydration.
+      </p>
+      <p>
         Streamed fragments arrive as real, parseable HTML in the same response
         the crawler fetched — not inert templates and not client-side fetches.
         Stream <em>order</em> is invisible to anything that reads the final
-        document; a single delegated script (carrying the adapter's CSP nonce)
-        moves each fragment into its boundary for visual placement. Crawlability
-        is determined by what is in the response, and the full content is in
-        the response.
+        document. On document loads, a single delegated script (carrying the
+        adapter's CSP nonce) moves each fragment into its boundary. During
+        client-side navigation, the browser router performs the same reveal as
+        HTML frames arrive. Crawlability is determined by what is in the
+        response, and the full content is in the response.
       </p>
 
       ${callout(

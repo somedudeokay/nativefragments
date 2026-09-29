@@ -23,7 +23,7 @@ const copyTemplate = async (source, destination, replacements) => {
     for (const entry of entries) {
       await copyTemplate(
         path.join(source, entry),
-        path.join(destination, entry),
+        path.join(destination, entry === "_gitignore" ? ".gitignore" : entry),
         replacements,
       );
     }

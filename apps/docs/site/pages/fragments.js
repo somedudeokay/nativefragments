@@ -4,157 +4,125 @@ import { callout, code, docPage } from "./blocks.js";
 export const fragmentsPage = () =>
   docPage({
     eyebrow: "Concepts",
-    title: "Fragments",
+    title: "Fragment Navigation",
     intro:
-      "A normal request returns a full HTML document. A fragment request returns only a region of the page plus its metadata, so navigation swaps content without reloading the document.",
+      "The router upgrades native links into streamed HTML navigation. It returns explicit navigate, prefetch, and invalidate capabilities and can be torn down with an AbortSignal.",
     body: html`
-      <h2>The navigation model</h2>
-      <p>
-        A link click is fetched with an <code>x-fragment: true</code> header. The
-        server runs the <em>same</em> route, returns just the body and metadata,
-        and the browser swaps it into the content slot and updates the document
-        head. The same route still serves a full page for a direct visit.
-      </p>
+      <h2>Start once</h2>
+      ${code(`// client/index.js
+import "@nativefragments/lit/client";
+import { startRouter } from "@nativefragments/core/client/router.js";
 
-      <h2>Installing navigation</h2>
-      <p>
-        Call <a href="/reference#installFragmentNavigation"><code>installFragmentNavigation</code></a>
-        once after the shell loads. It upgrades real links into fragment swaps.
-      </p>
-      ${code(`// public/app/client.js
-import { installFragmentNavigation } from "/nativefragments/router.js";
-
-installFragmentNavigation({
-  prefetch: "intent", // warm the cache on hover/focus (the default)
-  afterNavigate({ meta, url }) {
-    console.log(meta.title, url.pathname);
-  },
+const lifetime = new AbortController();
+export const router = startRouter({
+  target: "#content-slot",
+  prefetch: "intent",
+  viewTransitions: true,
+  signal: lifetime.signal,
 });`)}
-
-      <h2>Opting out</h2>
       <p>
-        External links, document-like URLs such as <code>/agents.txt</code>,
-        modified clicks, and links marked
-        <code>data-nativefragments-reload</code> or
-        <code>data-fragment-navigation="false"</code> use normal browser
-        navigation.
+        There is one active router per document. Aborting the lifetime signal
+        removes listeners, disconnects observers, cancels in-flight requests,
+        and permits another router to start.
       </p>
-      ${code(`<a href="/agents.txt" data-nativefragments-reload>Agent guide</a>
-<a href="/account/export" data-fragment-navigation="false">Export data</a>`, "js")}
 
-      <h2>Nested fragments</h2>
+      <h2>Native links are the baseline</h2>
+      ${code(`<a href="/reports">Reports</a>
+<a href="/settings" data-fragment-prefetch="visible">Settings</a>
+<a href="/export.csv" data-nativefragments-reload>Export</a>`, "js")}
       <p>
-        To update one region instead of the whole body, define a named
-        <a href="/reference#fragment"><code>fragment</code></a> on the route and
-        mark the link and target with the same slot. The link sends
-        <code>x-fragment-slot</code>; only the matching container is replaced.
+        Same-origin application links are upgraded. External URLs, downloads,
+        modified clicks, document-like assets, explicit reload links, and opted
+        out links retain browser navigation.
       </p>
-      ${code(`<a href="/settings/profile"
-   data-fragment-slot="settings-panel"
-   data-fragment-prefetch="intent">Profile</a>
 
-<section data-fragment-slot="settings-panel">…</section>`, "js")}
-
-      <h2>Prefetch modes</h2>
+      <h2>Named targets</h2>
       <p>
-        Prefetching warms the fragment cache so the swap is instant. Set a
-        default in <code>installFragmentNavigation</code>, or per link with
-        <code>data-fragment-prefetch</code>.
+        Use a named fragment when one route owns a smaller independently
+        navigable region. The server and HTML share the same slot name.
       </p>
-      ${code(`<a href="/reports" data-fragment-prefetch="visible">Reports</a> <!-- when scrolled into view -->
-<a href="/settings" data-fragment-prefetch="load">Settings</a>   <!-- immediately on load -->
-<a href="/logout" data-fragment-prefetch="none">Log out</a>      <!-- never -->`, "js")}
+      ${code(`const panel = fragment("settings-panel", renderSettings);
+
+route("/settings/profile", {
+  render: () => html\`
+    <a href="/settings/profile"\${panel.prefetchAttrs("intent")}>Profile</a>
+    <section\${panel.attrs()}>\${renderSettings()}</section>
+  \`,
+  fragments: [panel],
+});`)}
       <p>
-        For imperative control, call
-        <a href="/reference#prefetchFragment"><code>prefetchFragment</code></a>.
-        <code>visible</code> and <code>load</code> prefetch re-bind after each
-        navigation, so links that swap into the slot start prefetching too.
+        Different targets may navigate concurrently. A newer navigation to the
+        same target supersedes the older consumer without cancelling shared
+        prefetched work used elsewhere.
+      </p>
+
+      <h2>Imperative capabilities</h2>
+      <p>
+        Completed HTML is bounded by <code>cacheTtl</code> (30 seconds),
+        <code>cacheMaxEntries</code> (100 responses) and <code>cacheMaxBytes</code>
+        (2 MB). Response no-store/no-cache, max-age and Age further restrict reuse.
+        Redirect aliases share invalidation. Authenticated pages should send
+        <code>Cache-Control: private, no-store</code>.
+      </p>
+      ${code(`await router.navigate("/reports", { history: "push" });
+await router.navigate("/settings/profile", { slot: "settings-panel" });
+await router.prefetch("/reports");
+router.invalidate("/reports");
+router.invalidate(); // all cached and in-flight fragments`)}
+      <p>
+        <code>navigate</code> and <code>prefetch</code> accept a consumer
+        AbortSignal. <code>invalidate</code> is explicit; mutations decide which
+        cached HTML became stale.
       </p>
 
       <h2>GET forms</h2>
-      <p>
-        A search or filter <code>&lt;form method="get"&gt;</code> opts into
-        fragment navigation with <code>data-fragment-form</code>. The router
-        serializes the fields into the query string, fragment-navigates to the
-        result, and includes the submitter's <code>name</code>/<code>value</code>
-        when a specific button submits.
-      </p>
       ${code(`<form action="/search" method="get" data-fragment-form>
   <input name="q" />
   <button>Search</button>
 </form>`, "js")}
+      <p>
+        Opted-in GET forms navigate as fragments. POST forms remain native and
+        use route actions plus redirects, preserving a reliable no-JavaScript
+        mutation path.
+      </p>
+
+      <h2>Lifecycle events</h2>
+      ${code(`document.addEventListener("nativefragments:navigation-complete", (event) => {
+  console.log(event.detail.url, event.detail.target);
+});
+
+// navigation-start → navigation-swap → fragment-reveal* → navigation-complete
+// navigation-start → navigation-abort | navigation-error`)}
+      <p>
+        Events bubble and cross shadow boundaries. During a request the target
+        exposes <code>aria-busy="true"</code> and a
+        <code>data-nativefragments-navigation</code> state.
+      </p>
+
+      <h2>Protocol negotiation</h2>
+      <p>
+        Protocol 2 redirect envelopes apply Set-Cookie in the browser before
+        fetching the destination. Ancestor and descendant navigations cancel one
+        another. Back/Forward restores the primary route and all changed named
+        targets. A queued view transition cannot commit after cancellation.
+      </p>
+      <p>
+        Router requests send <code>X-NativeFragments-Protocol: 2</code>. A
+        compatible server may return a framed stream and echoes the version.
+        Missing or unknown versions receive one completed buffered fragment, so
+        an old tab cannot mistake stream frames for one HTML document.
+      </p>
+
       ${callout(
-        "Note",
-        "POST forms are never fragment-intercepted. They post to a route action() and return through a redirect — see Routing.",
+        "Failure behavior",
+        "Non-HTML responses, request failures, invalid stream framing, and cross-origin redirects emit navigation-error and fall back to a normal document navigation.",
       )}
-
-      <h2>Clearing the cache</h2>
-      <p>
-        After a mutation, drop stale fragment HTML with
-        <a href="/reference#clearFragmentCache"><code>clearFragmentCache</code></a>.
-        With no argument it clears every cached and in-flight fragment; with an
-        <code>href</code> it clears every slot for that pathname and search.
-      </p>
-      ${code(`import { clearFragmentCache } from "/nativefragments/router.js";
-
-await fetch("/api/todos", { method: "POST", body });
-clearFragmentCache(); // next navigation refetches`)}
-
-      <h2>Scroll, focus, and transitions</h2>
-      <p>
-        Fragment navigation preserves the platform feel: back/forward restores
-        the saved scroll position (including hash-only history entries),
-        in-page hash links keep native behavior, and a cross-page hash scrolls
-        to the anchor after the swap. Focus moves to the swapped container for
-        keyboard and screen-reader users. When the browser supports it, the swap
-        runs inside <code>document.startViewTransition()</code> — toggle it with
-        the <code>viewTransitions</code> option (default <code>true</code>).
-      </p>
-      ${code(`installFragmentNavigation({
-  prefetch: "intent",
-  viewTransitions: true, // the default
-});`)}
-      ${callout(
-        "Good to know",
-        "Fragment responses are validated by Content-Type: a non-text/html response falls back to a full document navigation instead of swapping garbage into the slot. Server redirects are followed, and the final URL lands in the address bar.",
-      )}
-
-      <h2>Window globals</h2>
-      <p>
-        Module imports are preferred, but the router also exposes globals for
-        inline handlers and console debugging:
-        <code>window.nativeFragmentsNavigate(href, pushState?, slot?)</code>,
-        <code>window.nativeFragmentsPrefetch(href, slot?)</code>, and
-        <code>window.nativeFragmentsClearFragmentCache(href?)</code>.
-      </p>
-
-      <h2>Prefetch discovery</h2>
-      <p>
-        Prefetching uses the real anchors in the document. The router scans
-        same-origin links and reads <code>data-fragment-prefetch</code> directly,
-        so browsers, developers, and agents inspect the same HTML.
-      </p>
-      ${callout(
-        "Good to know",
-        "Fragment responses are produced by renderFragment — the route body plus a data-fragment-meta script the router uses to update the head.",
-      )}
-
-      <h2>Deferred fragments</h2>
-      <p>
-        Fragments can also stream. When a route calls
-        <code>context.defer(fragment)</code>, the document flushes immediately
-        with a loading boundary and the fragment's completed HTML streams in
-        when its data resolves — out of order, on the same connection, with
-        error boundaries and timeouts built in. See
-        <a href="/concepts/streaming">Streaming</a> for the full model.
-      </p>
 
       <h2>See also</h2>
       <ul>
-        <li><a href="/concepts/routing">Routing</a> — define the routes fragments navigate between.</li>
-        <li><a href="/concepts/streaming">Streaming</a> — defer slow fragments and stream them out of order.</li>
-        <li><a href="/concepts/components">Components</a> — keep components alive across swaps.</li>
-        <li><a href="/reference#installFragmentNavigation">Reference: <code>installFragmentNavigation</code></a>, <a href="/reference#prefetchFragment"><code>prefetchFragment</code></a>, <a href="/reference#clearFragmentCache"><code>clearFragmentCache</code></a>.</li>
+        <li><a href="/concepts/streaming">Streaming</a> — framed navigation and deferred reveals.</li>
+        <li><a href="/concepts/routing">Routing</a> — routes and named fragment definitions.</li>
+        <li><a href="/reference#startRouter">Reference: <code>startRouter</code></a>.</li>
       </ul>
     `,
   });

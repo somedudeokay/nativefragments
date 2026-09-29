@@ -1,3 +1,10 @@
+export type RawHtml = import("./html.js").RawHtml;
+export type HtmlAttrs = import("./html.js").HtmlAttrs;
+export type RequestContext = import("./context.js").RequestContext;
+export type RouteContext = import("./router.js").RouteContext;
+export type Route = import("./router.js").Route;
+export type FragmentDefinition = import("./router.js").FragmentDefinition;
+export type ApiContext = import("./api.js").ApiContext;
 export { apiRoute, createApi } from "./api.js";
-export { attrs, declarativeShadow, escapeHtml, html, jsonScript, raw } from "./html.js";
+export { attrs, escapeHtml, html, jsonScript, raw } from "./html.js";
 export { createRoutes, errorRoute, fragment, fragmentMeta, notFoundRoute, readSearch, redirect, renderFragment, renderRoute, route } from "./router.js";

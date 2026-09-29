@@ -15,13 +15,13 @@ const headLinks = ({ meta, nonce }) => html`
   </script>
   <style${attrs({ nonce })}>${raw(criticalStyles)}</style>
   <link rel="stylesheet" href="/app/styles.css" />
-  <script${attrs({ nonce })} type="module" src="/app/client.js"></script>
+  <script${attrs({ nonce })} type="module" src="/build/client.js"></script>
 `;
 
 const activePath = (canonical) =>
   canonical?.startsWith("http") ? new URL(canonical).pathname : (canonical ?? "/");
 
-export const shell = ({ body, meta, nonce }) => html`<!doctype html>
+export const shell = async ({ body, meta, nonce }) => html`<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -31,7 +31,7 @@ export const shell = ({ body, meta, nonce }) => html`<!doctype html>
   </head>
   <body>
     <a class="skip-link" href="#content-slot">Skip to content</a>
-    ${siteHeader({ activePath: activePath(meta.canonical) })}
+    ${await siteHeader({ activePath: activePath(meta.canonical) })}
     <main id="content-slot">${body}</main>
     ${siteFooter()}
   </body>

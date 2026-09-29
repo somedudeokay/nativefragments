@@ -1,7 +1,7 @@
 {
   "name": "@nativefragments/core",
-  "version": "0.6.0",
-  "description": "Zero dependency, zero build framework core for agents building AI-friendly web applications.",
+  "version": "0.8.0",
+  "description": "Explicit HTML routing, fragments, and streaming for fast web applications.",
   "type": "module",
   "main": "./src/index.js",
   "types": "./types/src/index.d.ts",
@@ -19,16 +19,12 @@
       "default": "./src/server/index.js"
     },
     "./client/router.js": {
-      "types": "./types/public/nativefragments/router.d.ts",
-      "default": "./public/nativefragments/router.js"
-    },
-    "./client/component.js": {
-      "types": "./types/public/nativefragments/component.d.ts",
-      "default": "./public/nativefragments/component.js"
+      "types": "./types/client/router.d.ts",
+      "default": "./client/router.js"
     },
     "./client/worker.js": {
-      "types": "./types/public/nativefragments/worker.d.ts",
-      "default": "./public/nativefragments/worker.js"
+      "types": "./types/client/worker.d.ts",
+      "default": "./client/worker.js"
     }
   },
   "typesVersions": {
@@ -40,13 +36,10 @@
         "./types/src/server/index.d.ts"
       ],
       "client/router.js": [
-        "./types/public/nativefragments/router.d.ts"
-      ],
-      "client/component.js": [
-        "./types/public/nativefragments/component.d.ts"
+        "./types/client/router.d.ts"
       ],
       "client/worker.js": [
-        "./types/public/nativefragments/worker.d.ts"
+        "./types/client/worker.d.ts"
       ],
       "*": [
         "./types/src/index.d.ts"
@@ -55,7 +48,7 @@
   },
   "files": [
     "src",
-    "public/nativefragments",
+    "client",
     "types",
     "docs",
     "skills",
@@ -75,7 +68,7 @@
     "access": "public"
   },
   "scripts": {
-    "check": "find src public/nativefragments -name '*.js' -print0 | xargs -0 -n1 node --check",
+    "check": "find src client -name '*.js' -print0 | xargs -0 -n1 node --check",
     "test": "node --test",
     "types": "tsc -p tsconfig.types.json",
     "changeset": "changeset",
@@ -85,10 +78,10 @@
   "keywords": [
     "web-components",
     "cloudflare-workers",
-    "zero-build",
+    "html-streaming",
     "fragments",
-    "ai-agents",
-    "ai-friendly-apps"
+    "server-rendering",
+    "web-applications"
   ],
   "license": "MIT",
   "devDependencies": {

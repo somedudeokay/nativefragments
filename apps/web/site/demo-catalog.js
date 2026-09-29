@@ -5,7 +5,7 @@ export const demos = [
     slug: "analytics-dashboard",
     title: "Analytics Dashboard",
     summary:
-      "Server-rendered metrics with hydrated Shadow DOM filters and deterministic table summaries.",
+      "Server-rendered metrics with hydrated Lit filters and deterministic table summaries.",
     url: "https://analytics-dashboard.nativefragments.org",
   },
   {
@@ -31,10 +31,10 @@ export const demos = [
   },
   {
     slug: "signal-counter",
-    title: "Signal Counter",
+    title: "Lit Counter",
     summary:
-      "Reactive counter state and derived values without a build step or virtual DOM.",
-    url: "https://signal-counter.nativefragments.org",
+      "Lit component state and derived values hydrated from server-rendered Shadow DOM.",
+    url: "https://lit-counter.nativefragments.org",
   },
   {
     slug: "worker-search",
@@ -87,7 +87,7 @@ export const demos = [
   },
 ];
 
-const tags = ["Cloudflare Worker", "Native Fragments", "Zero build"];
+const tags = ["Cloudflare Workers", "HTML streaming", "Modern ESM"];
 
 const repoBase =
   "https://github.com/somedudeokay/nativefragments-examples/tree/main/apps";
@@ -103,8 +103,7 @@ const githubIcon = `<svg class="demo-action-icon" viewBox="0 0 16 16" fill="curr
 </svg>`;
 
 // Lighthouse (desktop) scores — verified 100 on every deployed demo. Shown as a
-// labelled scorecard alongside the runtime dependency count (which excludes dev
-// dependencies and the Native Fragments core that every demo shares).
+// labelled scorecard alongside the shared two-entry-point application shape.
 const lighthouse = [
   { value: "100", label: "Performance" },
   { value: "100", label: "Accessibility" },
@@ -130,8 +129,8 @@ const specHtml = () => html`<div class="demo-spec">
     <p class="demo-spec__title">Dependencies</p>
     <div class="demo-spec__stats">
       <div class="spec">
-        <span class="spec__num">0</span>
-        <span class="spec__cap">Runtime</span>
+        <span class="spec__num">2</span>
+        <span class="spec__cap">ESM entry points</span>
       </div>
     </div>
   </section>

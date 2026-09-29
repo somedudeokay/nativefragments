@@ -1,359 +1,257 @@
-import { declarativeShadow, html, raw } from "@nativefragments/core/server";
-import {
-  runtimeMapHtml,
-  runtimeMapStyles,
-} from "../../public/app/components/runtime-map-template.js";
+import { html } from "@nativefragments/core/server";
+import { renderLit } from "@nativefragments/lit/server";
+import { html as lit } from "lit";
+import "../../client/components/runtime-map.js";
 import { codeBlock } from "../code.js";
 
-const routeExample = `import { html, route } from "@nativefragments/core/server";
+const routeExample = `import { fragment, html, route } from "@nativefragments/core/server";
 
-export const routes = [
-  route("/", {
-    meta: () => ({
-      title: "Dashboard",
-      description: "A fast HTML-first dashboard.",
-      canonical: "https://example.com/",
-    }),
-    render: () => html\`
-      <h1>Revenue</h1>
-      <metric-card value="$42k"></metric-card>
-    \`,
-  }),
-];`;
-
-const streamExample = `const stats = fragment("stats", {
-  loading: () => html\`<p class="skeleton">Crunching…</p>\`,
-  error: () => html\`<p role="status">Stats are unavailable.</p>\`,
-  render: async (context) =>
-    statsCard(await loadStats(context.url, { signal: context.signal })),
+const activity = fragment("activity", {
+  loading: () => html\`<p aria-live="polite">Loading activity…</p>\`,
+  render: async ({ signal }) =>
+    activityFeed(await loadActivity({ signal })),
 });
 
-route("/", {
-  render: (context) => html\`<section>
-    <h1>Today</h1>
-    \${context.defer(stats, { class: "stats-slot" })}
-  </section>\`,
-  fragments: [stats],
-});`;
-
-const fragmentExample = `import { fragment, html, route } from "@nativefragments/core/server";
-
-const settingsPanel = fragment("settings-panel", renderSettingsPanel);
-
-export const settingsRoute = route("/settings/profile", {
-  render: () => html\`
-    <a href="/settings/profile"\${settingsPanel.prefetchAttrs("intent")}>
-      Profile
-    </a>
-    <section\${settingsPanel.attrs()}>
-      \${renderSettingsPanel()}
-    </section>
+export const dashboard = route("/dashboard", {
+  meta: () => ({ title: "Dashboard" }),
+  render: (context) => html\`
+    <h1>Dashboard</h1>
+    \${context.defer(activity)}
   \`,
-  fragments: [settingsPanel],
+  fragments: [activity],
 });`;
 
-const actionExample = `import { redirect, route } from "@nativefragments/core/server";
+const routerExample = `import "@nativefragments/lit/client";
+import { startRouter } from "@nativefragments/core/client/router.js";
 
-route("/todos", {
-  render: (context) => todoList(context.query.get("filter")),
-  // POST runs here, then redirects — no client JavaScript required.
-  action: async ({ request }) => {
-    await addTodo(await request.formData());
-    return redirect("/todos", 303);
-  },
-});`;
+const lifetime = new AbortController();
+const router = startRouter({
+  prefetch: "intent",
+  signal: lifetime.signal,
+});
 
-const componentExample = `import { shadow, sheet } from "/nativefragments/component.js";
+await router.navigate("/dashboard");
+router.prefetch("/settings");
+router.invalidate("/dashboard");`;
 
-const styles = sheet(\`
-  button {
-    border: 1px solid currentColor;
-  }
-\`);
+const litExample = `// app-card.js — ordinary Lit
+import { LitElement, css, html } from "lit";
 
-class ThemeSwitch extends HTMLElement {
-  connectedCallback() {
-    shadow(this, {
-      styles: [styles],
-      html: \`<button type="button">Switch theme</button>\`,
-    });
-  }
+class AppCard extends LitElement {
+  static styles = css\`:host { display: block }\`;
+  render() { return html\`<slot></slot>\`; }
 }
+customElements.define("app-card", AppCard);
 
-customElements.define("theme-switch", ThemeSwitch);`;
+// Server route — Lit SSR stays behind one adapter
+import { renderLit } from "@nativefragments/lit/server";
+import { html } from "lit";
 
-const apiExample = `import { apiRoute, createApi } from "@nativefragments/core/server";
+export const card = () =>
+  renderLit(html\`<app-card>Ready now.</app-card>\`);`;
 
-export const api = createApi([
-  apiRoute("GET", "/api/todos", ({ query }) => listTodos(query.get("filter"))),
-  apiRoute("POST", "/api/todos", async ({ request }) =>
-    Response.json(await createTodo(await request.json()), { status: 201 }),
-  ),
-]);
-
-// worker.js
-import { createCloudflareHandler } from "@nativefragments/core/cloudflare";
-
-export default createCloudflareHandler({ api, routes, shell });`;
-
-const stats = [
-  { value: "0", caption: "runtime dependencies" },
-  { value: "0", caption: "build steps" },
-  { value: "3.6 kB", caption: "client router, gzipped" },
-  { value: "67 ms", caption: "first byte, streamed live demo" },
-];
-
-const pillars = [
+const modes = [
   {
-    kicker: "Performance",
-    tone: "green",
-    title: "Streamed HTML, no hydration cliff.",
-    copy: "Pages render at the edge and stream while slow data is still loading. The browser parses HTML as it arrives — there is no bundle to download, parse, and replay before the page works.",
-    proof: "~6.3 kB gzipped: the entire browser runtime",
+    label: "Direct visit",
+    request: "GET /dashboard",
+    response: "Complete document, streamed",
   },
   {
-    kicker: "Low maintenance",
-    tone: "yellow",
-    title: "Nothing to update on Tuesday.",
-    copy: "Zero dependencies means zero dependency bumps, zero audit warnings, and no bundler config slowly drifting out of date. An app you scaffold today still runs unchanged next year — there is no build to break.",
-    proof: "npm ls → @nativefragments/core (and that's it)",
+    label: "Link navigation",
+    request: "GET /dashboard · x-fragment",
+    response: "Only the target HTML, streamed",
   },
   {
-    kicker: "Native web APIs",
-    tone: "blue",
-    title: "Standards don't ship breaking changes.",
-    copy: "Routes return HTML. Components are Custom Elements with Shadow DOM. Modules load as ES modules. Everything you learn is the platform itself, and view-source still tells the truth.",
-    proof: "Custom Elements · Shadow DOM · ESM · fetch · streams",
-  },
-  {
-    kicker: "Agents first",
-    tone: "pink",
-    title: "Made to be written — and read — by machines.",
-    copy: "Small explicit files in, readable HTML out. Real anchors, server-rendered content, and route manifests an agent can follow without executing a bundle. The npm package ships its own agent skill and docs.",
-    proof: "agents.txt · llms.txt · skills/ in the package",
+    label: "JavaScript off",
+    request: "Native anchor or form",
+    response: "The same route still works",
   },
 ];
 
-const pillarCard = ({ kicker, tone, title, copy, proof }) => html`<article
-  class="pillar pillar--${tone}"
->
-  <p class="pillar-kicker">${kicker}</p>
+const principles = [
+  {
+    number: "01",
+    title: "HTML is the interface",
+    copy: "Routes return escaped HTML. The browser receives useful content before application JavaScript runs.",
+  },
+  {
+    number: "02",
+    title: "Navigation stays native",
+    copy: "Real anchors and forms are the baseline. A small router upgrades them with history, prefetch, and streamed swaps.",
+  },
+  {
+    number: "03",
+    title: "Interactivity stays local",
+    copy: "Use Lit and Web Components for the parts that own state. Server rendering and hydration live in a replaceable adapter.",
+  },
+  {
+    number: "04",
+    title: "Tooling serves the app",
+    copy: "esbuild resolves modern ESM and creates deployable files. It is a fast implementation detail, not a compiler-shaped architecture.",
+  },
+];
+
+const principle = ({ number, title, copy }) => html`<article class="home-principle">
+  <span>${number}</span>
   <h3>${title}</h3>
-  <p class="pillar-copy">${copy}</p>
-  <p class="pillar-proof"><span aria-hidden="true">▸</span> ${proof}</p>
+  <p>${copy}</p>
 </article>`;
 
-const streamRows = [
-  { label: "Document shell", time: "0 ms", state: "ready", width: "4%" },
-  { label: "Stats card", time: "+112 ms", state: "ready", width: "18%" },
-  { label: "Artwork table", time: "+384 ms", state: "ready", width: "42%" },
-  { label: "Provenance feed", time: "error → boundary", state: "error", width: "70%" },
-];
-
-const streamTimeline = () => html`<div class="stream-timeline" aria-hidden="true">
-  <p class="stream-timeline-head">one connection · fastest first</p>
-  ${streamRows.map(
-    (row) => html`<div class="stream-row" data-state="${row.state}">
-          <span class="stream-label">${row.label}</span>
-          <span class="stream-bar"><span style="width: ${row.width}"></span></span>
-          <span class="stream-time">${row.time}</span>
-        </div>`,
-  )}
-</div>`;
-
-export const homePage = () => html`<section class="hero">
-  <div class="hero-copy">
-    <h1>The tiny web framework built for <span class="accent">coding agents</span>.</h1>
-    <p class="lede">
-      Native Fragments renders HTML at the edge and streams it to the browser —
-      no bundler, no dependencies, no hydration step. Apps stay small, fast,
-      and readable enough for an agent to maintain.
-    </p>
-    <div class="hero-actions">
-      <a class="primary-action" href="/docs">Start building <span class="cta-arrow" aria-hidden="true">→</span></a>
-      <a class="secondary-action agent-action" href="/agents.txt" data-nativefragments-reload>
-        <span class="agent-glyph" aria-hidden="true">&gt;_</span> Get started for agents
-      </a>
-      <a class="secondary-action" href="https://docs.nativefragments.org/reference">API reference</a>
+export const homePage = async () => html`
+  <section class="hero home-hero">
+    <div class="hero-copy">
+      <p class="eyebrow">HTML application framework</p>
+      <h1>Fast applications.<br /><span class="accent">Explicit HTML.</span></h1>
+      <p class="lede">
+        Native Fragments is a small framework for Cloudflare Workers that
+        streams server-rendered HTML, upgrades native navigation, and uses Lit
+        for interactive islands. Modern tooling, very little ceremony.
+      </p>
+      <div class="hero-actions">
+        <a class="primary-action" href="https://docs.nativefragments.org/getting-started">
+          Build an app <span class="cta-arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="secondary-action" href="https://met-gallery.nativefragments.org" data-nativefragments-reload>
+          Watch HTML stream
+        </a>
+        <a class="secondary-action" href="https://github.com/somedudeokay/nativefragments">
+          Read the source
+        </a>
+      </div>
+      <p class="home-stack" aria-label="Technology stack">
+        <span>Cloudflare Workers</span><span>Lit</span><span>Web Components</span><span>Native APIs</span>
+      </p>
     </div>
-  </div>
-  <nf-runtime-map>
-    ${declarativeShadow({
-      styles: [runtimeMapStyles],
-      html: runtimeMapHtml,
-    })}
-  </nf-runtime-map>
-</section>
+    ${await renderLit(lit`<nf-runtime-map></nf-runtime-map>`)}
+  </section>
 
-<section class="stats-strip" aria-label="Measured numbers">
-  ${stats.map(
-    (stat) => html`<div class="stat">
-          <strong>${stat.value}</strong>
-          <span>${stat.caption}</span>
-        </div>`,
-  )}
-</section>
+  <section class="home-proof" aria-label="Framework guarantees">
+    <div><strong>HTML</strong><span>first response</span></div>
+    <div><strong>Stream</strong><span>shell, then fragments</span></div>
+    <div><strong>Native</strong><span>links and forms</span></div>
+    <div><strong>Lit</strong><span>SSR + hydration adapter</span></div>
+  </section>
 
-<section class="statement">
-  <p class="eyebrow">The bet</p>
-  <h2 class="statement-text">
-    The web platform is the framework. We just wired it together.
-  </h2>
-  <div class="statement-copy">
-    <p>
-      Most frontend stacks hide the thing agents need to reason about: the
-      actual HTML, links, styles, and behavior. Native Fragments keeps those
-      surfaces explicit, so generated apps are easy to read, debug, click,
-      scrape, and extend.
+  <section class="home-intro">
+    <p class="eyebrow">The working model</p>
+    <h2>One route. Three honest response modes.</h2>
+    <p class="home-intro-lede">
+      The server owns routing and the first render. The browser router asks for
+      the same route as a fragment and swaps only its declared target. Without
+      JavaScript, the anchor simply performs a document navigation.
     </p>
-    <p>
-      The framework adds only the small contracts an app needs — route
-      manifests, escaped HTML templates, fragment responses, metadata updates,
-      Shadow DOM helpers. Everything else is ordinary browser code that was
-      already there.
-    </p>
-  </div>
-</section>
-
-<section class="pillars" aria-label="Why Native Fragments">
-  ${pillars.map(pillarCard)}
-</section>
-
-<section class="stream-slab">
-  <div class="stream-slab-copy">
-    <p class="eyebrow">New in 0.5 — HTML streaming</p>
-    <h2>Slow data never blocks a fast page.</h2>
-    <p>
-      Defer a fragment and the document streams immediately: shell first,
-      skeletons in place, then each fragment's real HTML arrives the moment its
-      data resolves — out of order, on one connection. A two-second API call
-      delays one region, not the page.
-    </p>
-    <p>
-      Failures stream an error boundary instead of breaking the response, every
-      fragment has a timeout, and the content arrives as crawlable HTML in the
-      same response — not a client-side fetch.
-    </p>
-    ${streamTimeline()}
-    <div class="stream-actions">
-      <a class="stream-link" href="https://met-gallery.nativefragments.org" data-nativefragments-reload>Watch it stream live <span aria-hidden="true">→</span></a>
-      <a class="stream-link stream-link--quiet" href="https://docs.nativefragments.org/concepts/streaming">Streaming docs</a>
+    <div class="response-modes">
+      ${modes.map((mode) => html`<article>
+        <p>${mode.label}</p>
+        <code>${mode.request}</code>
+        <strong>${mode.response}</strong>
+      </article>`)}
     </div>
-  </div>
-  <div class="stream-slab-code">
-    ${codeBlock(streamExample, "js", "site/routes.js")}
-  </div>
-</section>
+  </section>
 
-<section class="landing-section">
-  <div>
-    <p class="eyebrow">HTML first</p>
-    <h2>Routes are files agents can understand.</h2>
-  </div>
-  <div class="section-copy">
-    <p>
-      A route is a path, metadata, and a render function. Normal requests return
-      the full document. Fragment requests return only the page body and the
-      metadata the browser needs to update the head. No loaders, no client
-      bundle, no compiler conventions to memorize.
-    </p>
+  <section class="home-code-grid">
+    <div class="home-code-copy">
+      <p class="eyebrow">Server</p>
+      <h2>Render the application you mean.</h2>
+      <p>
+        Route definitions keep path, metadata, actions, and HTML together.
+        Deferred work starts immediately and fills its own boundary when ready.
+        A slow dependency delays one region—not the whole document.
+      </p>
+      <ul>
+        <li>Escaped interpolation by default</li>
+        <li>Abort signals follow the request</li>
+        <li>Error and loading boundaries are visible HTML</li>
+      </ul>
+    </div>
     ${codeBlock(routeExample, "js", "site/routes.js")}
-  </div>
-</section>
+  </section>
 
-<section class="landing-section landing-section--flip fragment-section">
-  <div>
-    <p class="eyebrow">Declarative fragments</p>
-    <h2>Partial updates without hiding the page.</h2>
-  </div>
-  <div class="section-copy">
+  <section class="home-stream">
+    <div>
+      <p class="eyebrow">Streaming navigation</p>
+      <h2>The next page reveals itself as its HTML arrives.</h2>
+      <p>
+        Fragment navigation uses a framed HTML protocol. The first frame swaps
+        the page immediately; later frames reveal deferred regions out of order.
+        Old tabs that do not speak the protocol receive a safe buffered response.
+      </p>
+      <div class="stream-actions">
+        <a class="stream-link" href="https://met-gallery.nativefragments.org" data-nativefragments-reload>
+          Open the Met Gallery <span aria-hidden="true">→</span>
+        </a>
+        <a class="stream-link stream-link--quiet" href="https://docs.nativefragments.org/concepts/streaming">Read the protocol</a>
+      </div>
+    </div>
+    <div class="stream-console" aria-label="Example fragment stream">
+      <p><span>00 ms</span><b>shell</b><em>painted</em></p>
+      <p><span>18 ms</span><b>page fragment</b><em>swapped</em></p>
+      <p><span>112 ms</span><b>summary</b><em>revealed</em></p>
+      <p><span>384 ms</span><b>artworks</b><em>revealed</em></p>
+      <p data-state="error"><span>421 ms</span><b>provenance</b><em>error boundary</em></p>
+    </div>
+  </section>
+
+  <section class="home-principles">
+    <div class="home-principles-head">
+      <p class="eyebrow">Design constraints</p>
+      <h2>Small core. Deliberate layers.</h2>
+      <p>
+        Native Fragments does not compete with the platform. It defines the
+        contracts the platform is missing for an HTML application, then gets out
+        of the way.
+      </p>
+    </div>
+    <div class="home-principles-grid">${principles.map(principle)}</div>
+  </section>
+
+  <section class="home-code-grid home-code-grid--reverse">
+    <div class="home-code-copy">
+      <p class="eyebrow">Browser</p>
+      <h2>A router you can hold in your hand.</h2>
+      <p>
+        Starting navigation returns three explicit capabilities. Lifecycle is
+        owned by an AbortSignal; cache invalidation is an application decision;
+        semantic DOM events make integrations observable.
+      </p>
+    </div>
+    ${codeBlock(routerExample, "js", "client/index.js")}
+  </section>
+
+  <section class="home-code-grid">
+    <div class="home-code-copy">
+      <p class="eyebrow">Interactive islands</p>
+      <h2>Use Lit where state actually lives.</h2>
+      <p>
+        Components are normal Lit elements. The adapter pins the evolving Lit
+        SSR surface and emits hydratable Declarative Shadow DOM, keeping labs
+        APIs out of application code.
+      </p>
+    </div>
+    ${codeBlock(litExample, "js", "client/app-card.js")}
+  </section>
+
+  <section class="home-build-note">
+    <p class="eyebrow">Build policy</p>
+    <h2>No framework compiler. No build-step theatre.</h2>
     <p>
-      Mark the region that can update; the route exposes the same fragment on
-      the server. The browser router upgrades real anchors and prefetches on
-      intent, visibility, or load — links keep working with JavaScript off.
+      Source stays standards-based ESM. A tiny esbuild step resolves packages,
+      bundles browser modules, and lets Wrangler run the Worker. You can import
+      from npm without turning the framework into a compiler or forcing every
+      dependency to publish browser-ready bare-specifier graphs.
     </p>
-    ${codeBlock(fragmentExample, "js", "site/settings.js")}
-  </div>
-</section>
+    <code>npm run dev&nbsp;&nbsp;→&nbsp;&nbsp;esbuild + wrangler dev --live-reload</code>
+  </section>
 
-<section class="landing-section">
-  <div>
-    <p class="eyebrow">No-JS mutations</p>
-    <h2>Write data with a plain form and a redirect.</h2>
-  </div>
-  <div class="section-copy">
-    <p>
-      A route <code>action</code> handles the POST and returns a
-      <code>redirect</code> — the classic POST-redirect-GET pattern, built in.
-      Forms submit, data changes, and the browser lands on fresh HTML with no
-      client code, no <code>onsubmit</code>, no fetch wiring. POST stays a full
-      document round trip by design — mutations never ride the fragment cache.
-    </p>
-    ${codeBlock(actionExample, "js", "site/routes.js")}
-  </div>
-</section>
-
-<section class="landing-section landing-section--flip">
-  <div>
-    <p class="eyebrow">Native islands</p>
-    <h2>Interactive pieces are Custom Elements.</h2>
-  </div>
-  <div class="section-copy">
-    <p>
-      Components use Shadow DOM for scoped CSS but expose normal DOM that
-      browsers, tests, and agents can inspect. When an island needs local
-      state, optional signal bindings cover it — the first payload stays
-      server-rendered HTML either way.
-    </p>
-    ${codeBlock(componentExample, "js", "public/app/components/theme-switch.js")}
-  </div>
-</section>
-
-<section class="landing-section install-section">
-  <div>
-    <p class="eyebrow">Edge native</p>
-    <h2>One Worker renders pages, fragments, and the API.</h2>
-  </div>
-  <div class="section-copy">
-    <p>
-      Define JSON endpoints with <code>apiRoute</code> and
-      <code>createApi</code> — same <code>:param</code> and catch-all matching as
-      pages, no second framework to pull in. Bring your own Hono or any Web
-      Standards <code>fetch</code> handler if you prefer; either mounts under
-      <code>/api/*</code> in the same Worker that streams the pages. The free
-      tier carries a real app.
-    </p>
-    ${codeBlock(apiExample, "js", "site/api.js")}
-  </div>
-</section>
-
-<section class="landing-section agent-section">
-  <div>
-    <p class="eyebrow">AI-friendly output</p>
-    <h2>Better for agents to build. Better for agents to browse.</h2>
-  </div>
-  <div class="section-copy">
-    <p>
-      Native Fragments is not just a framework agents can use. It produces apps
-      that are easier for agents to operate: real anchors, server-rendered
-      content, small modules, readable source, and minimal framework magic.
-    </p>
-    <ul class="agent-list">
-      <li>Route manifests expose the app map without executing a bundle.</li>
-      <li>Fragment navigation keeps every link crawlable.</li>
-      <li>Streamed content lands as real HTML in the response, not a client fetch.</li>
-      <li>Shadow DOM keeps component styling local and inspectable.</li>
-      <li><code>agents.txt</code>, <code>llms.txt</code>, and an agent skill ship with the package.</li>
-    </ul>
-  </div>
-</section>
-
-<section class="cta-section">
-  <p class="eyebrow">Start small</p>
-  <h2>Install the scaffold. Read every line before lunch.</h2>
-  <p class="cta-install"><code>npm create @nativefragments/app@latest my-app</code></p>
-  <div class="hero-actions">
-    <a class="primary-action" href="/docs">Get started <span class="cta-arrow" aria-hidden="true">→</span></a>
-    <a class="secondary-action" href="https://github.com/somedudeokay/nativefragments">View GitHub</a>
-  </div>
-</section>`;
+  <section class="cta-section home-cta">
+    <p class="eyebrow">Start with the whole stack</p>
+    <h2>From empty directory to streamed HTML.</h2>
+    <p class="cta-install"><code>npm create @nativefragments/app@latest my-app</code></p>
+    <div class="hero-actions">
+      <a class="primary-action" href="https://docs.nativefragments.org/getting-started">
+        Get started <span class="cta-arrow" aria-hidden="true">→</span>
+      </a>
+      <a class="secondary-action" href="/examples">Explore examples</a>
+    </div>
+  </section>
+`;

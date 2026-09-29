@@ -8,6 +8,22 @@ export const apiRoutesPage = () =>
     intro:
       "Serve a JSON API alongside your pages. Define endpoints with apiRoute and createApi — the same :param and :rest* matcher as page routes, dependency-free — or delegate the prefix to any router with a Web Standards fetch method.",
     body: html`
+      <h2>Shared request preparation</h2>
+      <p>See the <a href="https://task-board.nativefragments.org" data-nativefragments-reload>Fieldwork D1 workspace</a> for sign-in, persistent mutations and native form fallbacks. Its <a href="https://github.com/somedudeokay/nativefragments/tree/main/apps/task-board" data-nativefragments-reload>source and migrations</a> are included in the framework repository.</p>
+      <p>
+        Pass <code>prepare</code> to the adapter to initialize application locals
+        once per request. Routes, metadata, headers, actions, deferred fragments
+        and array-based APIs receive the same locals and runtime bindings.
+        External API routers keep their native fetch interface.
+      </p>
+      ${code(`createCloudflareHandler({
+  routes, shell, api,
+  prepare: async ({ request, env }) => ({
+    user: await readSession(request, env.DB),
+  }),
+});
+// In any renderer/action: context.locals.user, context.env.DB,
+// context.context (runtime execution context), context.signal.`)}
       <h2>Defining routes</h2>
       <p>
         <a href="/reference#apiRoute"><code>apiRoute(method, path, handler)</code></a>

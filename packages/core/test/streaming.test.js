@@ -37,6 +37,29 @@ const shell = ({ body, meta }) => html`<!doctype html>
   </body>
 </html>`;
 
+test("cancelling either response stream aborts deferred rendering", { timeout: 2000 }, async () => {
+  for (const headers of [{}, { "x-fragment": "true", "x-nativefragments-protocol": "2" }]) {
+    const cancelled = Promise.withResolvers();
+    const slow = fragment("slow", { render: ({ signal }) => new Promise((_, reject) => {
+      signal.addEventListener("abort", () => { cancelled.resolve(signal.aborted); reject(signal.reason); }, { once: true });
+    }) });
+    const app = createCloudflareHandler({ shell, routes: [route("/", { render: ctx => ctx.defer(slow) })] });
+    const response = await app.fetch(new Request("https://example.com/", { headers }));
+    const reader = response.body.getReader();
+    await reader.read();
+    await reader.cancel();
+    assert.equal(await cancelled.promise, true);
+  }
+});
+
+test("deferred identities differ across independent responses", async () => {
+  const item = fragment("item", () => html`Ready`);
+  const app = createCloudflareHandler({ shell, routes: [route("/", { render: ctx => ctx.defer(item) })] });
+  const bodies = await Promise.all([1, 2].map(async () => (await app.fetch(new Request("https://example.com/"))).text()));
+  const ids = bodies.map(body => /data-nativefragments-deferred="([^"]+)"/.exec(body)[1]);
+  assert.notEqual(ids[0], ids[1]);
+});
+
 test("document responses stream loading boundaries before deferred fragments resolve", async () => {
   let release;
   const remoteData = new Promise((resolve) => {
@@ -78,13 +101,13 @@ test("document responses stream loading boundaries before deferred fragments res
 
   assert.match(rest, /Curator note ready/);
   assert.match(rest, /data-nativefragments-deferred-bootstrap/);
-  assert.match(rest, /data-nativefragments-deferred-content="nf-curator-note-1"/);
+  assert.match(rest, /data-nativefragments-deferred-content="nf-curator-note-1-[a-f0-9-]+"/);
   assert.match(rest, /data-fragment-state="ready"/);
   assert.doesNotMatch(rest, /<template data-nativefragments-deferred-fragment/);
   assert.match(rest, /<\/html>/);
 });
 
-test("fragment requests still wait for and return the completed fragment", async () => {
+test("older fragment clients receive a completed buffered fragment", async () => {
   const curatorNote = fragment("curator-note", {
     loading: () => html`<p>Loading...</p>`,
     render: async () => html`<article><h2>Fragment response ready</h2></article>`,
@@ -114,16 +137,50 @@ test("fragment requests still wait for and return the completed fragment", async
   const body = await response.text();
 
   assert.equal(response.status, 200);
+  assert.equal(response.headers.get("X-NativeFragments-Protocol"), null);
+  assert.equal(response.headers.get("X-NativeFragments-Stream"), null);
   assert.match(body, /Fragment response ready/);
   assert.match(body, /data-fragment-meta/);
   assert.doesNotMatch(body, /Loading/);
   assert.doesNotMatch(body, /<!doctype html>/);
 });
 
-test("default fragment navigation resolves deferred page content before returning", async () => {
+test("unknown protocol versions fall back to completed buffered fragments", async () => {
+  const detail = fragment("detail", {
+    loading: () => html`<p>Loading...</p>`,
+    render: async () => html`<p>Completed safely</p>`,
+  });
+  const app = createCloudflareHandler({
+    shell,
+    routes: [
+      route("/", {
+        render: (context) => html`${context.defer(detail)}`,
+        fragments: [detail],
+      }),
+    ],
+  });
+  const response = await app.fetch(new Request("https://example.com/", {
+    headers: {
+      "x-fragment": "true",
+      "x-nativefragments-protocol": "99",
+    },
+  }), {}, {});
+  const body = await response.text();
+
+  assert.equal(response.headers.get("X-NativeFragments-Protocol"), null);
+  assert.equal(response.headers.get("X-NativeFragments-Stream"), null);
+  assert.match(body, /Completed safely/);
+  assert.doesNotMatch(body, /Loading/);
+});
+
+test("default fragment navigation streams loading boundaries and deferred content", async () => {
+  let release;
+  const remoteData = new Promise((resolve) => {
+    release = () => resolve("Deferred page content ready");
+  });
   const curatorNote = fragment("curator-note", {
     loading: () => html`<p>Loading deferred page content...</p>`,
-    render: async () => html`<article><h2>Deferred page content ready</h2></article>`,
+    render: async () => html`<article><h2>${await remoteData}</h2></article>`,
   });
 
   const app = createCloudflareHandler({
@@ -140,24 +197,45 @@ test("default fragment navigation resolves deferred page content before returnin
     ],
   });
 
-  const response = await app.fetch(
+  let responseSettled = false;
+  const responsePromise = app.fetch(
     new Request("https://example.com/", {
       headers: {
         "x-fragment": "true",
+        "x-nativefragments-protocol": "2",
       },
     }),
     {},
     {},
-  );
-  const body = await response.text();
+  ).then((response) => {
+    responseSettled = true;
+    return response;
+  });
+  await new Promise((resolve) => setImmediate(resolve));
+  const returnedBeforeDeferred = responseSettled;
+  if (!returnedBeforeDeferred) release();
 
+  const response = await responsePromise;
+  const reader = response.body.getReader();
+  const firstText = await readUntil(reader, /Loading deferred page content/);
+
+  assert.equal(returnedBeforeDeferred, true);
   assert.equal(response.status, 200);
-  assert.match(body, /Open gallery/);
-  assert.match(body, /Deferred page content ready/);
-  assert.match(body, /data-fragment-meta/);
-  assert.doesNotMatch(body, /Loading deferred page content/);
-  assert.doesNotMatch(body, /data-nativefragments-deferred-content/);
-  assert.doesNotMatch(body, /<!doctype html>/i);
+  assert.equal(response.headers.get("X-NativeFragments-Protocol"), "2");
+  assert.ok(response.headers.get("X-NativeFragments-Stream"));
+  assert.match(firstText, /Open gallery/);
+  assert.match(firstText, /Loading deferred page content/);
+  assert.match(firstText, /data-fragment-meta/);
+  assert.doesNotMatch(firstText, /Deferred page content ready/);
+  assert.doesNotMatch(firstText, /<!doctype html>/i);
+
+  release();
+  const rest = await readStreamText(reader);
+
+  assert.match(rest, /Deferred page content ready/);
+  assert.match(rest, /data-nativefragments-deferred-content/);
+  assert.match(rest, /nativefragments-stream-[A-Za-z0-9_-]+-end-->/);
+  assert.doesNotMatch(rest, /<!doctype html>/i);
 });
 
 test("deferred fragment errors render an error boundary chunk", async () => {
@@ -184,7 +262,7 @@ test("deferred fragment errors render an error boundary chunk", async () => {
 
   assert.equal(response.status, 200);
   assert.match(body, /Archive temporarily unavailable/);
-  assert.match(body, /data-nativefragments-deferred-content="nf-failing-note-1"/);
+  assert.match(body, /data-nativefragments-deferred-content="nf-failing-note-1-[a-f0-9-]+"/);
   assert.match(body, /data-fragment-state="error"/);
 });
 
@@ -267,7 +345,7 @@ test("the default loading boundary announces via its content, not the slot wrapp
   const response = await app.fetch(new Request("https://example.com/"), {}, {});
   const reader = response.body.getReader();
   const firstText = await readUntil(reader, /data-fragment-loading/);
-  const wrapper = firstText.match(/<section[^>]*data-nativefragments-deferred="nf-curator-note-1"[^>]*>/)?.[0];
+  const wrapper = firstText.match(/<section[^>]*data-nativefragments-deferred="nf-curator-note-1-[a-f0-9-]+"[^>]*>/)?.[0];
 
   assert.ok(wrapper);
   assert.match(wrapper, /aria-busy="true"/);
@@ -336,7 +414,7 @@ test("a shell without a body insertion point warns and buffers deferred content"
   assert.match(body, /Buffered fallback content/);
 });
 
-test("dropping the defer() boundary from the body warns when inlining", async (t) => {
+test("dropping the defer() boundary warns and omits its resolved content", async (t) => {
   const warn = t.mock.method(console, "warn", () => {});
   const curatorNote = fragment("curator-note", {
     render: async () => html`<article>Never placed</article>`,

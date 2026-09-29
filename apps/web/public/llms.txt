@@ -1,25 +1,23 @@
 # Native Fragments
 
-> Native Fragments is a zero-dependency, zero-build frontend framework that helps agents create fast, maintainable, AI-friendly web applications.
+> Fast applications. Explicit HTML. Native Fragments streams server-rendered
+> routes on Cloudflare Workers, upgrades native navigation, and uses Lit for
+> interactive islands.
 
-## Primary Docs
+## Documentation
 
-- [Technical documentation](https://docs.nativefragments.org/llms.txt)
+- [Technical docs](https://docs.nativefragments.org/llms.txt)
 - [Getting started](https://docs.nativefragments.org/getting-started.md)
+- [Fragment navigation](https://docs.nativefragments.org/fragments.md)
+- [Streaming](https://docs.nativefragments.org/streaming.md)
+- [Lit components](https://docs.nativefragments.org/components.md)
 - [API reference](https://docs.nativefragments.org/reference.md)
-- [API routes](https://docs.nativefragments.org/api-routes.md)
-- [Workers](https://docs.nativefragments.org/workers.md)
-- [Signals](https://docs.nativefragments.org/signals.md)
 
-## Product Pages
+## Project
 
 - [Landing page](https://nativefragments.org/)
 - [Examples](https://nativefragments.org/examples)
-- [Demos](https://nativefragments.org/demos)
 - [Manifesto](https://nativefragments.org/manifesto)
-
-## Package
-
-- [npm](https://www.npmjs.com/package/@nativefragments/core)
-- [signals npm](https://www.npmjs.com/package/@nativefragments/signals)
+- [Core npm](https://www.npmjs.com/package/@nativefragments/core)
+- [Lit adapter npm](https://www.npmjs.com/package/@nativefragments/lit)
 - [GitHub](https://github.com/somedudeokay/nativefragments)

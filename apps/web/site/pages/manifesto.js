@@ -12,8 +12,8 @@ export const manifestoPage = () => html`<section class="page-hero manifesto">
 
 <section class="goal-wall" aria-label="Native Fragments goals">
   <p>
-    Zero dependencies. Zero build. Blazing fast. Built for agents. AI-friendly
-    applications. Zero maintenance. Free to deploy. Infinite scale.
+    Explicit HTML. Stream the useful work. Keep native navigation. Put state
+    where it belongs. Use modern tools without making the toolchain the product.
   </p>
 </section>
 
@@ -28,16 +28,16 @@ export const manifestoPage = () => html`<section class="page-hero manifesto">
       <span>Native HTML and browser modules are easier to click, scrape, inspect, and maintain than opaque transpiled bundles.</span>
     </li>
     <li>
-      <strong>Maintenance comes from deletion.</strong>
-      <span>No compiler pipeline unless the app earns it.</span>
+      <strong>Tooling should stay subordinate.</strong>
+      <span>Use a fast ESM build to resolve packages, not a compiler-shaped application model.</span>
     </li>
     <li>
       <strong>HTML is the first payload.</strong>
       <span>JavaScript upgrades the page; it does not own the page.</span>
     </li>
     <li>
-      <strong>Shadow DOM is the style boundary.</strong>
-      <span>Components should not leak styling problems into the app.</span>
+      <strong>Lit owns interactive islands.</strong>
+      <span>Server-render them, hydrate in place, and keep local state local.</span>
     </li>
     <li>
       <strong>The edge is enough.</strong>
