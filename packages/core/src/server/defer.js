@@ -296,8 +296,9 @@ export const renderDeferredFragment = async (task, { document = false } = {}) =>
   )}</div><template data-nativefragments-deferred-complete="${task.id}"></template>${document ? html`<noscript><section data-fragment-fallback="${task.name}">${raw(resolved.body)}</section></noscript>` : ""}`;
 };
 
-// Serialized as framework-authored script text. No application data is evaluated.
-const installDocumentReveals = () => {
+// Keep this framework-authored program as literal source. Serializing a function
+// with toString() can capture helpers injected by production bundlers (keepNames).
+const documentRevealScript = String.raw`(() => {
   const targets = new Map([...document.querySelectorAll("[data-nativefragments-deferred]")]
     .map(target => [target.getAttribute("data-nativefragments-deferred"), target]));
   const process = () => {
@@ -339,10 +340,10 @@ const installDocumentReveals = () => {
   observer.observe(document.documentElement, { childList: true, subtree: true });
   document.addEventListener("DOMContentLoaded", loaded, { once: true });
   process();
-};
+})();`;
 
 /** Install response-scoped reveals that wait for complete parser payloads. @private */
 export const deferredFragmentBootstrap = ({ nonce } = {}) => html`<noscript><style${attrs({ nonce })}>[data-nativefragments-deferred][data-fragment-state="loading"]{display:none}</style></noscript><script${attrs({
   nonce,
   "data-nativefragments-deferred-bootstrap": true,
-})}>(${raw(installDocumentReveals.toString())})();</script>`;
+})}>${raw(documentRevealScript)}</script>`;

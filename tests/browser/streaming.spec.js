@@ -1,6 +1,8 @@
 import { test, expect } from "@playwright/test";
 
 test("document payloads wait for their closing tag across network chunks", async ({ page, request }) => {
+  const errors = [];
+  page.on("pageerror", error => errors.push(error.message));
   const gate = crypto.randomUUID();
   await page.goto(`/split-document?gate=${gate}`, { waitUntil: "commit" });
   const target = page.locator('[data-nativefragments-deferred="split"]');
@@ -8,6 +10,7 @@ test("document payloads wait for their closing tag across network chunks", async
   await request.get(`/control/release?gate=${gate}`);
   await expect(target).toHaveText("FirstLast");
   await expect(target).toHaveAttribute("data-fragment-state", "ready");
+  expect(errors).toEqual([]);
 });
 
 test("cached streamed navigation remains populated after a streamed document", async ({ page }) => {

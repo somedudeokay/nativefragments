@@ -6,7 +6,13 @@ import { renderLit } from "@nativefragments/lit/server";
 import { createNodeHandler } from "@nativefragments/create-app/http";
 import { createCloudflareHandler } from "@nativefragments/core/cloudflare";
 import { fragment, html, raw, route } from "@nativefragments/core/server";
-import { deferredFragmentBootstrap } from "../../packages/core/src/server/defer.js";
+// Match Wrangler's keepNames transform: emitted inline scripts must not capture
+// any bundler helpers from the server module's surrounding scope.
+const bootstrapBundle = await build({
+  stdin: { contents: 'export { deferredFragmentBootstrap } from "./packages/core/src/server/defer.js";', resolveDir: process.cwd() },
+  bundle: true, write: false, minify: true, keepNames: true, format: "esm", platform: "node",
+});
+const { deferredFragmentBootstrap } = await import(`data:text/javascript;base64,${Buffer.from(bootstrapBundle.outputFiles[0].contents).toString("base64")}`);
 import "./island.js";
 
 const { outputFiles } = await build({ entryPoints: ["tests/browser/island.js"], bundle: true, write: false, format: "esm", platform: "browser" });
@@ -75,7 +81,7 @@ const fetchFixture = async request => {
     return new Response(await readFile(new URL(`../../packages/core/client/${url.pathname.split("/").at(-1)}`, import.meta.url)), { headers: { "content-type": "text/javascript" } });
   }
   if (url.pathname === "/split-document") {
-    const markup = String(html`<!doctype html><html><body><main id="content-slot"><section data-nativefragments-deferred="split" data-fragment-state="loading">Loading</section></main>${deferredFragmentBootstrap()}<div hidden data-nativefragments-deferred-content="split" data-fragment-state="ready">`);
+    const markup = String(html`<!doctype html><html><body><main id="content-slot"><section data-nativefragments-deferred="split" data-fragment-state="loading">Loading</section></main>${raw(String(deferredFragmentBootstrap()))}<div hidden data-nativefragments-deferred-content="split" data-fragment-state="ready">`);
     return new Response(new ReadableStream({ async start(controller) {
       controller.enqueue(encoder.encode(markup));
       await gate(url.searchParams.get("gate")).promise;

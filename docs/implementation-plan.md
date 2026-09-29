@@ -17,7 +17,8 @@ example with migrations, isolated authentication, mutations and recovery keys.
 Streaming fixes cover partial parser payloads, response-scoped identities, stale
 observers, cached reveal replay, declarative shadow-root hydration, shared HTTP
 streaming and event-based gallery telemetry. Named targets exclude navigation
-links. No-JavaScript fallbacks are visible, including under strict CSP.
+links. No-JavaScript fallbacks are visible, including under strict CSP. Inline reveal programs remain literal source through production bundling;
+function serialization must not capture injected keepNames helpers.
 
 See packages/core/docs/migration-0.8.md for contracts and upgrade guidance,
 apps/task-board/README.md for operations, and release-0.8-validation.json for
