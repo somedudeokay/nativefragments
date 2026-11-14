@@ -7,7 +7,7 @@ import { codeBlock } from "../code.js";
 const routeExample = `import { fragment, html, route } from "@nativefragments/core/server";
 
 const activity = fragment("activity", {
-  loading: () => html\`<p aria-live="polite">Loading activity…</p>\`,
+  loading: () => html\`<p>Loading activity…</p>\`,
   render: async ({ signal }) =>
     activityFeed(await loadActivity({ signal })),
 });
@@ -118,14 +118,14 @@ export const homePage = async () => html`
           Read the source
         </a>
       </div>
-      <p class="home-stack" aria-label="Technology stack">
-        <span>Cloudflare Workers</span><span>Lit</span><span>Web Components</span><span>Native APIs</span>
-      </p>
+      <ul class="home-stack" role="list" aria-label="Technology stack">
+        <li>Cloudflare Workers</li><li>Lit</li><li>Web Components</li><li>Native APIs</li>
+      </ul>
     </div>
     ${await renderLit(lit`<nf-runtime-map></nf-runtime-map>`)}
   </section>
 
-  <section class="home-proof" aria-label="Framework guarantees">
+  <section class="home-proof">
     <div><strong>HTML</strong><span>first response</span></div>
     <div><strong>Stream</strong><span>shell, then fragments</span></div>
     <div><strong>Native</strong><span>links and forms</span></div>
@@ -183,13 +183,14 @@ export const homePage = async () => html`
         <a class="stream-link stream-link--quiet" href="https://docs.nativefragments.org/concepts/streaming">Read the protocol</a>
       </div>
     </div>
-    <div class="stream-console" aria-label="Example fragment stream">
+    <figure class="stream-console">
+      <figcaption>Response body · live</figcaption>
       <p><span>00 ms</span><b>shell</b><em>painted</em></p>
       <p><span>18 ms</span><b>page fragment</b><em>swapped</em></p>
       <p><span>112 ms</span><b>summary</b><em>revealed</em></p>
       <p><span>384 ms</span><b>artworks</b><em>revealed</em></p>
       <p data-state="error"><span>421 ms</span><b>provenance</b><em>error boundary</em></p>
-    </div>
+    </figure>
   </section>
 
   <section class="home-principles">

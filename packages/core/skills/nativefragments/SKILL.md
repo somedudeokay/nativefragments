@@ -40,7 +40,7 @@ ignored.
 import { fragment, html, route } from "@nativefragments/core/server";
 
 const details = fragment("details", {
-  loading: () => html`<p aria-live="polite">Loading…</p>`,
+  loading: () => html`<p>Loading…</p>`,
   error: () => html`<p role="status">Unavailable.</p>`,
   render: async ({ signal }) => detailsView(await loadDetails({ signal })),
 });
@@ -172,6 +172,24 @@ real browser that:
 - deferred regions reveal independently;
 - back/forward, focus, scroll, title, and canonical metadata work;
 - no JavaScript console errors or failed requests appear.
+
+## Accessibility defaults
+
+- Give every page one `<h1>`: primary navigation moves focus to it.
+- Keep `loading()` content plain. The deferred slot is `aria-busy`, which
+  silences live regions inside it; put a `role="status"` message outside the
+  slot when a wait is long enough to announce.
+- Mark the current link with `aria-current="page"` inside a `<nav>`; the router
+  keeps it in sync for links outside the swapped region.
+- Named-slot navigation keeps focus in place, so filter forms stay usable.
+- View transitions are skipped for reduced-motion users; gate your own
+  animation and smooth scrolling the same way.
+- Under a Trusted Types CSP, allow the `nativefragments` policy.
+
+For UI work (dialogs, forms, tables, theming, performance), consult
+`npx -y modern-web-guidance@latest search "<capability>"` when available. Its
+examples are plain HTML/JS: render the markup through `html`, put interaction
+in Lit components, and remember that fragment swaps replace DOM nodes.
 
 ## Request state and release guarantees
 

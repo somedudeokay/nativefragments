@@ -10,6 +10,6 @@ export const examplesPage = () => html`<section class="page-hero compact example
   </p>
 </section>
 
-<section class="demo-list" aria-label="Native Fragments examples">
+<section class="demo-list">
   ${demoRows()}
 </section>`;

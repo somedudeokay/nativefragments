@@ -1,5 +1,15 @@
 # @nativefragments/create-app
 
+## 0.7.1
+
+### Patch Changes
+
+- Starter template: every page has an `<h1>`, the counter works without
+  JavaScript through a POST action and a 303 redirect, the canonical URL comes
+  from the request origin, view transitions respect reduced motion, and the
+  template uses a system font stack with no third-party font request. Requires
+  `@nativefragments/core` 0.9.
+
 ## 0.7.0
 
 ### Minor Changes

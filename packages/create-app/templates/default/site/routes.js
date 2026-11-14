@@ -1,14 +1,14 @@
 import { route } from "@nativefragments/core/server";
-import { counterPage } from "./pages/counter.js";
+import { counterAction, counterPage } from "./pages/counter.js";
 import {
   nestedPanelFragment,
   nestedRoutePage,
 } from "./pages/nested-route.js";
 
-const origin = "https://example.com";
-
+// The canonical URL follows the origin the app is served from. Pin it to your
+// production origin here if the app is reachable on more than one host.
 const meta = (context, path, title, description) => ({
-  canonical: `${origin}${path}`,
+  canonical: new URL(path, context.url.origin).href,
   description,
   title,
 });
@@ -23,6 +23,7 @@ export const routes = [
         "A Native Fragments app with streamed HTML and a server-rendered Lit component.",
       ),
     render: counterPage,
+    action: counterAction,
   }),
   route("/nested-route", {
     fragments: [nestedPanelFragment],

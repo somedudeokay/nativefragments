@@ -1062,8 +1062,8 @@ export const apiSections = [
         "description": "",
         "properties": [],
         "type": "import(\"../server/router.js\").Route",
-        "line": 246,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L246"
+        "line": 249,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L249"
       },
       {
         "name": "CloudflareHandlerOptions",
@@ -1159,15 +1159,15 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 250,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L250"
+        "line": 253,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L253"
       }
     ],
     "symbols": [
       {
         "name": "createCloudflareHandler",
         "signature": "createCloudflareHandler(options) → { fetch(request: Request, env?: Record<string, unknown>, context?: unknown): Promise<Response> }",
-        "line": 286,
+        "line": 289,
         "description": "Create a Cloudflare Worker module for a Native Fragments app. Static assets are served from the configured assets binding. Normal document requests render the app shell. Requests with `x-fragment: true` return the route body plus fragment metadata, using framed HTML streaming when the route has deferred content. Requests under `apiPrefix` are delegated to the optional API router before app route matching.",
         "private": false,
         "params": [
@@ -1276,7 +1276,7 @@ export const apiSections = [
           "description": "Cloudflare Worker module."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L286"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/src/cloudflare/index.js#L289"
       }
     ]
   },
@@ -1291,8 +1291,8 @@ export const apiSections = [
         "description": "",
         "properties": [],
         "type": "\"none\" | \"intent\" | \"visible\" | \"load\"",
-        "line": 279,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L279"
+        "line": 351,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L351"
       },
       {
         "name": "FragmentRouterOptions",
@@ -1343,7 +1343,7 @@ export const apiSections = [
             "type": "boolean",
             "optional": true,
             "default": "true",
-            "description": "Use View Transitions when available.",
+            "description": "Use View Transitions when available. Skipped when the user prefers reduced motion. Named slots transition on their own element where supported; document transitions carry a `nativefragments-forward`, `-back` or `-replace` type for `:active-view-transition-type()`.",
             "rest": false
           },
           {
@@ -1356,8 +1356,8 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 283,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L283"
+        "line": 355,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L355"
       },
       {
         "name": "NavigateOptions",
@@ -1389,8 +1389,8 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 295,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L295"
+        "line": 371,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L371"
       },
       {
         "name": "FragmentRequestOptions",
@@ -1414,8 +1414,8 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 302,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L302"
+        "line": 378,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L378"
       },
       {
         "name": "InvalidateOptions",
@@ -1431,8 +1431,8 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 308,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L308"
+        "line": 384,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L384"
       },
       {
         "name": "FragmentRouter",
@@ -1464,15 +1464,15 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 313,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L313"
+        "line": 389,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L389"
       }
     ],
     "symbols": [
       {
         "name": "startRouter",
         "signature": "startRouter(options?) → Readonly<FragmentRouter>",
-        "line": 333,
+        "line": 409,
         "description": "Start document navigation and return a small imperative controller. Links and opted-in GET forms retain their native behavior when JavaScript is unavailable. While active, same-origin navigation is upgraded with streamed HTML fragments, history, metadata, focus, scrolling, and prefetching.",
         "private": false,
         "params": [
@@ -1529,7 +1529,7 @@ export const apiSections = [
                 "type": "boolean",
                 "optional": true,
                 "default": "true",
-                "description": "Use View Transitions when available.",
+                "description": "Use View Transitions when available. Skipped when the user prefers reduced motion. Named slots transition on their own element where supported; document transitions carry a `nativefragments-forward`, `-back` or `-replace` type for `:active-view-transition-type()`.",
                 "rest": false
               },
               {
@@ -1549,7 +1549,7 @@ export const apiSections = [
           "description": "Router controller."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L333",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L409",
         "returnFields": [
           {
             "name": "navigate",
@@ -1599,8 +1599,8 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 41,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/worker.js#L41"
+        "line": 43,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/worker.js#L43"
       },
       {
         "name": "NativeWorkerClient",
@@ -1632,8 +1632,8 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 46,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/worker.js#L46"
+        "line": 48,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/worker.js#L48"
       },
       {
         "name": "NativeWorkerScope",
@@ -1665,15 +1665,15 @@ export const apiSections = [
           }
         ],
         "type": "object",
-        "line": 55,
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/worker.js#L55"
+        "line": 57,
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/worker.js#L57"
       }
     ],
     "symbols": [
       {
         "name": "transferResult",
         "signature": "transferResult(payload, transfer?) → { payload: T, transfer: Transferable[], [transferMarker]: true }",
-        "line": 35,
+        "line": 37,
         "description": "Wrap a worker response with Transferable objects.",
         "private": false,
         "params": [
@@ -1700,12 +1700,12 @@ export const apiSections = [
           "description": ""
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/worker.js#L35"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/worker.js#L37"
       },
       {
         "name": "workerClient",
         "signature": "workerClient(worker, options?) → NativeWorkerClient",
-        "line": 72,
+        "line": 74,
         "description": "Create a tiny RPC client for a dedicated Web Worker.",
         "private": false,
         "params": [
@@ -1749,7 +1749,7 @@ export const apiSections = [
           "description": "Worker client."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/worker.js#L72",
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/worker.js#L74",
         "returnFields": [
           {
             "name": "call",
@@ -1780,7 +1780,7 @@ export const apiSections = [
       {
         "name": "createWorkerClient",
         "signature": "createWorkerClient(workerOrUrl, options?) → NativeWorkerClient",
-        "line": 148,
+        "line": 150,
         "description": "Create a module worker and wrap it with `workerClient`.",
         "private": false,
         "params": [
@@ -1824,12 +1824,12 @@ export const apiSections = [
           "description": "Worker client."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/worker.js#L148"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/worker.js#L150"
       },
       {
         "name": "exposeWorker",
         "signature": "exposeWorker(handlers, scope?) → () => void",
-        "line": 165,
+        "line": 167,
         "description": "Expose named handlers inside a dedicated Web Worker.",
         "private": false,
         "params": [
@@ -1882,7 +1882,7 @@ export const apiSections = [
           "description": "Cleanup function."
         },
         "type": "",
-        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/worker.js#L165"
+        "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/worker.js#L167"
       }
     ]
   },
@@ -2137,8 +2137,8 @@ export const apiTypes = [
     "description": "",
     "properties": [],
     "type": "\"none\" | \"intent\" | \"visible\" | \"load\"",
-    "line": 279,
-    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L279"
+    "line": 351,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L351"
   },
   {
     "name": "NavigateOptions",
@@ -2170,8 +2170,8 @@ export const apiTypes = [
       }
     ],
     "type": "object",
-    "line": 295,
-    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L295"
+    "line": 371,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L371"
   },
   {
     "name": "FragmentRequestOptions",
@@ -2195,8 +2195,8 @@ export const apiTypes = [
       }
     ],
     "type": "object",
-    "line": 302,
-    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L302"
+    "line": 378,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L378"
   },
   {
     "name": "InvalidateOptions",
@@ -2212,7 +2212,7 @@ export const apiTypes = [
       }
     ],
     "type": "object",
-    "line": 308,
-    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L308"
+    "line": 384,
+    "source": "https://github.com/somedudeokay/nativefragments/blob/main/packages/core/client/router.js#L384"
   }
 ];

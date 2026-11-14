@@ -1,5 +1,4 @@
-import { attrs, html, raw } from "@nativefragments/core/server";
-import { criticalStyles } from "./critical-styles.js";
+import { attrs, html } from "@nativefragments/core/server";
 import { siteFooter } from "./footer.js";
 import { siteHeader } from "./header.js";
 
@@ -13,7 +12,6 @@ const headLinks = ({ meta, nonce }) => html`
   <script${attrs({ nonce })}>
     document.documentElement.classList.add("js");
   </script>
-  <style${attrs({ nonce })}>${raw(criticalStyles)}</style>
   <link rel="stylesheet" href="/app/styles.css" />
   <script${attrs({ nonce })} type="module" src="/build/client.js"></script>
 `;
@@ -26,7 +24,7 @@ export const shell = async ({ body, meta, nonce }) => html`<!doctype html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="dark light" />
+    <meta name="color-scheme" content="light" />
     ${headLinks({ meta, nonce })}
   </head>
   <body>

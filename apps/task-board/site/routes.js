@@ -9,17 +9,21 @@ const rateLimit = async ({ env, request }) => {
   const key = request.headers.get("cf-connecting-ip") ?? "local";
   if (env.AUTH_LIMITER && !(await env.AUTH_LIMITER.limit({ key })).success) throw new Response("Please wait a minute before trying again.", { status: 429 });
 };
-const login = () => html`<section class="welcome"><p class="eyebrow">A little room to get things done</p><h1>Your work.<br>Your workspace.</h1><p class="intro">Keep a short list, finish what matters, and pick it up again later.</p>
+const htmlPage = (body, title, status) => new Response(String(shell({ body, meta: { title } })), { status, headers: { ...privateHeaders, "Content-Type": "text/html; charset=utf-8" } });
+const wantsJson = request => request.headers.get("accept")?.includes("application/json");
+const login = ({ error } = {}) => html`<section class="welcome"><p class="eyebrow">A little room to get things done</p><h1>Your work.<br>Your workspace.</h1><p class="intro">Keep a short list, finish what matters, and pick it up again later.</p>
   <div class="entry-options"><form action="/signup" method="post"><h2>Start fresh</h2><p>Create a private workspace. You’ll get a recovery key to reopen it on another device.</p><button>Create workspace <span aria-hidden="true">↗</span></button></form>
-  <form action="/login" method="post"><h2>Pick up where you left off</h2><label for="key">Recovery key</label><input id="key" name="key" type="password" required minlength="43" maxlength="43" autocomplete="off"><button class="secondary">Open workspace</button></form></div></section>`;
+  <form action="/login" method="post"><h2>Pick up where you left off</h2><label for="key">Recovery key</label><input id="key" name="key" type="password" required minlength="43" maxlength="43" autocomplete="current-password"${error ? html` aria-invalid="true" aria-describedby="key-error" autofocus` : ""}>${error ? html`<p class="field-error" id="key-error">${error}</p>` : ""}<button class="secondary">Open workspace</button></form></div></section>`;
 const tasks = fragment("tasks", async scope => {
   const workspace = requireWorkspace(scope);
   const filter = scope.params.filter === "done" ? "done" : scope.params.filter === "open" ? "open" : "all";
   const condition = filter === "all" ? "" : ` AND done = ${filter === "done" ? 1 : 0}`;
   const { results } = await scope.env.DB.prepare(`SELECT id, title, done FROM tasks WHERE workspace_id = ?${condition} ORDER BY created_at DESC, id DESC LIMIT 100`).bind(workspace).all();
-  return html`<div class="task-list">${results.length ? results.map(task => html`<article class="task" data-task-id="${task.id}" data-done="${task.done}">
+  const label = { all: "Everything", open: "To do", done: "Done" };
+  return html`<nav class="filters" aria-label="Filter tasks">${Object.keys(label).map(name => html`<a href="/workspace/${name}"${tasks.attrs(name === filter ? { "aria-current": "page" } : {})}>${label[name]}</a>`)}</nav>
+  ${results.length ? html`<ul class="task-list" role="list">${results.map(task => html`<li class="task" data-task-id="${task.id}" data-done="${task.done}">
     <form action="/tasks/${task.id}/toggle" method="post" data-task-form><button class="check" aria-label="${task.done ? "Reopen" : "Complete"} ${task.title}">${task.done ? "✓" : "○"}</button></form><span class="task-title">${task.title}</span>
-    <form action="/tasks/${task.id}/delete" method="post" data-task-form><button class="remove" aria-label="Delete ${task.title}">×</button></form></article>`) : html`<p class="empty">Nothing here yet. Add a task above to get started.</p>`}</div>`;
+    <form action="/tasks/${task.id}/delete" method="post" data-task-form><button class="remove" aria-label="Delete ${task.title}">×</button></form></li>`)}</ul>` : html`<p class="empty">Nothing here yet. Add a task above to get started.</p>`}`;
 });
 const summary = fragment("summary", {
   loading: () => html`<p>Counting your tasks…</p>`,
@@ -29,22 +33,25 @@ const summary = fragment("summary", {
     return html`<p class="summary"><b>${row.done}</b> of ${row.total} tasks complete</p>`;
   },
 });
+const addTask = ({ error, value = "" } = {}) => html`<form action="/tasks" method="post" data-task-form class="add-task"><label for="title">What needs doing?</label><div><input id="title" name="title" required maxlength="200" pattern=".*\\S.*" title="Use at least one character that is not a space" placeholder="Write the next small step" autocomplete="off" value="${value}"${error ? html` aria-invalid="true" aria-describedby="title-error" autofocus` : ""}><button>Add task</button></div>${error ? html`<p class="field-error" id="title-error">${error}</p>` : ""}</form>`;
+const taskError = (scope, message, status, value) => wantsJson(scope.request)
+  ? new Response(message, { status, headers: privateHeaders })
+  : htmlPage(html`<section class="welcome"><p class="eyebrow">Your workspace</p><h1>That task wasn’t added.</h1>${addTask({ error: message, value })}<p><a href="/workspace">Back to my tasks</a></p></section>`, "Error: task not added · Fieldwork", status);
 const workspace = async scope => {
   if (!scope.locals.workspace) return redirect("/login");
-  return html`<section class="workspace"><aside><p class="eyebrow">Your workspace</p><h1>Make room<br>for progress.</h1>${scope.defer(summary)}<form action="/logout" method="post"><button class="text-button">Sign out</button></form></aside>
-  <div class="workspace-main"><form action="/tasks" method="post" data-task-form class="add-task"><label for="title">What needs doing?</label><div><input id="title" name="title" required maxlength="200" placeholder="Write the next small step" autocomplete="off"><button>Add task</button></div></form><p id="form-status" role="status"></p>
-  <nav class="filters" aria-label="Filter tasks">${["all", "open", "done"].map(filter => html`<a href="/workspace/${filter}"${tasks.attrs()}>${filter === "all" ? "Everything" : filter === "open" ? "To do" : "Done"}</a>`)}</nav>
+  return html`<section class="workspace"><div class="workspace-side"><p class="eyebrow">Your workspace</p><h1>Make room<br>for progress.</h1><aside aria-label="Progress">${scope.defer(summary)}<form action="/logout" method="post"><button class="text-button">Sign out</button></form></aside></div>
+  <div class="workspace-main">${addTask()}<p id="form-status" role="status"></p>
   <section${tasks.attrs()} aria-label="Tasks">${await tasks.render(scope)}</section></div></section>`;
 };
-const mutationResult = request => request.headers.get("accept")?.includes("application/json")
+const mutationResult = request => wantsJson(request)
   ? Response.json({ ok: true }, { headers: privateHeaders }) : redirect("/workspace", 303);
 export const routes = [
   page("/", { render: () => redirect("/workspace") }),
-  page("/login", { render: login, action: async scope => {
+  page("/login", { render: () => login(), action: async scope => {
     const form = await readForm(scope); await rateLimit(scope);
     const key = form.get("key");
     const found = validRecoveryKey(key) && await scope.env.DB.prepare("SELECT id FROM workspaces WHERE recovery_hash = ?").bind(await digest(key)).first();
-    if (!found) return new Response("Recovery key not recognized. Go back and try again.", { status: 401, headers: privateHeaders });
+    if (!found) return htmlPage(login({ error: "Recovery key not recognized. Check it and try again." }), "Error: recovery key not recognized · Fieldwork", 401);
     return redirectWith("/workspace", await newSession(scope.env, found.id, scope.request));
   } }),
   page("/signup", { render: () => redirect("/login"), action: async scope => {
@@ -64,9 +71,9 @@ export const routes = [
   page("/workspace/:filter", { render: workspace, fragments: [tasks, summary] }),
   page("/tasks", { render: () => redirect("/workspace"), action: async scope => {
     const id = requireWorkspace(scope); const form = await readForm(scope); const title = form.get("title")?.trim();
-    if (!title || title.length > 200) return new Response("Use a task title between 1 and 200 characters.", { status: 400 });
+    if (!title || title.length > 200) return taskError(scope, "Use a task title between 1 and 200 characters.", 400, title ?? "");
     const result = await scope.env.DB.prepare("INSERT INTO tasks(id, workspace_id, title, created_at) SELECT ?, ?, ?, ? WHERE (SELECT count(*) FROM tasks WHERE workspace_id = ?) < 100").bind(crypto.randomUUID(), id, title, Date.now(), id).run();
-    if (!result.meta.changes) return new Response("This workspace has 100 tasks. Delete a task to make room.", { status: 409 });
+    if (!result.meta.changes) return taskError(scope, "This workspace has 100 tasks. Delete a task to make room.", 409, title);
     return mutationResult(scope.request);
   } }),
   ...["toggle", "delete"].map(operation => page(`/tasks/:id/${operation}`, { render: () => redirect("/workspace"), action: async scope => {

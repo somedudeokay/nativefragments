@@ -1,5 +1,5 @@
 import { createNavigationScope } from "./navigation.js";
-import { parseHtml } from "./dom.js";
+import { adoptChildren, parseHtml } from "./dom.js";
 import { createFragmentLoader } from "./fragment-loader.js";
 
 const defaultTarget = "#content-slot";
@@ -76,9 +76,7 @@ const revealDeferredContent = (content, root) => {
     const target = root.matches?.(selector) ? root : root.querySelector?.(selector);
     if (!target) continue;
 
-    const fragment = document.createDocumentFragment();
-    while (source.firstChild) fragment.appendChild(source.firstChild);
-    target.replaceChildren(fragment);
+    adoptChildren(source, target);
     const state = source.getAttribute("data-fragment-state") || "ready";
     target.setAttribute("data-fragment-state", state);
     target.removeAttribute("aria-busy");
@@ -119,9 +117,78 @@ const restoreScroll = (position) => {
   return true;
 };
 
-const focusTarget = (target) => {
-  if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
-  target.focus({ preventScroll: true });
+// Focus a navigation landmark without leaving a permanent tabindex behind: a
+// lingering tabindex="-1" makes every later click inside the element reset the
+// sequential focus starting point to its top.
+const focusElement = (element) => {
+  const temporary = !element.hasAttribute("tabindex");
+  if (temporary) {
+    element.setAttribute("tabindex", "-1");
+    element.addEventListener("blur", () => element.removeAttribute("tabindex"), { once: true });
+  }
+  element.focus({ preventScroll: true });
+};
+
+// Primary navigations focus the new view's heading, like a document load
+// announces its title. Named slots update in place, so focus only moves when
+// the swap removed the element that had it.
+const focusAfterSwap = (target, slot, hadFocus) => {
+  if (slot) {
+    if (hadFocus && !target.contains(document.activeElement)) focusElement(target);
+    return;
+  }
+  focusElement(target.querySelector("h1") ?? target);
+};
+
+const normalizedPath = (pathname) => pathname.replace(/(.)\/+$/, "$1");
+
+// Keep aria-current="page" truthful on navigation links that live outside the
+// swapped region (headers, sidebars). Within each <nav> the exact pathname
+// wins; otherwise the longest section prefix does, so "/docs" stays current on
+// "/docs/routing". Opt a <nav> out with data-fragment-current="manual".
+const syncCurrentLinks = (target) => {
+  const current = new URL(window.location.href);
+  const path = normalizedPath(current.pathname);
+  for (const nav of document.querySelectorAll('nav:not([data-fragment-current="manual"])')) {
+    let best = -1;
+    const scored = [];
+    for (const link of nav.querySelectorAll("a[href]")) {
+      if (target.contains(link)) continue;
+      let url;
+      try { url = new URL(link.href); } catch { continue; }
+      const linkPath = normalizedPath(url.pathname);
+      let score = -1;
+      if (url.origin === current.origin && (!url.search || url.search === current.search)) {
+        if (linkPath === path) score = Infinity;
+        else if (linkPath !== "/" && path.startsWith(`${linkPath}/`)) score = linkPath.length;
+      }
+      best = Math.max(best, score);
+      scored.push([link, score]);
+    }
+    for (const [link, score] of scored) {
+      if (score >= 0 && score === best) link.setAttribute("aria-current", "page");
+      else if (link.getAttribute("aria-current") === "page") link.removeAttribute("aria-current");
+    }
+  }
+};
+
+const prefersReducedMotion = () =>
+  typeof window.matchMedia === "function" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const supportsTransitionTypes = () =>
+  typeof ViewTransition === "function" && "types" in ViewTransition.prototype;
+
+// Named slots transition on their own element where supported, so concurrent
+// slot navigations do not cancel each other or block the rest of the page.
+const startTransition = (target, slot, update, direction) => {
+  if (slot && typeof target.startViewTransition === "function") {
+    return target.startViewTransition(update);
+  }
+  if (typeof document.startViewTransition !== "function") return null;
+  return supportsTransitionTypes()
+    ? document.startViewTransition({ update, types: [`nativefragments-${direction}`] })
+    : document.startViewTransition(update);
 };
 
 const saveCurrentScrollPosition = () => {
@@ -146,8 +213,10 @@ const applyFragment = async ({
   viewTransitions,
   transaction,
   commitNavigation,
+  direction,
 }) => {
   let revealed = [];
+  const hadFocus = target.contains(document.activeElement);
   const swap = () => transaction.commit(() => {
     target.removeAttribute("data-nativefragments-deferred");
     target.replaceChildren(fragment.content);
@@ -155,10 +224,13 @@ const applyFragment = async ({
     setHead(fragment.meta);
     bindPrefetch(target);
     commitNavigation(url, slot, historyMode);
+    if (!slot) syncCurrentLinks(target);
   });
 
-  if (viewTransitions && typeof document.startViewTransition === "function") {
-    const transition = document.startViewTransition(swap);
+  const transition = viewTransitions && !prefersReducedMotion()
+    ? startTransition(target, slot, swap, direction)
+    : null;
+  if (transition) {
     void transition.ready?.catch(() => {});
     void transition.finished?.catch(() => {});
     await transaction.wait(transition.updateCallbackDone);
@@ -170,7 +242,7 @@ const applyFragment = async ({
   if (!restoreScroll(restore) && !scrollToHash(url) && scroll) {
     scrollToTop();
   }
-  if (userInitiated) focusTarget(target);
+  if (userInitiated) focusAfterSwap(target, slot, hadFocus);
   return revealed;
 };
 
@@ -288,7 +360,11 @@ const navigationPhase = (error) =>
  * @property {number} [cacheMaxBytes=2000000] Maximum retained HTML bytes.
  * @property {PrefetchMode | boolean} [prefetch="intent"]
  * Default automatic prefetch policy.
- * @property {boolean} [viewTransitions=true] Use View Transitions when available.
+ * @property {boolean} [viewTransitions=true]
+ * Use View Transitions when available. Skipped when the user prefers reduced
+ * motion. Named slots transition on their own element where supported;
+ * document transitions carry a `nativefragments-forward`, `-back` or
+ * `-replace` type for `:active-view-transition-type()`.
  * @property {AbortSignal} [signal] Aborting this signal tears down the router.
  */
 
@@ -390,11 +466,11 @@ export const startRouter = ({
 
   const targetFor = (slot) => (slot ? namedSlotTarget(slot) : primaryTarget);
 
-  const prefetchFragment = async (href, { slot, signal } = {}) => {
+  const prefetchFragment = async (href, { slot, signal, priority } = {}) => {
     if (destroyed) throw new DOMException("Router lifetime ended", "InvalidStateError");
     const url = routeTo(href);
     if (url.origin !== window.location.origin || requestsDocumentNavigation(url)) return;
-    await loader.prefetch({ signal, slot, ttl: cacheTtl, url });
+    await loader.prefetch({ priority, signal, slot, ttl: cacheTtl, url });
   };
 
   const visibleObserver =
@@ -406,6 +482,7 @@ export const startRouter = ({
             visibleObserver.unobserve(link);
             void prefetchFragment(link.href, {
               slot: link.dataset.fragmentSlot || undefined,
+              priority: "low",
             }).catch(() => {});
           }
         }, { rootMargin: "240px" })
@@ -424,8 +501,10 @@ export const startRouter = ({
       const mode = linkPrefetchMode(link, defaultPrefetch);
       if (mode === "load" && !loadedLinks.has(link)) {
         loadedLinks.add(link);
+        // Speculative; must not compete with the document's own requests.
         void prefetchFragment(link.href, {
           slot: link.dataset.fragmentSlot || undefined,
+          priority: "low",
         }).catch(() => {});
       }
       if (mode === "visible" && visibleObserver && !visibleLinks.has(link)) {
@@ -450,7 +529,12 @@ export const startRouter = ({
 
   const navigateInternal = async (
     href,
-    { slot, history: historyMode = "push", signal, restore, userInitiated = historyMode !== "none" } = {},
+    {
+      slot, history: historyMode = "push", signal, restore,
+      userInitiated = historyMode !== "none",
+      direction = historyMode === "replace" ? "replace" : "forward",
+      transitions = viewTransitions,
+    } = {},
   ) => {
     if (destroyed) throw new DOMException("Router lifetime ended", "InvalidStateError");
     const requestedUrl = routeTo(href);
@@ -517,11 +601,14 @@ export const startRouter = ({
               target: root,
               url: frame.url,
               userInitiated,
-              viewTransitions,
+              viewTransitions: transitions,
               transaction,
               commitNavigation,
+              direction,
             });
             transaction.check();
+            // The first frame is usable; only deferred slots stay busy.
+            root.removeAttribute("aria-busy");
             dispatchNavigationEvent(root, "navigation-swap", {
               ...detail,
               meta: navigationMeta,
@@ -651,12 +738,19 @@ export const startRouter = ({
       if (!restoreScroll(event.state?.scroll) && !scrollToHash(url)) scrollToTop();
       return;
     }
+    const traversal = {
+      history: "none",
+      userInitiated: false,
+      direction: desired && desired.key < snapshot.key ? "back" : "forward",
+      // A swipe gesture already animated the change; do not animate twice.
+      transitions: viewTransitions && !event.hasUAVisualTransition,
+    };
     void (async () => {
       // Reconstruct the full route recipe, not just the last changed slot.
-      await navigateInternal(desired?.primary ?? url, { history: "none", userInitiated: false });
+      await navigateInternal(desired?.primary ?? url, traversal);
       for (const [slot, href] of Object.entries(desired?.slots ?? {})) {
         if (revision !== restoringHistory) return;
-        await navigateInternal(href, { slot, history: "none", userInitiated: false });
+        await navigateInternal(href, { ...traversal, slot });
       }
       if (revision !== restoringHistory) return;
       if (desired) snapshot = desired;
@@ -683,7 +777,7 @@ export const startRouter = ({
   const controller = Object.freeze({
     invalidate,
     navigate,
-    prefetch: prefetchFragment,
+    prefetch: (href, { slot, signal } = {}) => prefetchFragment(href, { slot, signal }),
   });
   activeRouter = controller;
   return controller;

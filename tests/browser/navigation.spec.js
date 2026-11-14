@@ -30,7 +30,8 @@ test("history restores the full named-target route recipe", async ({ page }) => 
 test("a queued view-transition callback cannot commit after supersession", async ({ page }) => {
   await ready(page);
   await page.evaluate(() => {
-    document.startViewTransition = callback => {
+    document.startViewTransition = arg => {
+      const callback = typeof arg === "function" ? arg : arg.update;
       const pending = Promise.withResolvers();
       window.releaseSwap = () => { try { callback(); pending.resolve(); } catch (error) { pending.reject(error); } };
       return { updateCallbackDone: pending.promise };
@@ -66,4 +67,36 @@ test("fragment navigation hydrates the original SSR shadow nodes", async ({ page
   })).toBe(true);
   await page.locator("test-island button").click();
   await expect(page.locator("test-island")).toHaveAttribute("clicked", "yes");
+});
+
+test("primary navigation focuses the heading, keeps no tabindex and syncs aria-current", async ({ page }) => {
+  await ready(page);
+  await navigate(page, "/plain");
+  await expect(page.locator("h1")).toBeFocused();
+  await expect(page.locator('nav a[href="/plain"]')).toHaveAttribute("aria-current", "page");
+  await expect(page.locator('nav a[href="/"]')).not.toHaveAttribute("aria-current");
+  await expect(page.locator("#content-slot")).not.toHaveAttribute("tabindex");
+  await expect(page.locator("#content-slot")).not.toHaveAttribute("aria-busy");
+  await page.locator("h1").evaluate(node => node.blur());
+  await expect(page.locator("h1")).not.toHaveAttribute("tabindex");
+});
+
+test("named slot navigation leaves focus where it was", async ({ page }) => {
+  await ready(page);
+  await navigate(page, "/settings");
+  const link = page.getByRole("link", { name: "Profile link before target" });
+  await link.focus();
+  await link.press("Enter");
+  await expect(page.locator('section[data-fragment-slot="panel"]')).toHaveText("profile");
+  await expect(link).toBeFocused();
+});
+
+test("fragment navigation works under enforced Trusted Types", async ({ page }) => {
+  await page.goto("/strict");
+  await page.waitForFunction(() => window.router);
+  await page.evaluate(() => { window.sameDocument = true; });
+  await navigate(page, "/plain");
+  await expect(page.locator("h1")).toHaveText("Plain");
+  expect(await page.evaluate(() => window.sameDocument)).toBe(true);
+  expect(await page.evaluate(() => window.events.some(event => event.name === "navigation-error"))).toBe(false);
 });

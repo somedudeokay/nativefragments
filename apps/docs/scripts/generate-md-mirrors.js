@@ -62,7 +62,7 @@ const toMarkdown = (htmlString) => {
   // Extract code + callouts first so the whitespace collapse cannot corrupt
   // highlighted token spacing inside code.
   html = html.replace(
-    /<pre class="code-block" data-language="([^"]+)"><code>([\s\S]*?)<\/code><\/pre>/g,
+    /<figure class="code-block" data-language="([^"]+)"><pre[^>]*><code>([\s\S]*?)<\/code><\/pre><\/figure>/g,
     (_, lang, body) => stash(`\`\`\`${lang}\n${stripTags(body)}\n\`\`\``),
   );
   html = html.replace(

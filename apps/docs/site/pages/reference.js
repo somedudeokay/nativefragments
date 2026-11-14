@@ -177,7 +177,7 @@ const sectionIntro = (section) => {
 
 const renderSymbol = (symbol) => `<article class="api-symbol">
   <h3 id="${symbol.name}">${symbolLink(symbol.name, symbol.source)}</h3>
-  <pre class="api-sig"><code>${escapeHtml(symbol.signature)}</code></pre>
+  <pre class="api-sig" tabindex="0" role="region" aria-label="${escapeHtml(symbol.name)} signature"><code>${escapeHtml(symbol.signature)}</code></pre>
   ${symbol.description ? `<p>${inline(symbol.description)}</p>` : ""}
   ${symbol.type ? `<p class="api-label">Type</p><p class="api-returns-line"><code>${linkTypes(symbol.type)}</code></p>` : ""}
   ${
@@ -202,7 +202,7 @@ const renderSymbol = (symbol) => `<article class="api-symbol">
 
 const renderAppendixType = (type) => `<div class="api-type" id="${type.name}">
   <h4 class="api-type-name">${symbolLink(type.name, type.source)}</h4>
-  <pre class="api-sig"><code>${escapeHtml(type.type)}</code></pre>
+  <pre class="api-sig" tabindex="0" role="region" aria-label="${escapeHtml(type.name)} type"><code>${escapeHtml(type.type)}</code></pre>
   ${type.description ? `<p>${inline(type.description)}</p>` : ""}
   ${type.properties?.length ? `<p class="api-label">Properties</p>${fieldList(type.properties)}` : ""}
 </div>`;

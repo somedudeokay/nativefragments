@@ -9,13 +9,15 @@ import "../client/components/docs-search.js";
 const renderNav = (pathname) => html`${navGroups.map(
   (group) => html`<section>
         <h2>${group.title}</h2>
-        ${group.links.map(
-          (link) => html`<a
-            href="${link.href}"
-            ${link.href === pathname ? html`aria-current="page"` : ""}
-            >${link.label}</a
-          >`,
-        )}
+        <ul role="list">
+          ${group.links.map(
+            (link) => html`<li><a
+              href="${link.href}"
+              ${link.href === pathname ? html`aria-current="page"` : ""}
+              >${link.label}</a
+            ></li>`,
+          )}
+        </ul>
       </section>`,
 )}`;
 
@@ -38,15 +40,14 @@ export const shell = async ({ body, meta, nonce }) => {
       document.documentElement.classList.add("js");
     </script>
     <style${attrs({ nonce })}>${raw(criticalStyles)}</style>
-    <link rel="preload" href="/fonts/geist-400.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/geist-500.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/geist-600.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/space-grotesk-700.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/space-grotesk.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/jetbrains-mono-500.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="/app/styles.css" />
     <script${attrs({ nonce })} type="module" src="/build/client.js"></script>
   </head>
   <body>
+    <a class="skip-link" href="#content-slot">Skip to content</a>
     <p class="agent-index">
       For AI agents: fetch <a href="/llms.txt">/llms.txt</a> first for the
       curated documentation index, then use same-host Markdown pages when
@@ -54,27 +55,33 @@ export const shell = async ({ body, meta, nonce }) => {
     </p>
     ${await siteHeader()}
     <div class="layout">
-      <aside class="sidebar" id="docs-sidebar">
-        <button type="button" class="search-trigger" data-search-trigger aria-label="Search documentation">
+      <nav class="sidebar" id="docs-sidebar" aria-label="Docs">
+        <a class="search-trigger" href="/search" data-search-trigger>
           <span class="search-trigger-label">Search the docs…</span>
-          <kbd class="search-trigger-key">⌘K</kbd>
-        </button>
+          <kbd class="search-trigger-key" aria-hidden="true">⌘K</kbd>
+        </a>
         ${renderNav(pathname)}
         <section class="sidebar-site">
           <h2>Native Fragments</h2>
-          <a href="https://nativefragments.org/">Home</a>
-          <a href="https://github.com/somedudeokay/nativefragments">GitHub</a>
+          <ul role="list">
+            <li><a href="https://nativefragments.org/">Home</a></li>
+            <li><a href="https://github.com/somedudeokay/nativefragments">GitHub</a></li>
+          </ul>
         </section>
-      </aside>
+      </nav>
       <main id="content-slot">${body}</main>
     </div>
     <div class="menu-scrim" data-menu-close></div>
-    <nav class="mobile-bar" aria-label="Mobile">
-      <button type="button" class="mobile-bar-btn" data-search-trigger aria-label="Search documentation">
+    <div class="mobile-bar">
+      <a class="mobile-bar-btn" href="/search" data-search-trigger>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
         <span>Search</span>
-      </button>
-      <button type="button" class="mobile-bar-btn mobile-menu-toggle" data-menu-toggle aria-expanded="false" aria-controls="docs-sidebar">
+      </a>
+      <a class="mobile-bar-btn mobile-menu-toggle no-js-only" href="#docs-sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"></path></svg>
+        Menu
+      </a>
+      <button type="button" class="mobile-bar-btn mobile-menu-toggle js-only" data-menu-toggle aria-expanded="false" aria-controls="docs-sidebar">
         <span class="mb-open">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"></path></svg>
           Menu
@@ -84,7 +91,7 @@ export const shell = async ({ body, meta, nonce }) => {
           Close
         </span>
       </button>
-    </nav>
+    </div>
     ${await renderLit(lit`<docs-search></docs-search>`)}
   </body>
 </html>`;

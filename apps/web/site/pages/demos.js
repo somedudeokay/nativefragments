@@ -10,6 +10,6 @@ export const demosPage = () => html`<section class="page-hero compact demos-hero
   </p>
 </section>
 
-<section class="demo-list" aria-label="Native Fragments demos">
+<section class="demo-list">
   ${demoRows()}
 </section>`;

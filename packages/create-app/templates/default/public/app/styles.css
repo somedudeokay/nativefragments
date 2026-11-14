@@ -21,9 +21,11 @@
   --shadow-md: 0 10px 30px -12px rgba(20, 20, 20, 0.18);
   --shadow-lg: 0 30px 60px -20px rgba(20, 20, 20, 0.25);
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --sans: "Geist", ui-sans-serif, system-ui, sans-serif;
-  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* System fonts: nothing to download and no third-party request. To use a
+     web font, self-host the woff2 files under public/app/fonts and add it here. */
+  --display: "Avenir Next", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 * {
@@ -34,7 +36,6 @@ html {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--sans);
-  font-size: 16px;
   line-height: 1.6;
   text-rendering: optimizeLegibility;
   touch-action: manipulation;
@@ -259,7 +260,7 @@ h2 {
   max-width: 58ch;
 }
 
-.counter-route app-counter-panel {
+.counter-route app-counter {
   align-self: center;
 }
 
@@ -346,6 +347,8 @@ h2 {
 .nested-copy li::before {
   color: var(--green);
   content: "->";
+  /* Decorative: the empty alternative text keeps screen readers from reading it. */
+  content: "->" / "";
   left: 0;
   position: absolute;
 }
@@ -373,6 +376,17 @@ p code {
 @media (prefers-reduced-motion: reduce) {
   .nested-copy {
     animation: none;
+  }
+
+  .nested-tabs a {
+    transition: none;
+  }
+
+  /* The router swaps fragments inside a view transition. */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }
 

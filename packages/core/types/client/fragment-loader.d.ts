@@ -10,7 +10,8 @@ export function createFragmentLoader({ maxEntries, maxBytes }?: {
         url: any;
     }) => Promise<any>;
     invalidate: (url: any, { slot }?: {}) => void;
-    prefetch: ({ signal, slot, ttl, url }: {
+    prefetch: ({ priority, signal, slot, ttl, url }: {
+        priority: any;
         signal: any;
         slot: any;
         ttl: any;

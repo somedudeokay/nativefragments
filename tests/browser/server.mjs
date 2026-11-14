@@ -40,7 +40,7 @@ const client = html`<script type="module" async>
   }
 </script><script type="module" src="/island.js"></script>`;
 const shell = ({ body, meta }) => {
-  const before = html`<!doctype html><html><head><meta charset="utf-8"><title>${meta.title ?? "Fixture"}</title>${client}</head><body><a href="/plain">Plain</a><main id="content-slot">`;
+  const before = html`<!doctype html><html><head><meta charset="utf-8"><title>${meta.title ?? "Fixture"}</title>${client}</head><body><nav><a href="/" aria-current="page">Home</a> <a href="/plain">Plain</a></nav><main id="content-slot">`;
   const after = html`</main></body></html>`;
   return body === undefined ? { before, after } : html`${before}${body}${after}`;
 };
@@ -59,6 +59,10 @@ const routes = [
   route("/plain", { render: () => html`<h1>Plain</h1><div style="height:1000px"></div><h2 id="anchor">Anchor</h2>` }),
   route("/stream", { render: ctx => html`<h1>Stream</h1>${ctx.defer(slow)}`, fragments: [slow] }),
   route("/island", { render: island }),
+  route("/strict", {
+    headers: { "Content-Security-Policy": "require-trusted-types-for 'script'; trusted-types nativefragments lit-html 'allow-duplicates'" },
+    render: () => html`<h1>Strict</h1>`,
+  }),
   route("/settings", { render: () => html`<h1>Settings</h1><a href="/settings/profile" data-fragment-slot="panel">Profile link before target</a><section data-fragment-slot="panel">Initial</section><section data-fragment-slot="other">Other initial</section>` }),
   route("/settings/:name", {
     render: ({ params }) => html`<h1>Settings</h1><section data-fragment-slot="panel">${params.name}</section>`,

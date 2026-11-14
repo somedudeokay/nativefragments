@@ -50,7 +50,7 @@ const context = (pathname) => ({
 const entries = [];
 
 for (const route of routes) {
-  if (route.path === "404") continue;
+  if (route.path === "404" || route.path === "/search") continue;
 
   const meta = (await route.meta?.(context(route.path))) ?? {};
   // Drop the "On this page" navigation so its labels don't pollute the index.

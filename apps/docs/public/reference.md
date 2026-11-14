@@ -500,7 +500,7 @@ Module: `@nativefragments/core/client/router.js`
 | `cacheMaxEntries` | `number` | `100` | Maximum cached response groups (including redirect aliases). |
 | `cacheMaxBytes` | `number` | `2000000` | Maximum retained HTML bytes. |
 | `prefetch` | `PrefetchMode | boolean` | `"intent"` | Default automatic prefetch policy. |
-| `viewTransitions` | `boolean` | `true` | Use View Transitions when available. |
+| `viewTransitions` | `boolean` | `true` | Use View Transitions when available. Skipped when the user prefers reduced motion. Named slots transition on their own element where supported; document transitions carry a `nativefragments-forward`, `-back` or `-replace` type for `:active-view-transition-type()`. |
 | `signal` | `AbortSignal` | — | Aborting this signal tears down the router. |
 
 ### NavigateOptions
