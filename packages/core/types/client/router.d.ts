@@ -22,7 +22,10 @@ export type FragmentRouterOptions = {
      */
     prefetch?: PrefetchMode | boolean;
     /**
-     * Use View Transitions when available.
+     * Use View Transitions when available. Skipped when the user prefers reduced
+     * motion. Named slots transition on their own element where supported;
+     * document transitions carry a `nativefragments-forward`, `-back` or
+     * `-replace` type for `:active-view-transition-type()`.
      */
     viewTransitions?: boolean;
     /**

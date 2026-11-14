@@ -1,5 +1,6 @@
 import { LitElement, html as lit, unsafeCSS } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
+import { searchPages } from "../../site/search-score.js";
 
 // <docs-search> — zero-dependency ⌘K command palette for the docs. Lazily loads
 // the static search index (built by scripts/generate-search-index.js), scores
@@ -9,22 +10,28 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 const searchStyles = `
   :host { display: contents; }
 
-  .overlay {
-    align-items: flex-start;
-    background: color-mix(in srgb, var(--ink, #141414) 38%, transparent);
-    backdrop-filter: blur(4px);
-    display: flex;
-    inset: 0;
-    justify-content: center;
-    padding: clamp(3rem, 12vh, 9rem) 1rem 1rem;
-    position: fixed;
-    z-index: 100;
+  dialog {
+    background: transparent;
+    border: 0;
+    color: inherit;
+    margin: clamp(3rem, 12vh, 9rem) auto auto;
+    max-height: none;
+    max-width: calc(100% - 2rem);
+    outline: 0;
+    overscroll-behavior: contain;
+    padding: 0;
+    width: min(640px, 100%);
   }
 
-  .overlay[hidden] { display: none; }
+  input[type="search"]::-webkit-search-cancel-button { display: none; }
 
-  .dialog {
-    animation: pop 0.16s var(--ease, ease) both;
+  dialog::backdrop {
+    backdrop-filter: blur(4px);
+    background: color-mix(in srgb, var(--ink, #141414) 38%, transparent);
+    overscroll-behavior: contain;
+  }
+
+  .panel {
     background: var(--surface, #fffdf6);
     border: 1px solid var(--line-strong, rgba(20, 20, 20, 0.24));
     border-radius: var(--radius-lg, 20px);
@@ -33,7 +40,10 @@ const searchStyles = `
     flex-direction: column;
     max-height: min(70vh, 34rem);
     overflow: hidden;
-    width: min(640px, 100%);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    dialog[open] .panel { animation: pop 0.16s var(--ease, ease) both; }
   }
 
   @keyframes pop {
@@ -44,9 +54,15 @@ const searchStyles = `
   .field {
     align-items: center;
     border-bottom: 1px solid var(--line, rgba(20, 20, 20, 0.1));
+    border-radius: var(--radius-lg, 20px) var(--radius-lg, 20px) 0 0;
     display: flex;
     gap: 0.6rem;
-    padding: 0.85rem 1rem;
+    padding: 0.6rem 0.6rem 0.6rem 1rem;
+  }
+
+  .field:has(input:focus-visible) {
+    outline: 2px solid var(--ink, #141414);
+    outline-offset: -2px;
   }
 
   .field svg { color: var(--muted, #5f5a50); flex: none; height: 1.05rem; width: 1.05rem; }
@@ -59,10 +75,37 @@ const searchStyles = `
     font-family: var(--sans, sans-serif);
     font-size: 1rem;
     min-width: 0;
-    outline: none;
+    outline: none; /* the indicator is drawn on .field */
+    padding: 0.35rem 0;
   }
 
-  input::placeholder { color: color-mix(in srgb, var(--muted, #5f5a50) 80%, transparent); }
+  input::placeholder { color: var(--muted, #5f5a50); }
+
+  form { display: contents; }
+
+  .close {
+    align-items: center;
+    background: color-mix(in srgb, var(--ink, #141414) 5%, transparent);
+    border: 1px solid var(--line, rgba(20, 20, 20, 0.1));
+    border-radius: 8px;
+    color: var(--muted, #5f5a50);
+    cursor: pointer;
+    display: inline-flex;
+    flex: none;
+    font-family: var(--sans, sans-serif);
+    font-size: 0.78rem;
+    font-weight: 500;
+    gap: 0.4rem;
+    min-height: 2rem;
+    padding: 0.25rem 0.55rem;
+  }
+
+  .close:hover { color: var(--ink, #141414); }
+
+  .close:focus-visible {
+    outline: 2px solid var(--ink, #141414);
+    outline-offset: 2px;
+  }
 
   kbd {
     background: color-mix(in srgb, var(--ink, #141414) 5%, transparent);
@@ -75,7 +118,20 @@ const searchStyles = `
     padding: 0.22rem 0.36rem;
   }
 
-  .results { overflow-y: auto; padding: 0.4rem; }
+  .close kbd { background: transparent; border: 0; padding: 0; }
+
+  .visually-hidden {
+    clip-path: inset(50%);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  .results { overflow-y: auto; overscroll-behavior: contain; padding: 0.4rem; }
+  .results:empty { display: none; }
 
   .group + .group { margin-top: 0.25rem; }
 
@@ -105,8 +161,9 @@ const searchStyles = `
   .item .ctx { color: var(--muted, #5f5a50); font-size: 0.78rem; }
   .item.section .label { color: var(--muted, #5f5a50); font-weight: 500; }
   .item.section .label::before {
-    color: var(--green, #1ed760);
+    color: #137a37;
     content: "#";
+    content: "#" / "";
     margin-right: 0.4rem;
   }
 
@@ -114,7 +171,15 @@ const searchStyles = `
     background: color-mix(in srgb, var(--green, #1ed760) 16%, transparent);
   }
 
-  .empty { color: var(--muted, #5f5a50); font-size: 0.92rem; padding: 1.5rem 0.7rem; text-align: center; }
+  @media (forced-colors: active) {
+    .item[aria-selected="true"] {
+      outline: 2px solid Highlight;
+      outline-offset: -2px;
+    }
+  }
+
+  .empty { color: var(--muted, #5f5a50); font-size: 0.92rem; margin: 0; padding: 1.5rem 0.7rem; text-align: center; }
+  .empty:empty { display: none; }
 
   .foot {
     border-top: 1px solid var(--line, rgba(20, 20, 20, 0.1));
@@ -132,21 +197,23 @@ const searchStyles = `
 
 const SEARCH_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>`;
 
-const TEMPLATE = `<div class="overlay" hidden>
-  <div class="dialog" role="dialog" aria-modal="true" aria-label="Search documentation">
-    <label class="field">
+const TEMPLATE = `<dialog aria-label="Search documentation">
+  <div class="panel">
+    <div class="field">
       ${SEARCH_ICON}
-      <input type="search" placeholder="Search the docs…" aria-label="Search documentation" autocomplete="off" spellcheck="false" />
-      <kbd>Esc</kbd>
-    </label>
-    <div class="results" role="listbox"></div>
-    <div class="foot">
+      <input type="search" placeholder="Search the docs…" aria-label="Search documentation" role="combobox" aria-expanded="false" aria-controls="search-results" aria-autocomplete="list" autocomplete="off" spellcheck="false" autofocus />
+      <form method="dialog"><button class="close" type="submit">Close <kbd aria-hidden="true">Esc</kbd></button></form>
+    </div>
+    <p class="visually-hidden" role="status"></p>
+    <div class="results" id="search-results" role="listbox" aria-label="Search results"></div>
+    <p class="empty"></p>
+    <div class="foot" aria-hidden="true">
       <span><kbd>↑</kbd><kbd>↓</kbd> Navigate</span>
       <span><kbd>↵</kbd> Open</span>
       <span><kbd>esc</kbd> Close</span>
     </div>
   </div>
-</div>`;
+</dialog>`;
 
 const escape = (value) =>
   String(value).replace(/[&<>"]/g, (char) =>
@@ -175,65 +242,80 @@ class DocsSearch extends LitElement {
     this.flat = []; // flat list of selectable { path, id } for keyboard nav
     this.active = 0;
 
-    this.overlay = root.querySelector(".overlay");
+    this.dialog = root.querySelector("dialog");
     this.input = root.querySelector("input");
     this.list = root.querySelector(".results");
+    this.empty = root.querySelector(".empty");
+    this.status = root.querySelector('[role="status"]');
 
     this.input.addEventListener("input", () => this.renderResults());
     this.input.addEventListener("keydown", (event) => this.onKeydown(event));
-    this.overlay.addEventListener("mousedown", (event) => {
-      if (event.target === this.overlay) this.close();
+    // A click that lands on the dialog itself is a click on the backdrop.
+    this.dialog.addEventListener("click", (event) => {
+      if (event.target === this.dialog) this.close();
     });
-    this.list.addEventListener("mousedown", (event) => {
+    this.list.addEventListener("click", (event) => {
       const item = event.target.closest(".item");
       if (!item) return;
+      // Leave modified clicks (new tab, etc.) to the browser.
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
       this.go(item.dataset.path, item.dataset.id || "");
     });
 
     this._onGlobalKey = (event) => {
       const cmdK = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k";
-      if (cmdK) {
-        event.preventDefault();
-        this.isOpen() ? this.close() : this.open();
-        return;
-      }
-      if (event.key === "Escape" && this.isOpen()) this.close();
+      if (!cmdK) return;
+      event.preventDefault();
+      this.isOpen() ? this.close() : this.open();
     };
     document.addEventListener("keydown", this._onGlobalKey);
 
+    // Triggers are links to /search, so they work before (or without) this
+    // script. Capture so the fragment router sees the click as handled.
     this._onTrigger = (event) => {
-      if (event.target.closest("[data-search-trigger]")) {
-        event.preventDefault();
-        this.open();
-      }
+      if (event.defaultPrevented || event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      if (!event.target.closest?.("[data-search-trigger]")) return;
+      event.preventDefault();
+      this.open();
     };
-    document.addEventListener("click", this._onTrigger);
+    document.addEventListener("click", this._onTrigger, true);
+
+    // Any navigation that starts while the palette is open closes it.
+    this._onNavigation = () => this.close();
+    document.addEventListener("nativefragments:navigation-start", this._onNavigation);
   }
 
   disconnectedCallback() {
     document.removeEventListener("keydown", this._onGlobalKey);
-    document.removeEventListener("click", this._onTrigger);
+    document.removeEventListener("click", this._onTrigger, true);
+    document.removeEventListener("nativefragments:navigation-start", this._onNavigation);
+    clearTimeout(this._statusTimer);
     this._wired = false;
     super.disconnectedCallback();
   }
 
   isOpen() {
-    return !this.overlay.hasAttribute("hidden");
+    return this.dialog.open;
   }
 
   async open() {
-    this.overlay.removeAttribute("hidden");
-    document.documentElement.style.overflow = "hidden";
-    await this.load();
+    if (this.isOpen()) return;
     this.input.value = "";
-    this.renderResults();
+    // Focus first so keystrokes typed while the index loads are kept.
+    this.dialog.showModal();
     this.input.focus();
+    this.renderResults();
+    if (!this.index) {
+      await this.load();
+      if (this.isOpen()) this.renderResults();
+    }
   }
 
   close() {
-    this.overlay.setAttribute("hidden", "");
-    document.documentElement.style.overflow = "";
+    // dialog.close() returns focus to the element that opened it.
+    if (this.isOpen()) this.dialog.close();
   }
 
   async load() {
@@ -246,75 +328,80 @@ class DocsSearch extends LitElement {
     }
   }
 
-  score(query, page) {
-    const q = query.toLowerCase();
-    const inTitle = page.title.toLowerCase().includes(q);
-    const inIntro = page.intro.toLowerCase().includes(q);
-    const inText = page.text.toLowerCase().includes(q);
-    const headings = page.headings.filter((heading) =>
-      heading.text.toLowerCase().includes(q),
-    );
-    let score = 0;
-    if (inTitle) score += 100;
-    if (headings.length) score += 40;
-    if (inIntro) score += 20;
-    if (inText) score += 10;
-    return { score, headings };
-  }
-
-  results() {
-    const pages = this.index ?? [];
-    const query = this.input.value.trim();
-
-    if (!query) {
-      return pages.map((page) => ({ page, headings: [] }));
-    }
-
-    return pages
-      .map((page) => ({ page, ...this.score(query, page) }))
-      .filter((entry) => entry.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .map((entry) => ({ page: entry.page, headings: entry.headings.slice(0, 4) }));
+  announce(message) {
+    clearTimeout(this._statusTimer);
+    this._statusTimer = setTimeout(() => {
+      this.status.textContent = message;
+    }, 500);
   }
 
   renderResults() {
-    const groups = this.results();
+    const query = this.input.value.trim();
     this.flat = [];
+    this.active = 0;
 
-    if (!groups.length) {
-      this.list.innerHTML = `<p class="empty">No results for “${escape(this.input.value.trim())}”.</p>`;
+    if (!this.index) {
+      this.list.innerHTML = "";
+      this.empty.textContent = "Loading search…";
+      this.syncCombobox();
       return;
     }
 
+    const groups = searchPages(this.index, query);
+
+    if (!groups.length) {
+      this.list.innerHTML = "";
+      this.empty.textContent = `No results for “${query}”.`;
+      this.syncCombobox();
+      this.announce(`No results for ${query}.`);
+      return;
+    }
+
+    this.empty.textContent = "";
     const html = groups
-      .map(({ page, headings }) => {
+      .map(({ page, headings }, groupIndex) => {
         const pageIndex = this.flat.length;
         this.flat.push({ path: page.path });
-        const pageItem = `<a class="item" role="option" data-index="${pageIndex}" data-path="${escape(page.path)}" href="${escape(page.path)}">
+        const pageItem = `<a class="item" role="option" tabindex="-1" id="search-option-${pageIndex}" data-path="${escape(page.path)}" href="${escape(page.path)}">
           <span class="label">${escape(page.title)}</span>
-          <span class="ctx">${escape(page.eyebrow || "Docs")}</span>
+          <span class="ctx" aria-hidden="true">${escape(page.eyebrow || "Docs")}</span>
         </a>`;
 
         const sectionItems = headings
           .map((heading) => {
             const index = this.flat.length;
             this.flat.push({ path: page.path, id: heading.id });
-            return `<a class="item section" role="option" data-index="${index}" data-path="${escape(page.path)}" data-id="${escape(heading.id)}" href="${escape(page.path)}#${escape(heading.id)}">
+            return `<a class="item section" role="option" tabindex="-1" id="search-option-${index}" data-path="${escape(page.path)}" data-id="${escape(heading.id)}" href="${escape(page.path)}#${escape(heading.id)}">
               <span class="label">${escape(heading.text)}</span>
             </a>`;
           })
           .join("");
 
-        return `<div class="group">
-          <p class="group-label">${escape(page.eyebrow || "Docs")}</p>
+        return `<div class="group" role="group" aria-labelledby="search-group-${groupIndex}">
+          <div class="group-label" id="search-group-${groupIndex}">${escape(page.eyebrow || "Docs")}</div>
           ${pageItem}${sectionItems}
         </div>`;
       })
       .join("");
 
     this.list.innerHTML = html;
-    this.active = 0;
     this.highlight();
+    if (query) {
+      const count = this.flat.length;
+      this.announce(`${count} ${count === 1 ? "result" : "results"}.`);
+    } else {
+      this.announce("");
+    }
+  }
+
+  syncCombobox() {
+    const has = this.flat.length > 0;
+    this.input.setAttribute("aria-expanded", has ? "true" : "false");
+    if (has) {
+      this.input.setAttribute("aria-activedescendant", `search-option-${this.active}`);
+    } else {
+      this.input.removeAttribute("aria-activedescendant");
+    }
   }
 
   highlight() {
@@ -324,12 +411,17 @@ class DocsSearch extends LitElement {
       item.setAttribute("aria-selected", selected ? "true" : "false");
       if (selected) item.scrollIntoView({ block: "nearest" });
     });
+    this.syncCombobox();
   }
 
   onKeydown(event) {
+    // Enter that confirms an IME composition must not open a result. keyCode
+    // 229 covers Safari, which fires keydown after compositionend.
+    if (event.isComposing || event.keyCode === 229) return;
+
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      this.active = Math.min(this.active + 1, this.flat.length - 1);
+      this.active = Math.min(this.active + 1, Math.max(this.flat.length - 1, 0));
       this.highlight();
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
@@ -346,27 +438,27 @@ class DocsSearch extends LitElement {
     this.close();
     const current = window.location.pathname.replace(/\/$/, "") || "/";
 
-    const scrollToHeading = () => {
+    if (path === current) {
       if (!id) {
         window.scrollTo({ top: 0 });
         return;
       }
-      requestAnimationFrame(() => {
-        document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    };
-
-    if (path === current) {
-      scrollToHeading();
+      // Same page: a native hash navigation scrolls, sets :target and focus
+      // start point, and records history. CSS decides whether it is smooth.
+      if (window.location.hash === `#${id}`) {
+        document.getElementById(id)?.scrollIntoView();
+      } else {
+        window.location.hash = id;
+      }
       return;
     }
 
-    const { router } = await import("../navigation.js");
-    if (router) {
-      await router.navigate(path);
-      scrollToHeading();
-    } else {
-      window.location.href = id ? `${path}#${id}` : path;
+    const href = id ? `${path}#${id}` : path;
+    try {
+      const { router } = await import("../navigation.js");
+      await router.navigate(href);
+    } catch (error) {
+      if (error?.name !== "AbortError") window.location.href = href;
     }
   }
 }

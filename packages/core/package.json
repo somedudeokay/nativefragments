@@ -1,6 +1,6 @@
 {
   "name": "@nativefragments/core",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Explicit HTML routing, fragments, and streaming for fast web applications.",
   "type": "module",
   "main": "./src/index.js",

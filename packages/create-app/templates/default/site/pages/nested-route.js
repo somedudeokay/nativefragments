@@ -60,15 +60,16 @@ export const nestedRegion = (context) => {
     }),
   ];
 
-  return html`<div class="nested-tabs" aria-label="Nested panels">
+  return html`<nav class="nested-tabs" aria-label="Panels">
       ${links}
-    </div>
+    </nav>
     ${panelContent(activePanel)}`;
 };
 
 export const nestedRoutePage = (context) => html`<section class="demo-hero nested-route">
   <div class="hero-copy">
     <p class="eyebrow">Nested route</p>
+    <h1>Nested fragments, real URLs.</h1>
     ${featureList()}
     <p class="lede">
       The tabs fetch only the panel below. Everything else stays mounted — no

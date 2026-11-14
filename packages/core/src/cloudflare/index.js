@@ -56,6 +56,9 @@ const fragmentStreamEnd = (token) =>
 const securityHeaders = ({ contentSecurityPolicy, nonce, request }) => {
   const headers = {
     "X-Content-Type-Options": "nosniff",
+    // Browsers ignore this when the policy has frame-ancestors; it keeps
+    // clickjacking protection when an application policy omits that directive.
+    "X-Frame-Options": "SAMEORIGIN",
   };
   const policy =
     typeof contentSecurityPolicy === "function"

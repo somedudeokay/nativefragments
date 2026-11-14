@@ -31,8 +31,8 @@ export const criticalStyles = `
     background: var(--paper);
     color: var(--ink);
     font-family: var(--sans);
-    font-size: 16px;
     line-height: 1.6;
+    scroll-padding-top: 5rem;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -53,7 +53,19 @@ export const criticalStyles = `
     outline-offset: 3px;
   }
 
-  .agent-index {
+  .skip-link {
+    left: 0;
+    position: absolute;
+    top: 0;
+    transform: translateY(-110%);
+    z-index: 200;
+  }
+
+  .skip-link:focus {
+    transform: none;
+  }
+
+  .agent-index:not(:focus-within) {
     clip: rect(0 0 0 0);
     clip-path: inset(50%);
     height: 1px;

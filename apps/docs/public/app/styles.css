@@ -1,45 +1,19 @@
 /* Self-hosted fonts (latin subset, OFL). See public/fonts/. */
+/* Geist and Space Grotesk are variable fonts: one file covers the whole
+   weight range, so each family is declared (and downloaded) once. */
 @font-face {
   font-family: "Geist";
   font-style: normal;
-  font-weight: 400;
+  font-weight: 400 600;
   font-display: swap;
-  src: url("/fonts/geist-400.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Geist";
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("/fonts/geist-500.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Geist";
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("/fonts/geist-600.woff2") format("woff2");
+  src: url("/fonts/geist.woff2") format("woff2");
 }
 @font-face {
   font-family: "Space Grotesk";
   font-style: normal;
-  font-weight: 500;
+  font-weight: 500 700;
   font-display: swap;
-  src: url("/fonts/space-grotesk-500.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Space Grotesk";
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("/fonts/space-grotesk-600.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Space Grotesk";
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("/fonts/space-grotesk-700.woff2") format("woff2");
+  src: url("/fonts/space-grotesk.woff2") format("woff2");
 }
 @font-face {
   font-family: "JetBrains Mono";
@@ -56,6 +30,7 @@
   --ink: #141414;
   --muted: #5f5a50;
   --green: #1ed760;
+  --green-text: #137a37; /* green that passes 4.5:1 as text on paper */
   --orange: #ff6b35;
   --code: #16181d;
 
@@ -91,8 +66,9 @@ html {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--sans);
-  font-size: 16px;
   line-height: 1.6;
+  /* Keep link targets and focused elements clear of the sticky header. */
+  scroll-padding-top: 5rem;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -113,7 +89,31 @@ a {
   outline-offset: 3px;
 }
 
-.agent-index {
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+.skip-link {
+  background: var(--ink);
+  border-radius: 0 0 10px 0;
+  color: var(--paper);
+  font-weight: 600;
+  left: 0;
+  padding: 0.7rem 1rem;
+  position: absolute;
+  top: 0;
+  transform: translateY(-110%);
+  z-index: 200;
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+/* Visually hidden until something inside it takes keyboard focus. */
+.agent-index:not(:focus-within) {
   clip: rect(0 0 0 0);
   clip-path: inset(50%);
   height: 1px;
@@ -151,6 +151,12 @@ a {
   top: 64px;
 }
 
+.sidebar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
 .sidebar section + section {
   margin-top: 1.75rem;
 }
@@ -167,7 +173,7 @@ a {
   text-transform: uppercase;
 }
 
-.sidebar a {
+.sidebar li a {
   border-radius: 8px;
   color: var(--muted);
   display: block;
@@ -180,21 +186,21 @@ a {
   z-index: 1;
 }
 
-.sidebar a:hover {
+.sidebar li a:hover {
   color: var(--ink);
 }
 
-.sidebar a[aria-current="page"] {
+.sidebar li a[aria-current="page"] {
   color: var(--ink);
   font-weight: 600;
 }
 
 /* No-JS / pre-init fallback; replaced by the sliding indicator once active. */
-.sidebar:not([data-sliding]) a:hover {
+.sidebar:not([data-sliding]) li a:hover {
   background: color-mix(in srgb, var(--ink) 5%, transparent);
 }
 
-.sidebar:not([data-sliding]) a[aria-current="page"] {
+.sidebar:not([data-sliding]) li a[aria-current="page"] {
   background: color-mix(in srgb, var(--green) 16%, transparent);
 }
 
@@ -241,6 +247,7 @@ a {
   justify-content: space-between;
   margin-bottom: 1.5rem;
   padding: 0.5rem 0.6rem;
+  text-decoration: none;
   transition: border-color 0.2s var(--ease);
   width: 100%;
 }
@@ -267,6 +274,12 @@ a {
   display: none;
 }
 
+/* Without JavaScript the bar shows plain links; with it, the drawer toggle. */
+.js .no-js-only,
+html:not(.js) .js-only {
+  display: none;
+}
+
 .mobile-bar-btn {
   align-items: center;
   background: var(--surface);
@@ -281,6 +294,11 @@ a {
   gap: 0.5rem;
   justify-content: center;
   padding: 0.7rem;
+  text-decoration: none;
+}
+
+a.mobile-bar-btn {
+  display: inline-flex;
 }
 
 .mobile-bar-btn svg {
@@ -388,10 +406,6 @@ h3 {
   margin: 0;
 }
 
-.doc :is(h2, h3)[id] {
-  scroll-margin-top: 84px;
-}
-
 h1 {
   font-size: clamp(2.2rem, 4.2vw, 3.2rem);
   letter-spacing: -0.035em;
@@ -478,8 +492,9 @@ li {
   border: 1px solid rgba(247, 243, 232, 0.09);
   border-radius: var(--radius);
   box-shadow: var(--shadow-md);
+  color-scheme: dark; /* dark scrollbars on the dark block */
   margin: 1.25rem 0;
-  overflow: hidden;
+  overflow: hidden; /* clips the decoration; the inner <pre> scrolls */
   padding-top: 2.4rem;
   position: relative;
 }
@@ -504,7 +519,7 @@ li {
 }
 
 .code-block::after {
-  color: #6f6a60;
+  color: #9a958a;
   content: attr(data-language);
   font-family: var(--mono);
   font-size: 0.62rem;
@@ -529,7 +544,13 @@ pre {
   background: transparent;
   border-radius: 0;
   margin: 0;
+  overflow-x: auto;
   padding: 0 1.3rem 1.35rem;
+}
+
+:is(.code-block pre, .api-sig):focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: -2px;
 }
 
 code {
@@ -567,7 +588,7 @@ li code {
 }
 
 .tok.comment {
-  color: #7d786e;
+  color: #9a958a;
   font-style: italic;
 }
 
@@ -641,7 +662,9 @@ li code {
 }
 
 .api-source:hover {
-  color: var(--green);
+  color: var(--green-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .api-ghlink {
@@ -650,7 +673,7 @@ li code {
 }
 
 .api-ghlink:hover {
-  color: var(--green);
+  color: var(--green-text);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -683,15 +706,12 @@ li code {
   font-size: 0.95rem;
 }
 
-.api-symbol h3 {
-  scroll-margin-top: 84px;
-}
-
 .api-sig {
   background: var(--code);
   border-radius: 10px;
   color: var(--paper);
   font-size: 0.82rem;
+  color-scheme: dark;
   margin: 0.85rem 0 0;
   overflow-x: auto;
   padding: 0.7rem 0.95rem;
@@ -874,7 +894,7 @@ li code {
 }
 
 .api-typelink:hover {
-  color: var(--green);
+  color: var(--green-text);
 }
 
 /* Types appendix */
@@ -894,11 +914,95 @@ li code {
   font-weight: 600;
   letter-spacing: -0.01em;
   margin: 0;
-  scroll-margin-top: 84px;
+}
+
+/* Search page (the no-JavaScript fallback for the ⌘K palette) */
+.search-form {
+  margin-top: 1.5rem;
+}
+
+.search-form label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.search-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.search-form input {
+  background: var(--surface);
+  border: 1px solid #76716a;
+  border-radius: 10px;
+  color: var(--ink);
+  flex: 1 1 14rem;
+  font: inherit;
+  min-width: 0;
+  padding: 0.6rem 0.8rem;
+}
+
+.search-form button {
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  border-radius: 10px;
+  color: var(--paper);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  padding: 0.6rem 1.1rem;
+}
+
+.search-count {
+  margin: 1.5rem 0 0;
+}
+
+.search-results,
+.search-sections {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.search-results > li {
+  border-top: 1px solid var(--line);
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+}
+
+.search-result {
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.search-results p {
+  font-size: 0.95rem;
+  margin: 0.35rem 0 0;
+}
+
+.search-sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin-top: 0.5rem;
+}
+
+.search-sections li {
+  font-size: 0.9rem;
 }
 
 /* Responsive */
 @media (max-width: 860px) {
+  html {
+    /* Keep focused elements clear of the fixed bottom bar. */
+    scroll-padding-bottom: 4.5rem;
+  }
+
   .layout,
   .quick-grid {
     grid-template-columns: minmax(0, 1fr);
@@ -908,8 +1012,29 @@ li code {
     padding-bottom: 5.5rem; /* clear the sticky bottom bar */
   }
 
-  /* The sidebar becomes a bottom-sheet drawer. */
-  .sidebar {
+  .search-trigger {
+    display: none;
+  }
+
+  .sidebar-site {
+    display: block;
+  }
+
+  /* Without JavaScript the sidebar is a plain block after the content; the
+     bar's Menu link jumps to it. */
+  html:not(.js) .sidebar {
+    border-right: 0;
+    border-top: 1px solid var(--line);
+    height: auto;
+    order: 2;
+    padding-bottom: 6rem;
+    position: static;
+  }
+
+  /* With JavaScript the sidebar becomes a bottom-sheet drawer. Closed, it is
+     hidden from focus and assistive tech (visibility here, `inert` once the
+     script runs). */
+  .js .sidebar {
     background: var(--surface);
     border: 1px solid var(--line);
     border-bottom: 0;
@@ -921,38 +1046,44 @@ li code {
     left: 0;
     max-height: 78vh;
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 1.5rem 1.25rem 6rem;
     position: fixed;
     right: 0;
     top: auto;
     transform: translateY(105%);
-    transition: transform 0.32s var(--ease);
+    visibility: hidden;
     white-space: normal;
     z-index: 60;
   }
 
-  .search-trigger {
-    display: none;
-  }
-
-  .sidebar-site {
-    display: block;
-  }
-
   html[data-menu-open] .sidebar {
     transform: translateY(0);
+    visibility: visible;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .js .sidebar {
+      transition:
+        transform 0.32s var(--ease),
+        visibility 0s linear 0.32s;
+    }
+
+    html[data-menu-open] .sidebar {
+      transition:
+        transform 0.32s var(--ease),
+        visibility 0s;
+    }
   }
 
   html[data-menu-open] .menu-scrim {
     background: color-mix(in srgb, var(--ink) 45%, transparent);
     display: block;
     inset: 0;
+    overscroll-behavior: contain;
     position: fixed;
+    touch-action: none;
     z-index: 50;
-  }
-
-  html[data-menu-open] body {
-    overflow: hidden;
   }
 
   .mobile-bar {

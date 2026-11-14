@@ -6,7 +6,7 @@ const normalize = (pathname) => pathname.replace(/\/+$/, "") || "/";
 
 export const initNavIndicator = () => {
   const sidebar = document.querySelector(".sidebar");
-  const links = sidebar ? [...sidebar.querySelectorAll("a")] : [];
+  const links = sidebar ? [...sidebar.querySelectorAll("li a")] : [];
   if (!sidebar || !links.length) return () => {};
 
   const indicator = document.createElement("span");

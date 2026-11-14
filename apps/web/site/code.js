@@ -164,7 +164,11 @@ const highlight = (source, language) => {
   return highlightJs(source);
 };
 
+// The figure carries the decoration and clips it; the inner <pre> scrolls
+// horizontally and is focusable so keyboard users can reach long lines.
 export const codeBlock = (source, language = "js", file = null) =>
-  html`<pre class="code-block" data-language="${language}"${
+  html`<figure class="code-block" data-language="${language}"${
     file ? html` data-file="${file}"` : ""
-  }><code>${raw(highlight(source.trim(), language))}</code></pre>`;
+  }><pre tabindex="0" role="region" aria-label="${
+    file ?? language
+  } code"><code>${raw(highlight(source.trim(), language))}</code></pre></figure>`;

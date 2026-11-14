@@ -346,14 +346,8 @@ export const runtimeMapStyles = `
     opacity: 1;
   }
 
-  .card[data-step="1"] .spinner,
-  .card[data-step="3"] .spinner {
-    animation: nf-spin 0.7s linear infinite;
-  }
-
   /* fragment fetch: glimmer the whole fragment, dim its content, pulse border */
   .card[data-step="1"] .fragment > .glimmer {
-    animation: nf-glimmer 1.2s linear infinite;
     opacity: 1;
   }
 
@@ -368,7 +362,6 @@ export const runtimeMapStyles = `
 
   /* subfragment fetch: glimmer only the subfragment and dim its content */
   .card[data-step="3"] .subfragment > .glimmer {
-    animation: nf-glimmer 1.2s linear infinite;
     opacity: 1;
   }
 
@@ -407,12 +400,50 @@ export const runtimeMapStyles = `
     }
   }
 
+  /* Motion is opt-in: looping animations and transitions only run when the
+     user has not asked for reduced motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    .card[data-step="1"] .spinner,
+    .card[data-step="3"] .spinner {
+      animation: nf-spin 0.7s linear infinite;
+    }
+
+    .card[data-step="1"] .fragment > .glimmer,
+    .card[data-step="3"] .subfragment > .glimmer {
+      animation: nf-glimmer 1.2s linear infinite;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .card *,
     .card .scope {
-      animation: none !important;
-      transition: none !important;
+      transition: none;
     }
+  }
+
+  .toggle {
+    align-items: center;
+    background: var(--surface, #fffdf6);
+    border: 1px solid var(--line-strong, rgba(20, 20, 20, 0.24));
+    border-radius: 999px;
+    color: var(--ink, #141414);
+    cursor: pointer;
+    display: flex;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin: 8px auto 0;
+    min-height: 2rem;
+    padding: 0.3rem 0.9rem;
+  }
+
+  .toggle[hidden] {
+    display: none;
+  }
+
+  .toggle:focus-visible {
+    outline: 2px solid var(--ink, #141414);
+    outline-offset: 2px;
   }
 `;
 
@@ -471,4 +502,5 @@ export const runtimeMapHtml = `<div class="frame">
       <span class="log-text">idle &middot; shell stays mounted</span>
     </div>
   </div>
+  <button class="toggle" type="button" hidden>Pause animation</button>
 </div>`;

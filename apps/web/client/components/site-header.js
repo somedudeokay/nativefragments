@@ -45,7 +45,7 @@ const headerStyles = `
 
   .beta {
     align-self: center;
-    background: #e5484d;
+    background: #c93a3f;
     border-radius: 999px;
     color: #fff;
     font-family: var(--mono, "JetBrains Mono", ui-monospace, SFMono-Regular, monospace);
@@ -100,8 +100,10 @@ const headerStyles = `
     color: var(--ink, #141414);
   }
 
+  /* Current page: an ink underline, not a background tint alone. */
   a[aria-current="page"] {
     background: color-mix(in srgb, var(--ink, #141414) 6%, transparent);
+    box-shadow: inset 0 -2px 0 var(--ink, #141414);
     color: var(--ink, #141414);
     font-weight: 600;
   }
@@ -136,27 +138,44 @@ const headerStyles = `
     width: 1.6rem;
   }
 
+  /* Small screens keep one row: the icon links (repeated in the footer) go
+     first, then the Beta pill; the nav scrolls sideways as a last resort. */
   @media (max-width: 560px) {
     header {
-      align-items: flex-start;
-      flex-direction: column;
-      gap: 0.35rem;
-      padding: 0.75rem 1.25rem;
+      gap: 0.5rem;
+      min-height: 56px;
+      padding: 0 1rem;
+    }
+
+    .brand {
+      flex: none;
+      font-size: 0.98rem;
     }
 
     .header-links {
-      align-items: center;
-      gap: 0.45rem;
+      min-width: 0;
     }
 
     nav {
-      flex-wrap: wrap;
+      gap: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    nav a {
+      flex: none;
+      font-size: 0.84rem;
+      padding: 0.4rem 0.45rem;
     }
 
     .icon-links {
-      border-left: 0;
-      margin-left: 0;
-      padding-left: 0;
+      display: none;
+    }
+  }
+
+  @media (max-width: 400px) {
+    .beta {
+      display: none;
     }
   }
 `;
@@ -214,7 +233,7 @@ export class NativeFragmentsHeader extends LitElement {
             >${label}</a>`,
           )}
         </nav>
-        <div class="icon-links" aria-label="Package links">
+        <div class="icon-links">
           <a class="icon-link" href="https://github.com/somedudeokay/nativefragments" aria-label="GitHub" title="GitHub">${githubIcon}</a>
           <a class="icon-link" href="https://www.npmjs.com/package/@nativefragments/core" aria-label="npm" title="npm"><span class="npm-mark">npm</span></a>
         </div>

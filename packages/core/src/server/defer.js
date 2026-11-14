@@ -36,7 +36,9 @@ const deferredId = (name, index, scope) => {
   return `nf-${slug || "fragment"}-${index}-${scope}`;
 };
 
-const defaultDeferredLoading = () => html`<div data-fragment-loading role="status">
+// The slot is aria-busy while loading, which suppresses nested live regions, so
+// the placeholder is plain text rather than a status region.
+const defaultDeferredLoading = () => html`<div data-fragment-loading>
   Loading...
 </div>`;
 
@@ -309,9 +311,19 @@ const documentRevealScript = String.raw`(() => {
       if (!source?.isConnected || source.getAttribute("data-nativefragments-deferred-content") !== id) continue;
       const target = targets.get(id);
       if (target?.isConnected && target.getAttribute("data-nativefragments-deferred") === id) {
-        const content = document.createDocumentFragment();
-        while (source.firstChild) content.appendChild(source.firstChild);
-        target.replaceChildren(content);
+        let moved = false;
+        if (typeof target.moveBefore === "function" && !target.contains(source)) {
+          try {
+            target.replaceChildren();
+            while (source.firstChild) target.moveBefore(source.firstChild, null);
+            moved = true;
+          } catch {}
+        }
+        if (!moved) {
+          const content = document.createDocumentFragment();
+          while (source.firstChild) content.appendChild(source.firstChild);
+          target.replaceChildren(content);
+        }
         const state = source.getAttribute("data-fragment-state") || "ready";
         target.setAttribute("data-fragment-state", state);
         target.removeAttribute("aria-busy");

@@ -350,7 +350,7 @@ test("the default loading boundary announces via its content, not the slot wrapp
   assert.ok(wrapper);
   assert.match(wrapper, /aria-busy="true"/);
   assert.doesNotMatch(wrapper, /role=/);
-  assert.match(firstText, /<div data-fragment-loading role="status">/);
+  assert.match(firstText, /<div data-fragment-loading>/);
 
   release();
   await readStreamText(reader);

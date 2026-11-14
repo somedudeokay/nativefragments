@@ -16,6 +16,9 @@ export const readClickCountCookie = (request) => {
   return toCount(decodeURIComponent(match.split("=").slice(1).join("=")));
 };
 
+export const clickCountCookie = (count) =>
+  `${clickCountCookieName}=${encodeURIComponent(String(toCount(String(count))))}; Path=/; Max-Age=31536000; SameSite=Lax`;
+
 export const clickCounterMeta = ({ request }) => ({
   clickCount: readClickCountCookie(request),
 });

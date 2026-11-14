@@ -20,7 +20,7 @@ test("renderLit emits declarative Shadow DOM and hydration markers", async () =>
   );
 
   assert.match(rendered, /<nativefragments-lit-test/);
-  assert.match(rendered, /<template shadowroot/);
+  assert.match(rendered, /<template [^>]*shadowrootmode="open"/);
   assert.match(rendered, /Hello/);
   assert.match(rendered, /Worker/);
   assert.match(rendered, /<!--lit-part/);

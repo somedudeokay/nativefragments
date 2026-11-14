@@ -1,3 +1,5 @@
+import { trustedScriptUrl } from "./dom.js";
+
 const channel = "nativefragments.worker";
 const transferMarker = Symbol("nativefragments.transfer");
 
@@ -150,7 +152,7 @@ export const createWorkerClient = (
   { workerOptions = { type: "module" }, ...clientOptions } = {},
 ) => {
   const owned = isWorkerUrl(workerOrUrl);
-  const worker = owned ? new Worker(workerOrUrl, workerOptions) : workerOrUrl;
+  const worker = owned ? new Worker(trustedScriptUrl(workerOrUrl), workerOptions) : workerOrUrl;
   return workerClient(worker, { ...clientOptions, owned });
 };
 

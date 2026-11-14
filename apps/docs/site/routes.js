@@ -7,6 +7,7 @@ import { fragmentsPage } from "./pages/fragments.js";
 import { gettingStartedPage } from "./pages/getting-started.js";
 import { homePage } from "./pages/home.js";
 import { referencePage } from "./pages/reference.js";
+import { searchPage } from "./pages/search.js";
 import { routingPage } from "./pages/routing.js";
 import { shellPage } from "./pages/shell.js";
 import { streamingPage } from "./pages/streaming.js";
@@ -111,6 +112,12 @@ export const routes = [
         "Generated API reference for Native Fragments Core.",
       ),
     render: referencePage,
+  }),
+  route("/search", {
+    meta: () =>
+      meta("/search", "Search", "Search the Native Fragments documentation."),
+    headers: { "Cache-Control": "no-store", "X-Robots-Tag": "noindex" },
+    render: searchPage,
   }),
   route("/ai", {
     meta: () =>

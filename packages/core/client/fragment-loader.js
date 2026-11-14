@@ -137,7 +137,7 @@ const cacheLifetime = (headers) => {
   return maxAge ? Math.max(0, Number(maxAge[1]) - age) * 1000 : Infinity;
 };
 
-const requestFragment = async ({ controller, onFrame, onUrl, slot, url }) => {
+const requestFragment = async ({ controller, onFrame, onUrl, priority, slot, url }) => {
   const name = requestedSlot(slot);
   let current = url;
   let lifetime = Infinity;
@@ -150,6 +150,7 @@ const requestFragment = async ({ controller, onFrame, onUrl, slot, url }) => {
         ...(name ? { "x-fragment-slot": name } : {}),
       },
       signal: controller.signal,
+      ...(priority ? { priority } : {}),
     });
     lifetime = Math.min(lifetime, cacheLifetime(response.headers));
     const redirect = response.headers.get("x-nativefragments-redirect");
@@ -262,7 +263,7 @@ export const createFragmentLoader = ({ maxEntries = 100, maxBytes = 2_000_000 } 
     return entry.result;
   };
 
-  const startRequest = ({ slot, ttl, url }) => {
+  const startRequest = ({ priority, slot, ttl, url }) => {
     const key = cacheKey(url, slot);
     const entry = {
       controller: new AbortController(), frames: [], key, promise: null, slot, ttl,
@@ -271,7 +272,7 @@ export const createFragmentLoader = ({ maxEntries = 100, maxBytes = 2_000_000 } 
     };
     inFlight.set(key, entry);
     entry.promise = requestFragment({
-      controller: entry.controller, slot, url,
+      controller: entry.controller, priority, slot, url,
       onUrl: (next) => entry.urls.add(next.href),
       onFrame: (frame) => {
         entry.frames.push(frame);
@@ -328,11 +329,11 @@ export const createFragmentLoader = ({ maxEntries = 100, maxBytes = 2_000_000 } 
     const entry = inFlight.get(key) ?? startRequest({ slot, ttl, url });
     return consumerResult(await consumeEntry(entry, (frame) => onFrame(consumerResult(frame, url)), signal), url);
   };
-  const prefetch = async ({ signal, slot, ttl, url }) => {
+  const prefetch = async ({ priority, signal, slot, ttl, url }) => {
     if (signal?.aborted) throw abortError(signal);
     if (validCacheEntry(url, slot, ttl)) return;
     const key = cacheKey(url, slot);
-    const entry = inFlight.get(key) ?? startRequest({ slot, ttl, url });
+    const entry = inFlight.get(key) ?? startRequest({ priority, slot, ttl, url });
     entry.prefetches++;
     try { await waitFor(entry.promise, signal); }
     finally { entry.prefetches--; release(entry); }

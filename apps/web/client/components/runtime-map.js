@@ -114,28 +114,55 @@ export class RuntimeMap extends LitElement {
 
     render();
 
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // The loop runs only while the map is on screen and not paused. It starts
+    // paused when the user prefers reduced motion; the button lets anyone
+    // pause or resume it (WCAG 2.2.2).
+    const toggle = root.querySelector(".toggle");
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+    let paused = reduced.matches;
+    let visible = false;
 
-    const start = () => {
-      if (!this._timer) {
+    const sync = () => {
+      const run = visible && !paused;
+      if (run && !this._timer) {
         this._timer = setInterval(() => {
           t += 1;
           render();
         }, TICK_MS);
-      }
-    };
-    const stop = () => {
-      if (this._timer) {
+      } else if (!run && this._timer) {
         clearInterval(this._timer);
         this._timer = null;
       }
+      if (toggle) {
+        toggle.textContent = paused ? "Play animation" : "Pause animation";
+      }
     };
 
+    this._onToggle = () => {
+      paused = !paused;
+      sync();
+    };
+    this._onMotionChange = () => {
+      paused = reduced.matches;
+      sync();
+    };
+    this._toggle = toggle;
+    this._reduced = reduced;
+    if (toggle) {
+      toggle.hidden = false;
+      toggle.addEventListener("click", this._onToggle);
+    }
+    reduced.addEventListener("change", this._onMotionChange);
+
     this._io = new IntersectionObserver(
-      (entries) => (entries[0] && entries[0].isIntersecting ? start() : stop()),
+      (entries) => {
+        visible = Boolean(entries[0] && entries[0].isIntersecting);
+        sync();
+      },
       { threshold: 0.1 },
     );
     this._io.observe(this);
+    sync();
   }
 
   disconnectedCallback() {
@@ -147,6 +174,8 @@ export class RuntimeMap extends LitElement {
       this._io.disconnect();
       this._io = null;
     }
+    this._toggle?.removeEventListener("click", this._onToggle);
+    this._reduced?.removeEventListener("change", this._onMotionChange);
     this._wired = false;
     super.disconnectedCallback();
   }

@@ -1,5 +1,5 @@
-// "On this page" behavior: smooth-scroll to a section on click and highlight
-// the current section while scrolling. The table of contents is server-rendered
+// "On this page" behavior: highlight the current section while scrolling.
+// Links are plain hash anchors; CSS decides whether scrolling is smooth. The table of contents is server-rendered
 // per page (inside the content slot), so this is re-initialized after each
 // fragment navigation.
 
@@ -12,16 +12,6 @@ export const initToc = () => {
   const headings = links
     .map((link) => document.getElementById(link.dataset.toc))
     .filter(Boolean);
-
-  toc.addEventListener("click", (event) => {
-    const link = event.target.closest(".toc-link");
-    if (!link) return;
-    const target = document.getElementById(link.dataset.toc);
-    if (!target) return;
-    event.preventDefault();
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
-    history.replaceState(null, "", `#${link.dataset.toc}`);
-  });
 
   let current;
   const setActive = (id) => {

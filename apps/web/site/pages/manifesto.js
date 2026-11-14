@@ -10,7 +10,7 @@ export const manifestoPage = () => html`<section class="page-hero manifesto">
   </p>
 </section>
 
-<section class="goal-wall" aria-label="Native Fragments goals">
+<section class="goal-wall">
   <p>
     Explicit HTML. Stream the useful work. Keep native navigation. Put state
     where it belongs. Use modern tools without making the toolchain the product.

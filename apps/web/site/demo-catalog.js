@@ -139,16 +139,21 @@ const specHtml = () => html`<div class="demo-spec">
 export const demoRows = () =>
   demos.map(
     (demo, index) => html`<article class="demo-row">
-          <a class="demo-shot-link" href="${demo.url}" data-nativefragments-reload>
+          <div class="demo-shot-frame">
             <img
               alt="${demo.title} screenshot"
               class="demo-shot"
-              height="832"
-              loading="eager"
+              height="832"${
+                index === 0
+                  ? raw(' fetchpriority="high"')
+                  : raw(' loading="lazy" decoding="async"')
+              }
+              sizes="(max-width: 900px) 100vw, 550px"
               src="/app/screenshots/${demo.slug}.webp"
+              srcset="/app/screenshots/${demo.slug}-640.webp 640w, /app/screenshots/${demo.slug}.webp 1280w"
               width="1280"
             />
-          </a>
+          </div>
           <div class="demo-row-copy">
             <p class="demo-kicker">Demo ${String(index + 1).padStart(2, "0")}</p>
             <h2><a href="${demo.url}" data-nativefragments-reload>${demo.title}</a></h2>
@@ -158,20 +163,16 @@ export const demoRows = () =>
             </p>
             ${specHtml()}
             <div class="demo-actions">
-              <a
-                class="demo-action demo-action--demo"
-                href="${demo.url}"
-                data-nativefragments-reload
-              >
+              <span class="demo-action demo-action--demo" aria-hidden="true">
                 ${raw(webIcon)} Open demo
-              </a>
+              </span>
               <a
                 class="demo-action demo-action--code"
                 href="${repoBase}/${demo.slug}"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                ${raw(githubIcon)} View code
+                ${raw(githubIcon)} View code<span class="visually-hidden"> for ${demo.title}</span>
               </a>
             </div>
           </div>

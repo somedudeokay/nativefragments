@@ -1,5 +1,37 @@
 # @nativefragments/core
 
+## 0.9.0
+
+### Minor Changes
+
+- Accessibility defaults in the browser router. A primary navigation moves focus
+  to the new view's first `<h1>` (or the target) without leaving a permanent
+  `tabindex`; a named-slot navigation keeps focus where it is unless the swap
+  removed the focused element. The target stops being `aria-busy` once the first
+  frame commits, and the default deferred loading placeholder is no longer a
+  `role="status"` region nested inside a busy slot.
+
+- `aria-current="page"` is kept in sync on `nav a[href]` links outside the
+  swapped region: the exact pathname wins, otherwise the longest section prefix.
+  This is new behavior; opt a `<nav>` out with `data-fragment-current="manual"`.
+
+- View transitions are skipped under `prefers-reduced-motion: reduce` and after a
+  browser-animated history gesture. Named slots transition on their own element
+  where `Element.startViewTransition()` exists, and document transitions carry a
+  `nativefragments-forward`, `-back` or `-replace` type.
+
+- Fragment parsing and worker URLs go through a Trusted Types policy named
+  `nativefragments`, so applications can enforce
+  `require-trusted-types-for 'script'`. HTML responses send
+  `X-Frame-Options: SAMEORIGIN` next to `frame-ancestors 'self'`.
+
+### Patch Changes
+
+- Declarative shadow roots keep their `clonable` and `serializable` flags when
+  fragments are parsed, deferred reveals use `moveBefore()` where available so
+  iframes and animations survive the move, and `visible` and `load` prefetches
+  use low fetch priority.
+
 ## 0.8.0
 
 ### Minor Changes
